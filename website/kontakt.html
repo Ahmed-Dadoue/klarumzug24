@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kontakt – Klarumzug24</title>
+  <meta name="description" content="Kontaktieren Sie Klarumzug24 fuer Ihr individuelles Umzugsangebot per Formular, E-Mail oder WhatsApp.">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://klarumzug24.de/kontakt.html">
+
+  <meta property="og:locale" content="de_DE">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Kontakt - Klarumzug24">
+  <meta property="og:description" content="Kontaktieren Sie Klarumzug24 fuer Ihr individuelles Umzugsangebot per Formular, E-Mail oder WhatsApp.">
+  <meta property="og:url" content="https://klarumzug24.de/kontakt.html">
+  <meta property="og:site_name" content="Klarumzug24">
+  <meta property="og:image" content="https://klarumzug24.de/logo.png">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Kontakt - Klarumzug24">
+  <meta name="twitter:description" content="Kontaktieren Sie Klarumzug24 fuer Ihr individuelles Umzugsangebot per Formular, E-Mail oder WhatsApp.">
+  <meta name="twitter:image" content="https://klarumzug24.de/logo.png">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link href="assets/site.css" rel="stylesheet">
+
+  <style>
+    body { background:#000; color:white; font-family:Arial, sans-serif; }
+    .gold { color:#FFD700; }
+    .navbar { background:#111; border-bottom:2px solid #FFD700; }
+    .content { padding:60px 20px; max-width:900px; margin:auto; }
+    footer { background:#111; padding:20px; text-align:center; border-top:2px solid #FFD700; margin-top:40px; }
+  </style>
+</head>
+
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark" style="background:#000; border-bottom:2px solid #FFD700; padding:10px 0;">
+  <div class="container d-flex justify-content-between align-items-center">
+
+    <a class="navbar-brand gold d-flex align-items-center" href="index.html">
+      <img src="assets/logo-navbar.png" class="navbar-logo">
+    </a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav ms-auto d-flex align-items-center" style="gap:20px;">
+        <li class="nav-item"><a class="nav-link gold" href="index.html">Startseite</a></li>
+        <li class="nav-item"><a class="nav-link gold" href="ueber-uns.html">Über uns</a></li>
+        <li class="nav-item"><a class="nav-link gold" href="umzugsrechner.html">Umzugsrechner</a></li>
+        <li class="nav-item"><a class="nav-link gold" href="kontakt.html">Kontakt</a></li>
+        <li class="nav-item"><a class="nav-link gold" href="agb.html">AGB</a></li>
+        <li class="nav-item"><a class="nav-link gold" href="datenschutz.html">Datenschutz</a></li>
+        <li class="nav-item"><a class="nav-link gold" href="impressum.html">Impressum</a></li>
+        
+      </ul>
+    </div>
+
+  </div>
+</nav>
+
+<div class="content">
+  <h1 class="gold text-center mb-4">Kontakt</h1>
+  <p class="text-center mb-4">
+    Sie haben Fragen oder möchten ein Angebot? Wir freuen uns auf Ihre Nachricht!
+  </p>
+
+  <form id="contactForm" class="row g-4">
+
+    <div class="col-md-6">
+      <label class="form-label gold">Name</label>
+      <input type="text" id="contactName" name="name" class="form-control" placeholder="Ihr Name" required>
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label gold">E-Mail</label>
+      <input type="email" id="contactEmail" name="email" class="form-control" placeholder="Ihre E-Mail" required>
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label gold">Telefonnummer</label>
+      <input type="tel" id="contactPhone" name="phone" class="form-control" placeholder="Ihre Telefonnummer" required>
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label gold">Foto hochladen (optional)</label>
+      <input type="file" id="contactPhoto" name="photo" class="form-control" accept="image/*">
+      <small class="text-secondary">Hinweis: Fotos bitte zusaetzlich per WhatsApp senden.</small>
+    </div>
+
+    <div class="col-12">
+      <label class="form-label gold">Nachricht</label>
+      <textarea id="contactMessage" name="message" class="form-control" rows="4" placeholder="Ihre Nachricht an uns"></textarea>
+    </div>
+
+    <p id="kontaktStatus" class="text-center mt-3"></p>
+
+    <div class="col-12 text-center mt-3">
+      <button id="contactSubmit" type="submit" class="btn btn-warning btn-lg">
+        <i class="fa-solid fa-paper-plane"></i> Absenden
+      </button>
+    </div>
+
+  </form>
+</div>
+
+<footer>
+  © 2026 Klarumzug24 – Lüttbarten 8b, 24582 Bordesholm  
+  <br> Telefon: 0163 615 7234 – E-Mail: info@klarumzug24.de
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  const contactForm = document.getElementById("contactForm");
+  const kontaktStatus = document.getElementById("kontaktStatus");
+  const contactSubmit = document.getElementById("contactSubmit");
+  const isLocalHost = ["localhost", "127.0.0.1"].includes(window.location.hostname);
+
+  function normalizeGermanPhoneSoft(value) {
+    const digits = (value || "").replace(/\D+/g, "");
+    if (!digits) return "";
+
+    if (digits.startsWith("0049")) {
+      return "+49" + digits.slice(4).replace(/^0+/, "");
+    }
+    if (digits.startsWith("49")) {
+      return "+49" + digits.slice(2).replace(/^0+/, "");
+    }
+    if (digits.startsWith("0")) {
+      return "+49" + digits.slice(1);
+    }
+    return value.trim();
+  }
+
+  async function sendContactRequest(payload) {
+    const endpoints = ["/api/leads", "https://api.klarumzug24.de/api/leads"];
+    if (isLocalHost) {
+      endpoints.unshift("http://127.0.0.1:8000/api/leads");
+    }
+    let lastError = null;
+
+    for (const endpoint of endpoints) {
+      try {
+        const response = await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        let result = null;
+        try {
+          result = await response.json();
+        } catch (_) {
+          result = null;
+        }
+
+        if (!response.ok || result?.ok === false) {
+          throw new Error(result?.message || ("HTTP " + response.status));
+        }
+
+        return result;
+      } catch (error) {
+        lastError = error;
+      }
+    }
+
+    throw lastError || new Error("Unbekannter Fehler");
+  }
+
+  contactForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    kontaktStatus.className = "text-center mt-3 text-warning";
+    kontaktStatus.textContent = "Anfrage wird gesendet...";
+    contactSubmit.disabled = true;
+
+    const selectedPhoto = document.getElementById("contactPhoto").files[0];
+    const normalizedPhone = normalizeGermanPhoneSoft(document.getElementById("contactPhone").value);
+    const payload = {
+      name: document.getElementById("contactName").value.trim(),
+      email: document.getElementById("contactEmail").value.trim(),
+      phone: normalizedPhone,
+      message: document.getElementById("contactMessage").value.trim(),
+      photo_name: selectedPhoto ? selectedPhoto.name : "",
+    };
+    document.getElementById("contactPhone").value = normalizedPhone;
+
+    try {
+      const result = await sendContactRequest(payload);
+      kontaktStatus.className = "text-center mt-3 text-success";
+      kontaktStatus.textContent = result?.message || "Ihre Anfrage wurde erfolgreich gesendet.";
+      contactForm.reset();
+    } catch (error) {
+      kontaktStatus.className = "text-center mt-3 text-danger";
+      kontaktStatus.textContent = error?.message || "Senden fehlgeschlagen. Bitte spaeter erneut versuchen.";
+    } finally {
+      contactSubmit.disabled = false;
+    }
+  });
+</script>
+
+</body>
+</html>
+
+
