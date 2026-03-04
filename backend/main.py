@@ -29,7 +29,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from app.services.emailer import send_lead_notification
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./klarumzug.db")
-ADMIN_API_KEY = os.getenv("ADMIN_API_KEY", "dev-admin-key-change-me")
+ADMIN_API_KEY = os.getenv("ADMIN_API_KEY", "").strip()
 DEDUP_HOURS = int(os.getenv("DEDUP_HOURS", "6"))
 ALLOWED_ORIGINS = [
     origin.strip()
@@ -371,7 +371,7 @@ def generate_api_key() -> str:
 def require_admin_api_key(
     x_api_key: str | None = Header(default=None, alias="X-API-Key"),
 ) -> None:
-    if not x_api_key or not secrets.compare_digest(x_api_key, ADMIN_API_KEY):
+    if not x_api_key or not ADMIN_API_KEY or not secrets.compare_digest(x_api_key, ADMIN_API_KEY):
         raise HTTPException(status_code=401, detail="invalid admin api key")
 
 
@@ -1364,5 +1364,4 @@ async function downloadCsv() {
 </body>
 </html>
 """
-
 
