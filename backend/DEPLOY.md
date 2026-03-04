@@ -72,6 +72,7 @@ DEDUP_HOURS=6
 
 Note:
 - This app uses `psycopg` (from `requirements.txt`), so URL must be `postgresql+psycopg://...`
+- `ADMIN_API_KEY` is mandatory for admin endpoints. If it is missing, admin routes return `503`.
 
 ## 6) Local service smoke test
 
