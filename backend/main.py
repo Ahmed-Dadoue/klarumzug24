@@ -371,9 +371,7 @@ def generate_api_key() -> str:
 def require_admin_api_key(
     x_api_key: str | None = Header(default=None, alias="X-API-Key"),
 ) -> None:
-    if not ADMIN_API_KEY:
-        raise HTTPException(status_code=503, detail="admin api key is not configured")
-    if not x_api_key or not secrets.compare_digest(x_api_key, ADMIN_API_KEY):
+    if not x_api_key or not ADMIN_API_KEY or not secrets.compare_digest(x_api_key, ADMIN_API_KEY):
         raise HTTPException(status_code=401, detail="invalid admin api key")
 
 
