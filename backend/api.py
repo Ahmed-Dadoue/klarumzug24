@@ -1,6 +1,8 @@
 import json
 import os
+import smtplib
 from datetime import datetime, timezone
+from email.message import EmailMessage
 from pathlib import Path
 from typing import Optional
 
@@ -35,6 +37,12 @@ app.add_middleware(
 BASE_DIR = Path(__file__).resolve().parent
 MODEL_PATH = BASE_DIR / "umzug_preis_model.pkl"
 CONTACT_LOG_PATH = BASE_DIR / "contact_requests.jsonl"
+SMTP_HOST = os.getenv("SMTP_HOST", "smtp.hostinger.com")
+SMTP_PORT = int(os.getenv("SMTP_PORT", "465"))
+SMTP_USER = os.getenv("SMTP_USER", "")
+SMTP_PASS = os.getenv("SMTP_PASS", "")
+MAIL_TO = os.getenv("MAIL_TO", "")
+MAIL_FROM = os.getenv("MAIL_FROM", SMTP_USER)
 
 model = joblib.load(MODEL_PATH)
 
@@ -129,6 +137,36 @@ def _append_contact_log(contact_data: dict) -> None:
     with CONTACT_LOG_PATH.open("a", encoding="utf-8") as file_handle:
         file_handle.write(json.dumps(entry, ensure_ascii=False) + "\n")
 
+
+def send_contact_email(contact_data: dict) -> None:
+    if not SMTP_USER or not SMTP_PASS or not MAIL_TO:
+        raise HTTPException(
+            status_code=500,
+            detail="E-Mail-Konfiguration fehlt auf dem Server.",
+        )
+
+    msg = EmailMessage()
+    msg["Subject"] = f"Neue Kontaktanfrage von {contact_data['name']}"
+    msg["From"] = MAIL_FROM
+    msg["To"] = MAIL_TO
+
+    body = f"""
+Neue Kontaktanfrage von der Website
+
+Name: {contact_data['name']}
+E-Mail: {contact_data['email']}
+Telefon: {contact_data['phone']}
+Foto: {contact_data.get('photo_name', '')}
+
+Nachricht:
+{contact_data['message']}
+"""
+    msg.set_content(body)
+
+    with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, timeout=20) as server:
+        server.login(SMTP_USER, SMTP_PASS)
+        server.send_message(msg)
+
 @app.post("/predict")
 def predict_price(req: UmzugRequest):
     x = np.array([[req.qm, req.kartons, req.fahrstuhl, req.stockwerk,
@@ -154,10 +192,16 @@ def submit_contact(req: ContactRequest):
 
     try:
         _append_contact_log(cleaned)
+        send_contact_email(cleaned)
     except OSError as error:
         raise HTTPException(
             status_code=500,
             detail="Kontaktanfrage konnte nicht gespeichert werden.",
+        ) from error
+    except smtplib.SMTPException as error:
+        raise HTTPException(
+            status_code=500,
+            detail="E-Mail konnte nicht gesendet werden.",
         ) from error
 
     return {

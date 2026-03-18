@@ -2,16 +2,17 @@
 import csv
 import io
 import logging
+import mimetypes
 import os
 import secrets
 from datetime import datetime, timedelta
-from typing import Any
+from typing import Any, Literal
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, ValidationError
 from sqlalchemy import (
     Boolean,
     Column,
@@ -24,8 +25,10 @@ from sqlalchemy import (
     text,
 )
 from sqlalchemy.orm import declarative_base, sessionmaker
+from starlette.datastructures import UploadFile
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from app.ai import generate_dode_reply
 from app.services.emailer import send_lead_notification
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./klarumzug.db")
@@ -39,6 +42,11 @@ ALLOWED_ORIGINS = [
     ).split(",")
     if origin.strip()
 ]
+MAX_PHOTO_BYTES = 10 * 1024 * 1024
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "").strip()
+DODE_MODEL = os.getenv("DODE_MODEL", "gpt-4.1-mini").strip()
+DODE_MAX_MESSAGES = int(os.getenv("DODE_MAX_MESSAGES", "12"))
+DODE_MAX_OUTPUT_TOKENS = int(os.getenv("DODE_MAX_OUTPUT_TOKENS", "220"))
 
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
@@ -91,6 +99,8 @@ class LeadDB(Base):
     express = Column(Boolean, nullable=False, default=False)
     message = Column(String(5000), nullable=True)
     photo_name = Column(String(255), nullable=True)
+    accepted_agb = Column(Boolean, nullable=False, default=False)
+    accepted_privacy = Column(Boolean, nullable=False, default=False)
     company_id = Column(Integer, ForeignKey("companies.id"), nullable=True, index=True)
     status = Column(String(40), nullable=False, default="new")
     assigned_price_eur = Column(Integer, nullable=True)
@@ -129,8 +139,14 @@ def ensure_schema() -> None:
             conn.execute(text("ALTER TABLE leads ADD COLUMN message VARCHAR(5000)"))
         if "photo_name" not in lead_columns:
             conn.execute(text("ALTER TABLE leads ADD COLUMN photo_name VARCHAR(255)"))
+        if "accepted_agb" not in lead_columns:
+            conn.execute(text("ALTER TABLE leads ADD COLUMN accepted_agb BOOLEAN DEFAULT 0"))
+        if "accepted_privacy" not in lead_columns:
+            conn.execute(text("ALTER TABLE leads ADD COLUMN accepted_privacy BOOLEAN DEFAULT 0"))
         conn.execute(text("UPDATE leads SET status = 'new' WHERE status IS NULL OR status = ''"))
         conn.execute(text("UPDATE leads SET express = 0 WHERE express IS NULL"))
+        conn.execute(text("UPDATE leads SET accepted_agb = 0 WHERE accepted_agb IS NULL"))
+        conn.execute(text("UPDATE leads SET accepted_privacy = 0 WHERE accepted_privacy IS NULL"))
 
         company_columns = {
             row[1] for row in conn.execute(text("PRAGMA table_info(companies)"))
@@ -158,6 +174,8 @@ class LeadIn(BaseModel):
     express: bool = False
     message: str | None = None
     photo_name: str | None = None
+    accepted_agb: bool = False
+    accepted_privacy: bool = False
 
 
 class CompanyIn(BaseModel):
@@ -195,6 +213,16 @@ class PredictIn(BaseModel):
     waschmaschine: int = Field(ge=0, le=100)
     fernseher: int = Field(ge=0, le=100)
     montage: int = Field(ge=0, le=1)
+
+
+class ChatMessageIn(BaseModel):
+    role: Literal["user", "assistant"]
+    content: str = Field(min_length=1, max_length=2000)
+
+
+class ChatRequestIn(BaseModel):
+    messages: list[ChatMessageIn] = Field(min_length=1, max_length=20)
+    page: str | None = Field(default=None, max_length=200)
 
 
 app = FastAPI(title="Klarumzug24 API")
@@ -349,6 +377,90 @@ def parse_iso_datetime(value: str | None, field_name: str) -> datetime | None:
         raise HTTPException(status_code=422, detail=f"invalid {field_name} format") from exc
 
 
+def _normalize_form_value(value: Any) -> Any:
+    if value is None:
+        return None
+    if isinstance(value, str):
+        cleaned = value.strip()
+        if not cleaned:
+            return None
+        lowered = cleaned.lower()
+        if lowered in {"true", "1", "yes", "on"}:
+            return True
+        if lowered in {"false", "0", "no", "off"}:
+            return False
+        return cleaned
+    return value
+
+
+def _build_lead_payload(data: dict[str, Any]) -> LeadIn:
+    try:
+        return LeadIn.model_validate(data)
+    except ValidationError as exc:
+        raise RequestValidationError(exc.errors()) from exc
+
+
+async def _read_photo_attachment(photo: UploadFile | None) -> dict[str, Any] | None:
+    if photo is None or not getattr(photo, "filename", ""):
+        return None
+
+    filename = os.path.basename((photo.filename or "").strip())
+    if not filename:
+        return None
+
+    content = await photo.read()
+    if not content:
+        return None
+    if len(content) > MAX_PHOTO_BYTES:
+        raise HTTPException(status_code=413, detail="photo is too large")
+
+    content_type = (photo.content_type or "").strip().lower()
+    if content_type and not content_type.startswith("image/"):
+        raise HTTPException(status_code=422, detail="photo must be an image")
+    if not content_type:
+        guessed_type, _ = mimetypes.guess_type(filename)
+        content_type = guessed_type or "application/octet-stream"
+
+    return {
+        "filename": filename,
+        "content": content,
+        "content_type": content_type,
+    }
+
+
+async def _parse_lead_request(request: Request) -> tuple[LeadIn, dict[str, Any] | None]:
+    content_type = (request.headers.get("content-type") or "").lower()
+    if "multipart/form-data" in content_type or "application/x-www-form-urlencoded" in content_type:
+        form = await request.form()
+        photo = form.get("photo")
+        photo_attachment = (
+            await _read_photo_attachment(photo)
+            if isinstance(photo, UploadFile)
+            else None
+        )
+        payload_data = {
+            "name": _normalize_form_value(form.get("name")),
+            "phone": _normalize_form_value(form.get("phone")),
+            "email": _normalize_form_value(form.get("email")),
+            "from_city": _normalize_form_value(form.get("from_city")),
+            "to_city": _normalize_form_value(form.get("to_city")),
+            "rooms": _normalize_form_value(form.get("rooms")),
+            "distance_km": _normalize_form_value(form.get("distance_km")),
+            "express": _normalize_form_value(form.get("express")) or False,
+            "message": _normalize_form_value(form.get("message")),
+            "photo_name": (
+                photo_attachment["filename"]
+                if photo_attachment
+                else _normalize_form_value(form.get("photo_name"))
+            ),
+            "accepted_agb": _normalize_form_value(form.get("accepted_agb")) or False,
+            "accepted_privacy": _normalize_form_value(form.get("accepted_privacy")) or False,
+        }
+        return _build_lead_payload(payload_data), photo_attachment
+
+    return _build_lead_payload(await request.json()), None
+
+
 def calculate_estimated_price(payload: PredictIn) -> float:
     estimate = (
         payload.qm * 4.2
@@ -362,6 +474,53 @@ def calculate_estimated_price(payload: PredictIn) -> float:
         + (95 if payload.montage else 0)
     )
     return round(max(0.0, float(estimate)), 2)
+
+
+def get_dode_client():
+    if not OPENAI_API_KEY:
+        raise HTTPException(status_code=503, detail="Dode AI ist noch nicht konfiguriert.")
+
+    try:
+        from openai import OpenAI
+    except ImportError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail="OpenAI client library is not installed.",
+        ) from exc
+
+    return OpenAI(api_key=OPENAI_API_KEY)
+
+
+def build_dode_system_prompt(page: str | None) -> str:
+    page_hint = page or "-"
+    return (
+        "Du bist Dode, der Website-Assistent von Klarumzug24. "
+        "Antworte freundlich, klar, professionell und knapp. "
+        "Antworte meistens in 2 bis 4 kurzen Saetzen. "
+        "Keine Emojis. Keine langen Listen, ausser wenn der Nutzer es ausdruecklich will. "
+        "Keine HTML-Tags und kein Markdown-Linkformat ausgeben. "
+        "Hilf bei Preisfragen, Kontakt, WhatsApp, Leistungen, Regionen, Fotos, Terminwunsch und allgemeinen Fragen zum Umzug. "
+        "Wenn es um einen konkreten oder verbindlichen Preis geht, verweise auf den Umzugsrechner oder eine direkte Anfrage. "
+        "Erfinde keine Fakten. Wenn etwas nicht sicher ist, sage das offen und verweise auf Kontakt oder WhatsApp. "
+        "Klarumzug24 arbeitet in Bordesholm, Schleswig-Holstein und der Region. "
+        "Kontakt: Telefon +49 163 615 7234, E-Mail info@klarumzug24.de, WhatsApp. "
+        "Wichtige Seiten sind /umzugsrechner.html, /kontakt.html, /ueber-uns.html, /agb.html, /datenschutz.html und /impressum.html. "
+        "Nutze moeglichst Seitennamen oder Pfade wie /kontakt.html und /umzugsrechner.html statt rohe URLs. "
+        "Wenn du WhatsApp empfiehlst, nenne einfach WhatsApp und keinen langen Link. "
+        "Antworte in der Sprache des Nutzers. "
+        "Aktuelle Seite: " + page_hint
+    )
+
+
+def build_dode_transcript(messages: list[ChatMessageIn]) -> str:
+    transcript_lines: list[str] = []
+    for message in messages[-DODE_MAX_MESSAGES:]:
+        role_name = "Kunde" if message.role == "user" else "Dode"
+        content = " ".join(message.content.split())
+        if len(content) > 1200:
+            content = content[:1200].rstrip() + "..."
+        transcript_lines.append(f"{role_name}: {content}")
+    return "\n".join(transcript_lines)
 
 
 def generate_api_key() -> str:
@@ -616,12 +775,16 @@ def serialize_lead(row: LeadDB, include_pii: bool = True) -> dict:
         data["email"] = row.email
         data["message"] = row.message
         data["photo_name"] = row.photo_name
+        data["accepted_agb"] = bool(row.accepted_agb)
+        data["accepted_privacy"] = bool(row.accepted_privacy)
     else:
         data["name"] = None
         data["phone"] = mask_phone(row.phone)
         data["email"] = mask_email(row.email)
         data["message"] = None
         data["photo_name"] = None
+        data["accepted_agb"] = None
+        data["accepted_privacy"] = None
 
     return data
 
@@ -655,6 +818,25 @@ def predict_price(payload: PredictIn):
         "Price estimate calculated",
         data=result,
         legacy=result,
+    )
+
+
+@app.post("/api/chat")
+def dode_chat(payload: ChatRequestIn):
+    page = normalize_text(payload.page)
+    reply = generate_dode_reply(
+        messages=payload.messages,
+        page=page,
+        session_factory=SessionLocal,
+        assigned_price_calculator=calculate_assigned_price,
+        logger=LOGGER,
+    )
+
+    reply_data = {"reply": reply}
+    return success_response(
+        "Dode reply generated",
+        data=reply_data,
+        legacy=reply_data,
     )
 
 
@@ -817,8 +999,10 @@ def list_pricing_rules(
     finally:
         db.close()
 
-@app.post("/api/leads")
-def create_lead(payload: LeadIn):
+def _create_lead(
+    payload: LeadIn,
+    photo_attachment: dict[str, Any] | None = None,
+):
     db = SessionLocal()
     try:
         name = (payload.name or "").strip()
@@ -831,9 +1015,16 @@ def create_lead(payload: LeadIn):
         express = bool(payload.express)
         message = normalize_text(payload.message)
         photo_name = normalize_text(payload.photo_name)
+        accepted_agb = bool(payload.accepted_agb)
+        accepted_privacy = bool(payload.accepted_privacy)
 
         if not name:
             raise HTTPException(status_code=422, detail="name is required")
+        if not accepted_agb or not accepted_privacy:
+            raise HTTPException(
+                status_code=422,
+                detail="Bitte AGB und Datenschutzerklärung akzeptieren.",
+            )
         validate_non_negative_int("rooms", rooms)
         validate_non_negative_float("distance_km", distance_km)
 
@@ -862,6 +1053,8 @@ def create_lead(payload: LeadIn):
                 duplicate.message = message
             if photo_name:
                 duplicate.photo_name = photo_name
+            duplicate.accepted_agb = accepted_agb
+            duplicate.accepted_privacy = accepted_privacy
 
             if duplicate.company_id is None:
                 assign_lead_to_company(db, duplicate)
@@ -869,7 +1062,10 @@ def create_lead(payload: LeadIn):
             db.commit()
             db.refresh(duplicate)
             try:
-                send_lead_notification(serialize_lead(duplicate, include_pii=True))
+                send_lead_notification(
+                    serialize_lead(duplicate, include_pii=True),
+                    photo_attachment=photo_attachment,
+                )
             except Exception:
                 LOGGER.exception(
                     "Email notify failed (lead saved anyway): lead_id=%s",
@@ -899,6 +1095,8 @@ def create_lead(payload: LeadIn):
             express=express,
             message=message,
             photo_name=photo_name,
+            accepted_agb=accepted_agb,
+            accepted_privacy=accepted_privacy,
             status="new",
         )
 
@@ -909,7 +1107,10 @@ def create_lead(payload: LeadIn):
         db.commit()
         db.refresh(lead)
         try:
-            send_lead_notification(serialize_lead(lead, include_pii=True))
+            send_lead_notification(
+                serialize_lead(lead, include_pii=True),
+                photo_attachment=photo_attachment,
+            )
         except Exception:
             LOGGER.exception(
                 "Email notify failed (lead saved anyway): lead_id=%s",
@@ -929,6 +1130,18 @@ def create_lead(payload: LeadIn):
         )
     finally:
         db.close()
+
+
+@app.post("/contact")
+async def submit_contact(request: Request):
+    payload, photo_attachment = await _parse_lead_request(request)
+    return _create_lead(payload, photo_attachment=photo_attachment)
+
+
+@app.post("/api/leads")
+async def create_lead(request: Request):
+    payload, photo_attachment = await _parse_lead_request(request)
+    return _create_lead(payload, photo_attachment=photo_attachment)
 
 
 @app.get("/api/leads")
@@ -1215,6 +1428,8 @@ def export_leads_csv(
                 "company_id",
                 "status",
                 "assigned_price_eur",
+                "accepted_agb",
+                "accepted_privacy",
                 "created_at",
             ],
         )

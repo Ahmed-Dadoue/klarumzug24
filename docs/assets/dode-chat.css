@@ -1,0 +1,195 @@
+.dode-fab {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 1200;
+  border: 0;
+  border-radius: 999px;
+  padding: 14px 18px;
+  background: linear-gradient(135deg, #ffd700, #f4b400);
+  color: #111;
+  font-weight: 700;
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.3);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.dode-panel {
+  position: fixed;
+  right: 22px;
+  bottom: 92px;
+  z-index: 1200;
+  width: min(380px, calc(100vw - 24px));
+  max-height: min(72vh, 680px);
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 215, 0, 0.22);
+  background: linear-gradient(180deg, #141414, #090909);
+  box-shadow: 0 26px 60px rgba(0, 0, 0, 0.45);
+}
+
+.dode-panel.is-open {
+  display: flex;
+}
+
+.dode-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 16px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 215, 0, 0.08);
+}
+
+.dode-header-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dode-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: #ffd700;
+  color: #111;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  flex: 0 0 auto;
+}
+
+.dode-title {
+  margin: 0;
+  color: #ffd700;
+  font-size: 1rem;
+}
+
+.dode-subtitle {
+  margin: 2px 0 0;
+  color: #f2f2f2;
+  font-size: 0.84rem;
+}
+
+.dode-close {
+  border: 0;
+  background: transparent;
+  color: #fff;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.dode-body {
+  padding: 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background:
+    radial-gradient(circle at top right, rgba(255, 215, 0, 0.08), transparent 28%),
+    #0d0d0d;
+}
+
+.dode-message {
+  max-width: 88%;
+  padding: 12px 14px;
+  border-radius: 16px;
+  line-height: 1.55;
+  font-size: 0.94rem;
+  word-break: break-word;
+}
+
+.dode-message.bot {
+  align-self: flex-start;
+  background: #171717;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #f4f4f4;
+}
+
+.dode-message.user {
+  align-self: flex-end;
+  background: #ffd700;
+  color: #111;
+  font-weight: 600;
+}
+
+.dode-message a {
+  color: #ffd700;
+  text-decoration: underline;
+}
+
+.dode-quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.dode-chip {
+  border: 1px solid rgba(255, 215, 0, 0.18);
+  background: rgba(255, 215, 0, 0.08);
+  color: #f7e89a;
+  border-radius: 999px;
+  padding: 7px 12px;
+  font-size: 0.84rem;
+  cursor: pointer;
+}
+
+.dode-footer {
+  padding: 14px 16px 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: #101010;
+}
+
+.dode-input-row {
+  display: flex;
+  gap: 8px;
+}
+
+.dode-input {
+  flex: 1;
+  min-height: 46px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  background: #f2f4f7;
+  color: #111;
+  padding: 10px 14px;
+}
+
+.dode-send {
+  min-width: 48px;
+  border: 0;
+  border-radius: 14px;
+  background: #ffd700;
+  color: #111;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.dode-note {
+  margin-top: 10px;
+  color: #bdbdbd;
+  font-size: 0.78rem;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .dode-fab {
+    right: 16px;
+    bottom: 16px;
+    padding: 13px 16px;
+  }
+
+  .dode-panel {
+    right: 12px;
+    bottom: 82px;
+    width: calc(100vw - 24px);
+    max-height: 72vh;
+  }
+}

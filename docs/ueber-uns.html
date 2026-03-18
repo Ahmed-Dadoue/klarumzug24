@@ -3,84 +3,99 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Über uns – Klarumzug24</title>
+  <title>Ueber uns - Klarumzug24</title>
   <meta name="description" content="Erfahren Sie mehr ueber Klarumzug24: zuverlaessige Umzugsfirma fuer Privat- und Firmenumzuege in Schleswig-Holstein.">
   <meta name="robots" content="index,follow">
   <link rel="canonical" href="https://klarumzug24.de/ueber-uns.html">
 
   <meta property="og:locale" content="de_DE">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Ueber Uns - Klarumzug24">
+  <meta property="og:title" content="Ueber uns - Klarumzug24">
   <meta property="og:description" content="Erfahren Sie mehr ueber Klarumzug24: zuverlaessige Umzugsfirma fuer Privat- und Firmenumzuege in Schleswig-Holstein.">
   <meta property="og:url" content="https://klarumzug24.de/ueber-uns.html">
   <meta property="og:site_name" content="Klarumzug24">
   <meta property="og:image" content="https://klarumzug24.de/logo.png">
 
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Ueber Uns - Klarumzug24">
+  <meta name="twitter:title" content="Ueber uns - Klarumzug24">
   <meta name="twitter:description" content="Erfahren Sie mehr ueber Klarumzug24: zuverlaessige Umzugsfirma fuer Privat- und Firmenumzuege in Schleswig-Holstein.">
   <meta name="twitter:image" content="https://klarumzug24.de/logo.png">
 
-  <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-  <!-- Icons -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
   <link href="assets/site.css" rel="stylesheet">
+  <link href="assets/dode-chat.css?v=20260309b" rel="stylesheet">
 
   <style>
-    body {
-      background: #000;
-      color: white;
-      font-family: Arial, sans-serif;
-      transition: background 0.5s ease;
+    body { background:#000; color:white; font-family:Arial, sans-serif; margin:0; }
+    .gold { color:#FFD700; }
+    .navbar { background:#111; border-bottom:2px solid #FFD700; }
+    .content { padding:60px 20px 80px; max-width:960px; margin:auto; }
+    footer { background:#111; padding:20px; text-align:center; border-top:2px solid #FFD700; margin-top:40px; }
+    .hero-box {
+      background:linear-gradient(145deg, #121212, #080808);
+      border:1px solid rgba(255, 215, 0, 0.22);
+      border-radius:24px;
+      padding:34px 28px;
+      box-shadow:0 18px 50px rgba(0, 0, 0, 0.28);
+      margin-bottom:28px;
     }
-
-    .gold { color: #FFD700; }
-
-    .navbar {
-      background: #111;
-      border-bottom: 2px solid #FFD700;
+    .hero-tag {
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 14px;
+      border-radius:999px;
+      background:rgba(255, 215, 0, 0.12);
+      color:#f4e6a0;
+      font-size:0.92rem;
+      margin-bottom:14px;
     }
-
-    .content {
-      padding: 60px 20px;
-      max-width: 900px;
-      margin: auto;
+    .hero-title { color:#FFD700; margin-bottom:16px; }
+    .lead-copy { color:#f2f2f2; font-size:1.05rem; line-height:1.75; }
+    .info-card {
+      background:#101010;
+      border:1px solid rgba(255, 255, 255, 0.08);
+      border-radius:20px;
+      padding:24px;
     }
-
-    footer {
-      background: #111;
-      padding: 20px;
-      text-align: center;
-      border-top: 2px solid #FFD700;
-      margin-top: 40px;
+    .reasons-title { color:#FFD700; margin-bottom:16px; }
+    .reasons-list {
+      list-style:none;
+      padding:0;
+      margin:0;
+      display:grid;
+      gap:14px;
     }
-
-    
-
-    body.dark {
-      background: #121212;
-      color: white;
+    .reasons-list li {
+      display:flex;
+      align-items:flex-start;
+      gap:12px;
+      color:#f2f2f2;
+      line-height:1.6;
     }
-
-    body.dark .navbar,
-    body.dark footer {
-      background: #1f1f1f;
+    .reasons-list i {
+      color:#FFD700;
+      margin-top:3px;
+      flex:0 0 auto;
+    }
+    .closing-copy {
+      margin-top:22px;
+      color:#f2f2f2;
+      font-size:1.02rem;
+    }
+    @media (max-width: 768px) {
+      .content { padding:40px 16px 56px; }
+      .hero-box, .info-card { padding:22px 18px; }
     }
   </style>
 </head>
 
 <body>
-
-  
-
-  <!-- Navigation -->
 <nav class="navbar navbar-expand-lg navbar-dark" style="background:#000; border-bottom:2px solid #FFD700; padding:10px 0;">
   <div class="container d-flex justify-content-between align-items-center">
-
     <a class="navbar-brand gold d-flex align-items-center" href="index.html">
-      <img src="assets/logo-navbar.png" class="navbar-logo">
+      <img src="assets/logo-navbar.png" class="navbar-logo" alt="Klarumzug24 Logo">
     </a>
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
@@ -90,59 +105,64 @@
     <div class="collapse navbar-collapse" id="navMenu">
       <ul class="navbar-nav ms-auto d-flex align-items-center" style="gap:20px;">
         <li class="nav-item"><a class="nav-link gold" href="index.html">Startseite</a></li>
-        <li class="nav-item"><a class="nav-link gold" href="ueber-uns.html">Über uns</a></li>
         <li class="nav-item"><a class="nav-link gold" href="umzugsrechner.html">Umzugsrechner</a></li>
         <li class="nav-item"><a class="nav-link gold" href="kontakt.html">Kontakt</a></li>
         <li class="nav-item"><a class="nav-link gold" href="agb.html">AGB</a></li>
         <li class="nav-item"><a class="nav-link gold" href="datenschutz.html">Datenschutz</a></li>
         <li class="nav-item"><a class="nav-link gold" href="impressum.html">Impressum</a></li>
-        
+        <li class="nav-item"><a class="nav-link gold" href="ueber-uns.html">Ueber uns</a></li>
       </ul>
     </div>
-
   </div>
 </nav>
 
-  <!-- Content -->
-  <div class="content">
-    <h1 class="gold text-center mb-4">Über uns</h1>
+<div class="content">
+  <section class="hero-box">
+    <div class="hero-tag">
+      <i class="fa-solid fa-truck-fast"></i>
+      Zuverlaessig, regional und professionell
+    </div>
+    <h1 class="hero-title">Ueber uns</h1>
 
-    <p>
-      Klarumzug24 ist Ihr zuverlässiger Partner für professionelle Umzüge und Transporte
-      in Bordesholm, Schleswig-Holstein und Umgebung. Unser Anspruch ist es, jeden Auftrag
-      mit höchster Sorgfalt, Effizienz und Verantwortung durchzuführen.
+    <p class="lead-copy">
+      Klarumzug24 ist Ihr zuverlaessiger Partner fuer professionelle Umzuege und Transporte in Bordesholm, Schleswig-Holstein und der gesamten Region.
     </p>
 
-    <p>
-      Mit modernem Equipment, langjähriger Erfahrung und einem engagierten Team sorgen wir dafür,
-      dass Ihr Umzug stressfrei, sicher und termingerecht abläuft. Egal ob Privat- oder Firmenumzug,
-      Nah- oder Ferntransport – wir bewegen, was Ihnen wichtig ist.
+    <p class="lead-copy">
+      Unser Ziel ist es, jeden Umzug sorgfaeltig zu planen und effizient durchzufuehren, damit Ihr Wohnungswechsel so stressfrei und reibungslos wie moeglich verlaeuft.
     </p>
 
-    <h3 class="gold mt-4">Warum Klarumzug24?</h3>
-    <ul>
-      <li>? Professionelle und freundliche Mitarbeiter</li>
-      <li>? Faire und transparente Preise</li>
-      <li>? Schnelle und zuverlässige Durchführung</li>
-      <li>? Sicherer Transport Ihrer Möbel und Wertgegenstände</li>
-      <li>? Individuelle Beratung und flexible Lösungen</li>
+    <p class="lead-copy">
+      Mit modernem Equipment, langjaehriger Erfahrung und einem engagierten Team kuemmern wir uns um jeden Schritt Ihres Umzugs - von der Planung bis zum sicheren Transport Ihrer Moebel und persoenlichen Gegenstaende.
+    </p>
+
+    <p class="lead-copy mb-0">
+      Ganz gleich, ob es sich um einen Privatumzug, Firmenumzug, Nah- oder Fernumzug handelt - wir bieten Ihnen massgeschneiderte Loesungen, die genau auf Ihre Beduerfnisse abgestimmt sind.
+    </p>
+  </section>
+
+  <section class="info-card">
+    <h2 class="reasons-title">Warum Klarumzug24?</h2>
+    <ul class="reasons-list">
+      <li><i class="fa-solid fa-check"></i><span>Professionelle und freundliche Mitarbeiter</span></li>
+      <li><i class="fa-solid fa-check"></i><span>Faire und transparente Preise ohne versteckte Kosten</span></li>
+      <li><i class="fa-solid fa-check"></i><span>Schnelle und zuverlaessige Durchfuehrung</span></li>
+      <li><i class="fa-solid fa-check"></i><span>Sicherer Transport Ihrer Moebel und Wertgegenstaende</span></li>
+      <li><i class="fa-solid fa-check"></i><span>Individuelle Beratung und flexible Loesungen</span></li>
     </ul>
 
-    <p class="mt-4">
-      Wir freuen uns darauf, auch Ihnen beim nächsten Umzug zur Seite zu stehen.
+    <p class="closing-copy">
+      Wir begleiten Sie persoenlich, transparent und mit dem Anspruch, Ihren Umzug so angenehm wie moeglich zu machen.
     </p>
-  </div>
+  </section>
+</div>
 
-  <!-- Footer -->
-  <footer>
-    © 2026 Klarumzug24 – Lüttbarten 8b, 24582 Bordesholm  
-    <br> Telefon: 0163 615 7234 – E-Mail: info@klarumzug24.de
-  </footer>
+<footer>
+  &copy; 2026 Klarumzug24 - Luettbarten 8b, 24582 Bordesholm
+  <br> Telefon: 0163 615 7234 - E-Mail: info@klarumzug24.de
+</footer>
 
-  
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
+<script src="assets/dode-chat.js?v=20260309b" defer></script>
 </body>
 </html>
-
-

@@ -19,7 +19,10 @@ def _as_text(value: object | None) -> str:
     return text if text else "-"
 
 
-def send_lead_notification(lead: dict) -> None:
+def send_lead_notification(
+    lead: dict,
+    photo_attachment: dict | None = None,
+) -> None:
     """
     Send one email notification for a created/updated lead.
     Uses SMTP over SSL (Hostinger: smtp.hostinger.com:465).
@@ -29,8 +32,8 @@ def send_lead_notification(lead: dict) -> None:
     port = int(_env("SMTP_PORT", "465") or "465")
     user = _env("SMTP_USER")
     password = _env("SMTP_PASS")
-    sender = _env("SMTP_FROM", user)
-    recipient = _env("NOTIFY_TO", user)
+    sender = _env("MAIL_FROM") or _env("SMTP_FROM", user)
+    recipient = _env("MAIL_TO") or _env("NOTIFY_TO", user)
 
     missing = [
         key
@@ -38,8 +41,8 @@ def send_lead_notification(lead: dict) -> None:
             "SMTP_HOST": host,
             "SMTP_USER": user,
             "SMTP_PASS": password,
-            "SMTP_FROM": sender,
-            "NOTIFY_TO": recipient,
+            "MAIL_FROM": sender,
+            "MAIL_TO": recipient,
         }.items()
         if not current
     ]
@@ -68,6 +71,8 @@ def send_lead_notification(lead: dict) -> None:
                 f"Distance (km): {_as_text(lead.get('distance_km'))}",
                 f"Express: {_as_text(lead.get('express'))}",
                 f"Photo name: {_as_text(lead.get('photo_name'))}",
+                f"AGB accepted: {_as_text(lead.get('accepted_agb'))}",
+                f"Privacy accepted: {_as_text(lead.get('accepted_privacy'))}",
                 "",
                 "Message:",
                 _as_text(lead.get("message")),
@@ -76,6 +81,23 @@ def send_lead_notification(lead: dict) -> None:
             ]
         )
     )
+
+    if photo_attachment:
+        content = photo_attachment.get("content")
+        filename = _as_text(photo_attachment.get("filename"))
+        content_type = str(photo_attachment.get("content_type") or "application/octet-stream")
+        maintype, subtype = (
+            content_type.split("/", 1)
+            if "/" in content_type
+            else ("application", "octet-stream")
+        )
+        if isinstance(content, bytes) and content and filename != "-":
+            msg.add_attachment(
+                content,
+                maintype=maintype,
+                subtype=subtype,
+                filename=filename,
+            )
 
     with smtplib.SMTP_SSL(host, port, timeout=20) as smtp:
         smtp.login(user, password)

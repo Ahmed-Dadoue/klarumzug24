@@ -3,47 +3,310 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Umzugsrechner – Klarumzug24</title>
-  <meta name="description" content="Berechnen Sie online eine realistische Umzugspreis-Schaetzung mit dem Umzugsrechner von Klarumzug24.">
+  <title>Umzugsrechner - Klarumzug24</title>
+  <meta name="description" content="Berechnen Sie online eine realistische Preis-Schaetzung mit dem Umzugsrechner von Klarumzug24.">
   <meta name="robots" content="index,follow">
   <link rel="canonical" href="https://klarumzug24.de/umzugsrechner.html">
 
   <meta property="og:locale" content="de_DE">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Umzugsrechner - Klarumzug24">
-  <meta property="og:description" content="Berechnen Sie online eine realistische Umzugspreis-Schaetzung mit dem Umzugsrechner von Klarumzug24.">
+  <meta property="og:description" content="Berechnen Sie online eine realistische Preis-Schaetzung mit dem Umzugsrechner von Klarumzug24.">
   <meta property="og:url" content="https://klarumzug24.de/umzugsrechner.html">
   <meta property="og:site_name" content="Klarumzug24">
   <meta property="og:image" content="https://klarumzug24.de/logo.png">
 
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Umzugsrechner - Klarumzug24">
-  <meta name="twitter:description" content="Berechnen Sie online eine realistische Umzugspreis-Schaetzung mit dem Umzugsrechner von Klarumzug24.">
+  <meta name="twitter:description" content="Berechnen Sie online eine realistische Preis-Schaetzung mit dem Umzugsrechner von Klarumzug24.">
   <meta name="twitter:image" content="https://klarumzug24.de/logo.png">
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
   <link href="assets/site.css" rel="stylesheet">
+  <link href="assets/dode-chat.css?v=20260309b" rel="stylesheet">
 
   <style>
-    body { background:#000; color:white; font-family:Arial, sans-serif; transition:0.5s; }
-    .gold { color:#FFD700; }
-    .navbar { background:#111; border-bottom:2px solid #FFD700; }
-    .content { padding:60px 20px; max-width:1100px; margin:auto; }
-    footer { background:#111; padding:20px; text-align:center; border-top:2px solid #FFD700; margin-top:40px; }
-    
-    body.dark { background:#121212; }
-    body.dark .navbar, body.dark footer { background:#1f1f1f; }
-    .section-title { margin-top:30px; border-bottom:1px solid #444; padding-bottom:5px; }
+    :root {
+      --gold: #ffd700;
+      --gold-soft: rgba(255, 215, 0, 0.14);
+      --border: rgba(255, 215, 0, 0.18);
+      --card: #0d0d0d;
+      --muted: #cfcfcf;
+      --text-soft: #f4e7a3;
+    }
+
+    body { background:#000; color:white; font-family:Arial, sans-serif; }
+    .gold { color:var(--gold); }
+    .navbar { background:#111; border-bottom:2px solid var(--gold); }
+    .content { padding:60px 20px 80px; max-width:1120px; margin:auto; }
+    footer { background:#111; padding:20px; text-align:center; border-top:2px solid var(--gold); margin-top:40px; }
+
+    .hero-panel {
+      background:
+        radial-gradient(circle at top right, rgba(255, 215, 0, 0.18), transparent 32%),
+        linear-gradient(145deg, #131313, #080808);
+      border:1px solid var(--border);
+      border-radius:28px;
+      padding:34px 28px;
+      box-shadow:0 24px 60px rgba(0, 0, 0, 0.35);
+      margin-bottom:28px;
+    }
+
+    .hero-tag {
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 14px;
+      border-radius:999px;
+      background:var(--gold-soft);
+      color:var(--text-soft);
+      font-size:0.9rem;
+      margin-bottom:14px;
+    }
+
+    .hero-title {
+      font-size:clamp(2.2rem, 5vw, 4rem);
+      line-height:1.04;
+      margin-bottom:14px;
+      color:var(--gold);
+    }
+
+    .hero-copy {
+      max-width:760px;
+      color:#f4f4f4;
+      font-size:1.06rem;
+      margin-bottom:22px;
+    }
+
+    .hero-points {
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px;
+    }
+
+    .hero-point {
+      border:1px solid rgba(255, 255, 255, 0.08);
+      background:rgba(255, 255, 255, 0.03);
+      border-radius:999px;
+      padding:10px 14px;
+      color:#f8f0c4;
+      font-size:0.92rem;
+    }
+
+    .form-shell {
+      display:grid;
+      gap:22px;
+    }
+
+    .calc-card,
+    .result-panel {
+      background:var(--card);
+      border:1px solid rgba(255, 255, 255, 0.08);
+      border-radius:24px;
+      padding:26px;
+      box-shadow:0 16px 44px rgba(0, 0, 0, 0.22);
+    }
+
+    .card-kicker {
+      display:flex;
+      gap:14px;
+      align-items:flex-start;
+      margin-bottom:18px;
+    }
+
+    .step-index {
+      width:36px;
+      height:36px;
+      border-radius:12px;
+      background:var(--gold-soft);
+      color:var(--gold);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:700;
+      flex:0 0 auto;
+    }
+
+    .card-title {
+      margin:0;
+      color:var(--gold);
+      font-size:1.55rem;
+    }
+
+    .card-copy {
+      margin:6px 0 0;
+      color:var(--muted);
+      max-width:740px;
+      font-size:0.98rem;
+    }
+
+    .form-label {
+      color:#f2f2f2;
+      font-size:0.94rem;
+      margin-bottom:8px;
+    }
+
+    .form-control,
+    .form-select {
+      min-height:54px;
+      border-radius:14px;
+      border:1px solid rgba(255, 255, 255, 0.09);
+      background:#f2f4f7;
+      color:#111;
+    }
+
+    textarea.form-control {
+      min-height:132px;
+      padding-top:14px;
+    }
+
+    .primary-action {
+      display:flex;
+      justify-content:center;
+      margin-top:24px;
+    }
+
+    .primary-action .btn {
+      min-width:230px;
+      border-radius:16px;
+      padding:14px 26px;
+      font-size:1.05rem;
+      font-weight:700;
+      box-shadow:0 12px 34px rgba(255, 193, 7, 0.22);
+    }
+    .result-panel {
+      display:none;
+      text-align:center;
+      background:
+        radial-gradient(circle at top center, rgba(255, 215, 0, 0.12), transparent 42%),
+        #0e0e0e;
+      border-color:var(--border);
+    }
+
+    .result-panel.is-visible {
+      display:block;
+    }
+
+    .result-tag {
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      border-radius:999px;
+      padding:8px 14px;
+      background:var(--gold-soft);
+      color:var(--text-soft);
+      font-size:0.9rem;
+      margin-bottom:18px;
+    }
+
+    .result-price {
+      font-size:clamp(2rem, 5vw, 4rem);
+      color:var(--gold);
+      line-height:1.06;
+      margin-bottom:12px;
+    }
+
+    .result-copy {
+      color:#f3f3f3;
+      font-size:1.02rem;
+      margin:0 auto;
+      max-width:780px;
+    }
+
+    .optional-card { overflow:hidden; }
+    .optional-card summary {
+      list-style:none;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:18px;
+      font-size:1.08rem;
+      color:var(--gold);
+      font-weight:700;
+    }
+    .optional-card summary::-webkit-details-marker { display:none; }
+    .optional-summary-text small {
+      display:block;
+      margin-top:6px;
+      color:var(--muted);
+      font-weight:400;
+      font-size:0.92rem;
+    }
+    .optional-chevron { transition:transform 0.2s ease; color:#fff3bf; }
+    .optional-card[open] .optional-chevron { transform:rotate(180deg); }
+    .optional-grid { display:grid; gap:22px; margin-top:22px; }
+    .optional-group { border-top:1px solid rgba(255, 255, 255, 0.08); padding-top:22px; }
+    .optional-group:first-of-type { border-top:0; padding-top:0; }
+    .optional-group-title { color:var(--gold); font-size:1.08rem; margin-bottom:14px; }
+
+    .contact-card {
+      background:linear-gradient(180deg, #111, #0b0b0b);
+      border-color:rgba(255, 255, 255, 0.1);
+    }
+
+    .checkbox-panel {
+      margin-top:10px;
+      padding:18px;
+      border:1px solid rgba(255, 255, 255, 0.08);
+      border-radius:18px;
+      background:#0f0f0f;
+    }
+    .checkbox-panel .form-check { margin-bottom:12px; }
+    .checkbox-panel .form-check:last-child { margin-bottom:0; }
+    .form-check-input {
+      width:1.15rem;
+      height:1.15rem;
+      margin-top:0.18rem;
+      border-radius:6px;
+      border:1px solid rgba(255, 255, 255, 0.24);
+      background:#fff;
+    }
+    .form-check-input:checked {
+      background-color:var(--gold);
+      border-color:var(--gold);
+    }
+    .form-check-label { color:#f4f4f4; line-height:1.55; }
+    .form-check-label a { color:var(--gold); }
+    .consent-note { margin:14px 0 0; color:#bfbfbf; font-size:0.92rem; }
+    .lead-status { min-height:32px; margin:18px 0 8px; text-align:center; font-size:1rem; }
+    .action-row {
+      display:flex;
+      justify-content:center;
+      gap:14px;
+      flex-wrap:wrap;
+      margin-top:8px;
+    }
+    .action-row .btn {
+      min-width:230px;
+      border-radius:16px;
+      padding:13px 24px;
+      font-size:1rem;
+    }
+    .contact-tip { color:#d4d4d4; margin-top:6px; font-size:0.95rem; text-align:center; }
+
+    @media (max-width: 768px) {
+      .content { padding:36px 16px 56px; }
+      .hero-panel, .calc-card, .result-panel {
+        padding:22px 18px;
+        border-radius:20px;
+      }
+      .card-kicker { flex-direction:column; }
+      .step-index {
+        width:32px;
+        height:32px;
+        border-radius:10px;
+      }
+      .action-row .btn,
+      .primary-action .btn { width:100%; }
+    }
   </style>
 </head>
 
 <body>
-
- 
 <nav class="navbar navbar-expand-lg navbar-dark" style="background:#000; border-bottom:2px solid #FFD700; padding:10px 0;">
   <div class="container d-flex justify-content-between align-items-center">
-
     <a class="navbar-brand gold d-flex align-items-center" href="index.html">
       <img src="assets/logo-navbar.png" class="navbar-logo">
     </a>
@@ -55,324 +318,395 @@
     <div class="collapse navbar-collapse" id="navMenu">
       <ul class="navbar-nav ms-auto d-flex align-items-center" style="gap:20px;">
         <li class="nav-item"><a class="nav-link gold" href="index.html">Startseite</a></li>
-        <li class="nav-item"><a class="nav-link gold" href="ueber-uns.html">Über uns</a></li>
         <li class="nav-item"><a class="nav-link gold" href="umzugsrechner.html">Umzugsrechner</a></li>
         <li class="nav-item"><a class="nav-link gold" href="kontakt.html">Kontakt</a></li>
         <li class="nav-item"><a class="nav-link gold" href="agb.html">AGB</a></li>
         <li class="nav-item"><a class="nav-link gold" href="datenschutz.html">Datenschutz</a></li>
         <li class="nav-item"><a class="nav-link gold" href="impressum.html">Impressum</a></li>
-        
+        <li class="nav-item"><a class="nav-link gold" href="ueber-uns.html">Ueber uns</a></li>
       </ul>
     </div>
-
   </div>
 </nav>
 
 <div class="content">
-  <h1 class="gold text-center mb-4">Umzugsrechner</h1>
-  <p class="text-center mb-5">
-    Beantworten Sie die folgenden Fragen – Sie erhalten eine <span class="gold">realistische Preis-Schätzung</span> für Ihren Umzug.
-  </p>
-
-  <form id="form" class="row g-3">
-
-    <!-- Wohnungsdetails -->
-    <h4 class="gold section-title">Wohnungsdetails</h4>
-
-    <div class="col-md-4">
-      <label class="form-label">Wohnfläche (qm)</label>
-      <input type="number" id="qm" class="form-control" required>
+  <section class="hero-panel">
+    <div class="hero-tag">
+      <i class="fa-solid fa-bolt"></i>
+      Schnell, unverbindlich und direkt versandbereit
     </div>
-
-    <div class="col-md-4">
-      <label class="form-label">Anzahl Zimmer</label>
-      <input type="number" id="zimmer" class="form-control" required>
+    <h1 class="hero-title">Umzugspreis in wenigen Schritten berechnen</h1>
+    <p class="hero-copy">
+      Geben Sie zuerst nur die wichtigsten Daten ein. Sie erhalten sofort eine realistische Preis-Schaetzung und koennen die Anfrage danach direkt an Klarumzug24 senden.
+    </p>
+    <div class="hero-points">
+      <div class="hero-point"><i class="fa-solid fa-check"></i> Erst Preis sehen, dann absenden</div>
+      <div class="hero-point"><i class="fa-solid fa-check"></i> Zusatzdetails nur bei Bedarf</div>
+      <div class="hero-point"><i class="fa-solid fa-check"></i> WhatsApp oder direkte Anfrage</div>
     </div>
+  </section>
 
-    <div class="col-md-4">
-      <label class="form-label">Haustyp</label>
-      <select id="haustyp" class="form-select">
-        <option value="wohnung">Wohnung</option>
-        <option value="haus">Haus</option>
-        <option value="reihenhaus">Reihenhaus</option>
-      </select>
-    </div>
+  <form id="form" class="form-shell">
+    <section class="calc-card">
+      <div class="card-kicker">
+        <div class="step-index">1</div>
+        <div>
+          <h2 class="card-title">Schnelle Preis-Schaetzung</h2>
+          <p class="card-copy">
+            Diese Angaben reichen fuer eine gute erste Schaetzung. Weitere Details koennen Sie weiter unten optional ergaenzen.
+          </p>
+        </div>
+      </div>
 
-    <div class="col-md-3">
-      <label class="form-label">Keller vorhanden?</label>
-      <select id="keller" class="form-select">
-        <option value="0">Nein</option>
-        <option value="1">Ja</option>
-      </select>
-    </div>
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label" for="qm">Wohnflaeche (qm)</label>
+          <input type="number" id="qm" class="form-control" required>
+        </div>
 
-    <div class="col-md-3">
-      <label class="form-label">Dachboden vorhanden?</label>
-      <select id="dachboden" class="form-select">
-        <option value="0">Nein</option>
-        <option value="1">Ja</option>
-      </select>
-    </div>
+        <div class="col-md-4">
+          <label class="form-label" for="zimmer">Anzahl Zimmer</label>
+          <input type="number" id="zimmer" class="form-control" required>
+        </div>
 
-    <div class="col-md-3">
-      <label class="form-label">Balkon vorhanden?</label>
-      <select id="balkon" class="form-select">
-        <option value="0">Nein</option>
-        <option value="1">Ja</option>
-      </select>
-    </div>
+        <div class="col-md-4">
+          <label class="form-label" for="haustyp">Haustyp</label>
+          <select id="haustyp" class="form-select">
+            <option value="wohnung">Wohnung</option>
+            <option value="haus">Haus</option>
+            <option value="reihenhaus">Reihenhaus</option>
+          </select>
+        </div>
 
-    <div class="col-md-3">
-      <label class="form-label">Garage vorhanden?</label>
-      <select id="garage" class="form-select">
-        <option value="0">Nein</option>
-        <option value="1">Ja</option>
-      </select>
-    </div>
+        <div class="col-md-4">
+          <label class="form-label" for="stockwerk">Stockwerk</label>
+          <input type="number" id="stockwerk" class="form-control" required>
+        </div>
 
-    <!-- Transport & Zugang -->
-    <h4 class="gold section-title">Transport & Zugang</h4>
+        <div class="col-md-4">
+          <label class="form-label" for="fahrstuhl">Fahrstuhl vorhanden?</label>
+          <select id="fahrstuhl" class="form-select">
+            <option value="1">Ja</option>
+            <option value="0">Nein</option>
+          </select>
+        </div>
 
-    <div class="col-md-4">
-      <label class="form-label">Stockwerk</label>
-      <input type="number" id="stockwerk" class="form-control" required>
-    </div>
+        <div class="col-md-4">
+          <label class="form-label" for="distanz">Distanz Wohnung-Auto (Meter)</label>
+          <input type="number" id="distanz" class="form-control" required>
+        </div>
 
-    <div class="col-md-4">
-      <label class="form-label">Fahrstuhl vorhanden?</label>
-      <select id="fahrstuhl" class="form-select">
-        <option value="1">Ja</option>
-        <option value="0">Nein</option>
-      </select>
-    </div>
+        <div class="col-md-4">
+          <label class="form-label" for="entfernung">Entfernung alt - neu (km)</label>
+          <input type="number" id="entfernung" class="form-control" required>
+        </div>
 
-    <div class="col-md-4">
-      <label class="form-label">Distanz Wohnung–Auto (Meter)</label>
-      <input type="number" id="distanz" class="form-control" required>
-    </div>
+        <div class="col-md-4">
+          <label class="form-label" for="kartons">Anzahl Kartons</label>
+          <input type="number" id="kartons" class="form-control" required>
+        </div>
 
-    <div class="col-md-4">
-      <label class="form-label">Entfernung alt ? neu (km)</label>
-      <input type="number" id="entfernung" class="form-control" required>
-    </div>
+        <div class="col-md-4">
+          <label class="form-label" for="schraenke">Anzahl Schraenke</label>
+          <input type="number" id="schraenke" class="form-control" required>
+        </div>
 
-    <div class="col-md-4">
-      <label class="form-label">Halteverbotszone nötig?</label>
-      <select id="halteverbot" class="form-select">
-        <option value="0">Nein</option>
-        <option value="1">Ja</option>
-      </select>
-    </div>
+        <div class="col-md-4">
+          <label class="form-label" for="montage">Moebelmontage noetig?</label>
+          <select id="montage" class="form-select">
+            <option value="1">Ja</option>
+            <option value="0">Nein</option>
+          </select>
+        </div>
 
-    <div class="col-md-4">
-      <label class="form-label">Parken direkt vor der Tür?</label>
-      <select id="parken" class="form-select">
-        <option value="1">Ja</option>
-        <option value="0">Nein</option>
-      </select>
-    </div>
+        <div class="col-md-4">
+          <label class="form-label" for="express">Express-Umzug?</label>
+          <select id="express" class="form-select">
+            <option value="0">Nein</option>
+            <option value="1">Ja</option>
+          </select>
+        </div>
+      </div>
 
-    <!-- Kartons & Standardmöbel -->
-    <h4 class="gold section-title">Kartons & Standardmöbel</h4>
+      <div class="primary-action">
+        <button type="button" class="btn btn-warning btn-lg" onclick="berechnen()">
+          <i class="fa-solid fa-calculator"></i> Preis berechnen
+        </button>
+      </div>
+    </section>
 
-    <div class="col-md-4">
-      <label class="form-label">Anzahl Kartons</label>
-      <input type="number" id="kartons" class="form-control" required>
-    </div>
+    <section id="resultPanel" class="result-panel" aria-live="polite">
+      <div class="result-tag">
+        <i class="fa-solid fa-sparkles"></i>
+        Ihre Preis-Schaetzung ist bereit
+      </div>
+      <h2 id="ergebnis" class="result-price"></h2>
+      <p id="zusatzinfo" class="result-copy"></p>
+    </section>
+    <details class="calc-card optional-card">
+      <summary>
+        <span class="optional-summary-text">
+          Weitere Angaben fuer eine genauere Anfrage
+          <small>Optional: nur ausfuellen, wenn diese Details bei Ihrem Umzug wichtig sind.</small>
+        </span>
+        <i class="fa-solid fa-chevron-down optional-chevron"></i>
+      </summary>
 
-    <div class="col-md-4">
-      <label class="form-label">Anzahl Schränke</label>
-      <input type="number" id="schraenke" class="form-control" required>
-    </div>
+      <div class="optional-grid">
+        <div class="optional-group">
+          <h3 class="optional-group-title">Wohnung und Zugang</h3>
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label" for="keller">Keller vorhanden?</label>
+              <select id="keller" class="form-select">
+                <option value="0">Nein</option>
+                <option value="1">Ja</option>
+              </select>
+            </div>
 
-    <div class="col-md-4">
-      <label class="form-label">Anzahl Betten</label>
-      <input type="number" id="betten" class="form-control" required>
-    </div>
+            <div class="col-md-4">
+              <label class="form-label" for="dachboden">Dachboden vorhanden?</label>
+              <select id="dachboden" class="form-select">
+                <option value="0">Nein</option>
+                <option value="1">Ja</option>
+              </select>
+            </div>
 
-    <div class="col-md-4">
-      <label class="form-label">Anzahl Sofas</label>
-      <input type="number" id="sofas" class="form-control" required>
-    </div>
+            <div class="col-md-4">
+              <label class="form-label" for="balkon">Balkon vorhanden?</label>
+              <select id="balkon" class="form-select">
+                <option value="0">Nein</option>
+                <option value="1">Ja</option>
+              </select>
+            </div>
 
-    <div class="col-md-4">
-      <label class="form-label">Anzahl Tische</label>
-      <input type="number" id="tische" class="form-control" required>
-    </div>
+            <div class="col-md-4">
+              <label class="form-label" for="garage">Garage vorhanden?</label>
+              <select id="garage" class="form-select">
+                <option value="0">Nein</option>
+                <option value="1">Ja</option>
+              </select>
+            </div>
 
-    <div class="col-md-4">
-      <label class="form-label">Anzahl Stühle</label>
-      <input type="number" id="stuehle" class="form-control" required>
-    </div>
+            <div class="col-md-4">
+              <label class="form-label" for="halteverbot">Halteverbotszone noetig?</label>
+              <select id="halteverbot" class="form-select">
+                <option value="0">Nein</option>
+                <option value="1">Ja</option>
+              </select>
+            </div>
 
-    <!-- Geräte & Spezialstücke -->
-    <h4 class="gold section-title">Geräte & Spezialstücke</h4>
+            <div class="col-md-4">
+              <label class="form-label" for="parken">Parken direkt vor der Tuer?</label>
+              <select id="parken" class="form-select">
+                <option value="1">Ja</option>
+                <option value="0">Nein</option>
+              </select>
+            </div>
+          </div>
+        </div>
 
-    <div class="col-md-4">
-      <label class="form-label">Anzahl Waschmaschinen</label>
-      <input type="number" id="waschmaschine" class="form-control" required>
-    </div>
+        <div class="optional-group">
+          <h3 class="optional-group-title">Moebel und Spezialstuecke</h3>
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label" for="betten">Anzahl Betten</label>
+              <input type="number" id="betten" class="form-control" value="0">
+            </div>
 
-    <div class="col-md-4">
-      <label class="form-label">Anzahl Kühlschränke</label>
-      <input type="number" id="kuehlschrank" class="form-control" required>
-    </div>
+            <div class="col-md-4">
+              <label class="form-label" for="sofas">Anzahl Sofas</label>
+              <input type="number" id="sofas" class="form-control" value="0">
+            </div>
 
-    <div class="col-md-4">
-      <label class="form-label">Anzahl Fernseher</label>
-      <input type="number" id="fernseher" class="form-control" required>
-    </div>
+            <div class="col-md-4">
+              <label class="form-label" for="tische">Anzahl Tische</label>
+              <input type="number" id="tische" class="form-control" value="0">
+            </div>
 
-    <div class="col-md-4">
-      <label class="form-label">Aquarium vorhanden?</label>
-      <select id="aquarium" class="form-select">
-        <option value="0">Nein</option>
-        <option value="1">Ja</option>
-      </select>
-    </div>
+            <div class="col-md-4">
+              <label class="form-label" for="stuehle">Anzahl Stuehle</label>
+              <input type="number" id="stuehle" class="form-control" value="0">
+            </div>
 
-    <div class="col-md-4">
-      <label class="form-label">Klavier / Flügel?</label>
-      <select id="klavier" class="form-select">
-        <option value="0">Nein</option>
-        <option value="1">Ja</option>
-      </select>
-    </div>
+            <div class="col-md-4">
+              <label class="form-label" for="waschmaschine">Anzahl Waschmaschinen</label>
+              <input type="number" id="waschmaschine" class="form-control" value="0">
+            </div>
 
-    <div class="col-md-4">
-      <label class="form-label">Tresor vorhanden?</label>
-      <select id="tresor" class="form-select">
-        <option value="0">Nein</option>
-        <option value="1">Ja</option>
-      </select>
-    </div>
+            <div class="col-md-4">
+              <label class="form-label" for="kuehlschrank">Anzahl Kuehlschraenke</label>
+              <input type="number" id="kuehlschrank" class="form-control" value="0">
+            </div>
 
-    <!-- Montage & Service -->
-    <h4 class="gold section-title">Montage & Service</h4>
+            <div class="col-md-4">
+              <label class="form-label" for="fernseher">Anzahl Fernseher</label>
+              <input type="number" id="fernseher" class="form-control" value="0">
+            </div>
 
-    <div class="col-md-4">
-      <label class="form-label">Möbelmontage nötig?</label>
-      <select id="montage" class="form-select">
-        <option value="1">Ja</option>
-        <option value="0">Nein</option>
-      </select>
-    </div>
+            <div class="col-md-4">
+              <label class="form-label" for="aquarium">Aquarium vorhanden?</label>
+              <select id="aquarium" class="form-select">
+                <option value="0">Nein</option>
+                <option value="1">Ja</option>
+              </select>
+            </div>
 
-    <div class="col-md-4">
-      <label class="form-label">Küche abbauen?</label>
-      <select id="kueche_ab" class="form-select">
-        <option value="0">Nein</option>
-        <option value="1">Ja</option>
-      </select>
-    </div>
+            <div class="col-md-4">
+              <label class="form-label" for="klavier">Klavier oder Fluegel?</label>
+              <select id="klavier" class="form-select">
+                <option value="0">Nein</option>
+                <option value="1">Ja</option>
+              </select>
+            </div>
 
-    <div class="col-md-4">
-      <label class="form-label">Küche aufbauen?</label>
-      <select id="kueche_auf" class="form-select">
-        <option value="0">Nein</option>
-        <option value="1">Ja</option>
-      </select>
-    </div>
+            <div class="col-md-4">
+              <label class="form-label" for="tresor">Tresor vorhanden?</label>
+              <select id="tresor" class="form-select">
+                <option value="0">Nein</option>
+                <option value="1">Ja</option>
+              </select>
+            </div>
+          </div>
+        </div>
 
-    <div class="col-md-4">
-      <label class="form-label">Einpackservice?</label>
-      <select id="einpack" class="form-select">
-        <option value="0">Nein</option>
-        <option value="1">Ja</option>
-      </select>
-    </div>
+        <div class="optional-group">
+          <h3 class="optional-group-title">Service und Termin</h3>
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label" for="kueche_ab">Kueche abbauen?</label>
+              <select id="kueche_ab" class="form-select">
+                <option value="0">Nein</option>
+                <option value="1">Ja</option>
+              </select>
+            </div>
 
-    <div class="col-md-4">
-      <label class="form-label">Auspackservice?</label>
-      <select id="auspack" class="form-select">
-        <option value="0">Nein</option>
-        <option value="1">Ja</option>
-      </select>
-    </div>
+            <div class="col-md-4">
+              <label class="form-label" for="kueche_auf">Kueche aufbauen?</label>
+              <select id="kueche_auf" class="form-select">
+                <option value="0">Nein</option>
+                <option value="1">Ja</option>
+              </select>
+            </div>
 
-    <div class="col-md-4">
-      <label class="form-label">Entsorgung alter Möbel?</label>
-      <select id="entsorgung" class="form-select">
-        <option value="0">Nein</option>
-        <option value="1">Ja</option>
-      </select>
-    </div>
+            <div class="col-md-4">
+              <label class="form-label" for="einpack">Einpackservice?</label>
+              <select id="einpack" class="form-select">
+                <option value="0">Nein</option>
+                <option value="1">Ja</option>
+              </select>
+            </div>
 
-    <!-- Rabatt & Express -->
-    <h4 class="gold section-title">Rabatt & Express</h4>
+            <div class="col-md-4">
+              <label class="form-label" for="auspack">Auspackservice?</label>
+              <select id="auspack" class="form-select">
+                <option value="0">Nein</option>
+                <option value="1">Ja</option>
+              </select>
+            </div>
 
-    <div class="col-md-4">
-      <label class="form-label">Rabattcode</label>
-      <input type="text" id="rabattcode" class="form-control" placeholder="z.B. NEUKUNDE10">
-    </div>
+            <div class="col-md-4">
+              <label class="form-label" for="entsorgung">Entsorgung alter Moebel?</label>
+              <select id="entsorgung" class="form-select">
+                <option value="0">Nein</option>
+                <option value="1">Ja</option>
+              </select>
+            </div>
 
-    <div class="col-md-4">
-      <label class="form-label">Express-Umzug?</label>
-      <select id="express" class="form-select">
-        <option value="0">Nein</option>
-        <option value="1">Ja</option>
-      </select>
-    </div>
+            <div class="col-md-4">
+              <label class="form-label" for="rabattcode">Rabattcode</label>
+              <input type="text" id="rabattcode" class="form-control" placeholder="z. B. NEUKUNDE10">
+            </div>
 
-    <!-- Datum & Kontakt -->
-    <h4 class="gold section-title">Datum & Kontakt</h4>
+            <div class="col-md-4">
+              <label class="form-label" for="datum">Umzugsdatum</label>
+              <input type="date" id="datum" class="form-control">
+            </div>
+          </div>
+        </div>
+      </div>
+    </details>
+    <section class="calc-card contact-card">
+      <div class="card-kicker">
+        <div class="step-index">2</div>
+        <div>
+          <h2 class="card-title">Kontaktdaten und Anfrage senden</h2>
+          <p class="card-copy">
+            Nachdem der Preis berechnet wurde, koennen Sie Ihre Anfrage direkt an uns senden oder per WhatsApp weitergeben.
+          </p>
+        </div>
+      </div>
 
-    <div class="col-md-4">
-      <label class="form-label">Umzugsdatum</label>
-      <input type="date" id="datum" class="form-control">
-    </div>
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label" for="name">Name</label>
+          <input type="text" id="name" class="form-control">
+        </div>
 
-    <div class="col-md-4">
-      <label class="form-label">Name</label>
-      <input type="text" id="name" class="form-control">
-    </div>
+        <div class="col-md-4">
+          <label class="form-label" for="telefon">Telefon</label>
+          <input type="text" id="telefon" class="form-control">
+        </div>
 
-    <div class="col-md-4">
-      <label class="form-label">Telefon</label>
-      <input type="text" id="telefon" class="form-control">
-    </div>
+        <div class="col-md-4">
+          <label class="form-label" for="email">E-Mail</label>
+          <input type="email" id="email" class="form-control">
+        </div>
 
-    <div class="col-md-6">
-      <label class="form-label">E-Mail</label>
-      <input type="email" id="email" class="form-control">
-    </div>
+        <div class="col-12">
+          <label class="form-label" for="hinweise">Besondere Hinweise</label>
+          <textarea id="hinweise" class="form-control"></textarea>
+        </div>
+      </div>
 
-    <div class="col-md-6">
-      <label class="form-label">Besondere Hinweise</label>
-      <textarea id="hinweise" class="form-control" rows="2"></textarea>
-    </div>
+      <div class="checkbox-panel">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="acceptAgb">
+          <label class="form-check-label" for="acceptAgb">
+            Ich akzeptiere die <a href="agb.html" target="_blank" rel="noopener">AGB</a>.
+          </label>
+        </div>
 
-    <!-- Button -->
-    <div class="col-12 text-center mt-4">
-      <button type="button" class="btn btn-warning btn-lg" onclick="berechnen()">
-        <i class="fa-solid fa-calculator"></i> Preis berechnen
-      </button>
-    </div>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="acceptPrivacy">
+          <label class="form-check-label" for="acceptPrivacy">
+            Ich habe die <a href="datenschutz.html" target="_blank" rel="noopener">Datenschutzerklaerung</a> gelesen und akzeptiere sie.
+          </label>
+        </div>
 
+        <p class="consent-note">
+          Mit dem Absenden bestaetigen Sie, dass die Angaben wahrheitsgemaess gemacht wurden.
+        </p>
+      </div>
+
+      <p id="leadHinweis" class="lead-status text-secondary">
+        Berechnen Sie zuerst Ihren Preis. Danach werden die Versandoptionen aktiviert.
+      </p>
+
+      <div class="action-row">
+        <button id="whatsAppButton" type="button" class="btn btn-success" onclick="sendWhatsApp()" disabled>
+          <i class="fa-brands fa-whatsapp"></i> Anfrage per WhatsApp senden
+        </button>
+
+        <button id="directSendButton" type="button" class="btn btn-primary" onclick="sendInquiryDirectly()" disabled>
+          <i class="fa-solid fa-paper-plane"></i> Anfrage senden
+        </button>
+      </div>
+
+      <p class="contact-tip">
+        Tipp: Fuer die direkte Anfrage brauchen wir Name, Telefon, E-Mail sowie Ihre Zustimmung zu AGB und Datenschutz.
+      </p>
+    </section>
   </form>
-
-  <h2 id="ergebnis" class="gold text-center mt-4"></h2>
-  <p id="zusatzinfo" class="text-center mt-2"></p>
-  <p id="apiHinweis" class="text-center mt-1"></p>
-  <p id="leadHinweis" class="text-center mt-1"></p>
-
-  <div class="text-center mt-4">
-    <button class="btn btn-success me-2" onclick="sendWhatsApp()">
-      <i class="fa-brands fa-whatsapp"></i> Anfrage per WhatsApp senden
-    </button>
-
-    <button class="btn btn-primary" onclick="sendEmail()">
-      <i class="fa-solid fa-envelope"></i> Anfrage per E-Mail senden
-    </button>
-  </div>
 </div>
 
 <footer>
-  © 2026 Klarumzug24 – Lüttbarten 8b, 24582 Bordesholm  
-  <br> Telefon: 0163 615 7234 – E-Mail: info@klarumzug24.de
+  &copy; 2026 Klarumzug24 - Luettbarten 8b, 24582 Bordesholm
+  <br> Telefon: 0163 615 7234 - E-Mail: info@klarumzug24.de
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="assets/dode-chat.js?v=20260309b" defer></script>
 <script>
   const isLocalHost = ["localhost", "127.0.0.1"].includes(window.location.hostname);
 
@@ -402,73 +736,61 @@
     return value;
   }
 
-  window.addEventListener("DOMContentLoaded", () => {
-    document.querySelectorAll('input[type="number"]').forEach((input) => {
-      if (!input.hasAttribute("min")) {
-        input.setAttribute("min", "0");
-      }
-      if (!input.hasAttribute("step")) {
-        input.setAttribute("step", "1");
-      }
-    });
-  });
-
-  async function fetchModelEstimate(payload) {
-    const endpoints = [
-      "/api/predict",
-      "/predict",
-      "https://api.klarumzug24.de/api/predict",
-      "https://api.klarumzug24.de/predict",
-    ];
-    if (isLocalHost) {
-      endpoints.unshift("http://127.0.0.1:8000/api/predict", "http://127.0.0.1:8000/predict");
-    }
-    let lastError = null;
-
-    for (const endpoint of endpoints) {
-      try {
-        const response = await fetch(endpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-
-        let result = null;
-        try {
-          result = await response.json();
-        } catch (_) {
-          result = null;
-        }
-
-        if (!response.ok || result?.ok === false) {
-          throw new Error(result?.message || ("HTTP " + response.status));
-        }
-        return Number(result.estimated_price_eur);
-      } catch (error) {
-        lastError = error;
-      }
-    }
-
-    throw lastError || new Error("API nicht erreichbar");
+  function yesNo(id) {
+    return document.getElementById(id).value === "1" ? "Ja" : "Nein";
   }
-  async function submitLead() {
-    const name = document.getElementById("name")?.value.trim() || "";
-    const phone = normalizeGermanPhoneSoft(document.getElementById("telefon")?.value || "");
-    const email = document.getElementById("email")?.value.trim() || "";
-    const from_city = document.getElementById("from_city")?.value.trim() || "";
-    const to_city = document.getElementById("to_city")?.value.trim() || "";
 
-    if (!name || !phone || !email) {
-      return { ok: false, reason: "missing" };
+  function setActionButtonsEnabled(enabled) {
+    const whatsAppButton = document.getElementById("whatsAppButton");
+    const directSendButton = document.getElementById("directSendButton");
+
+    if (whatsAppButton) {
+      whatsAppButton.disabled = !enabled;
     }
+    if (directSendButton) {
+      directSendButton.disabled = !enabled;
+    }
+  }
 
-    const payload = { name, phone, email, from_city, to_city };
+  function setLeadHint(message, tone) {
+    const leadHint = document.getElementById("leadHinweis");
+    if (!leadHint) return;
+
+    leadHint.className = "lead-status";
+    if (tone) {
+      leadHint.classList.add(tone);
+    } else {
+      leadHint.classList.add("text-secondary");
+    }
+    leadHint.textContent = message;
+  }
+
+  function hasCalculatedEstimate() {
+    return Boolean(document.getElementById("ergebnis")?.textContent.trim());
+  }
+
+  function getLeadPayload() {
+    return {
+      name: document.getElementById("name").value.trim(),
+      phone: normalizeGermanPhoneSoft(document.getElementById("telefon").value),
+      email: document.getElementById("email").value.trim(),
+      message: getFormDataText().trim(),
+      rooms: getNonNegativeNumber("zimmer"),
+      distance_km: getNonNegativeNumber("entfernung"),
+      express: document.getElementById("express").value === "1",
+      accepted_agb: document.getElementById("acceptAgb").checked,
+      accepted_privacy: document.getElementById("acceptPrivacy").checked,
+    };
+  }
+
+  async function submitLead(payload) {
     const endpoints = ["/api/leads", "https://api.klarumzug24.de/api/leads"];
     if (isLocalHost) {
       endpoints.unshift("http://127.0.0.1:8000/api/leads");
     }
 
     let lastError = null;
+
     for (const endpoint of endpoints) {
       try {
         const response = await fetch(endpoint, {
@@ -488,17 +810,127 @@
           throw new Error(data?.message || ("HTTP " + response.status));
         }
 
-        const leadId = data?.data?.lead_id ?? data?.lead_id ?? null;
-        return { ok: true, leadId };
+        return data;
       } catch (error) {
         lastError = error;
       }
     }
 
-    return { ok: false, reason: "api", error: lastError };
+    throw lastError || new Error("API nicht erreichbar");
+  }
+  function getFormDataText() {
+    return `
+Umzugsanfrage - Klarumzug24
+
+Geschaetzter Preis:
+${document.getElementById("ergebnis").textContent || "-"}
+
+Kundendaten:
+Name: ${document.getElementById("name").value.trim() || "-"}
+Telefon: ${document.getElementById("telefon").value.trim() || "-"}
+E-Mail: ${document.getElementById("email").value.trim() || "-"}
+Umzugsdatum: ${document.getElementById("datum").value || "-"}
+
+Schnelle Angaben:
+Wohnflaeche: ${document.getElementById("qm").value || "0"} qm
+Zimmer: ${document.getElementById("zimmer").value || "0"}
+Haustyp: ${document.getElementById("haustyp").value}
+Stockwerk: ${document.getElementById("stockwerk").value || "0"}
+Fahrstuhl: ${yesNo("fahrstuhl")}
+Distanz Wohnung-Auto: ${document.getElementById("distanz").value || "0"} m
+Entfernung alt - neu: ${document.getElementById("entfernung").value || "0"} km
+Kartons: ${document.getElementById("kartons").value || "0"}
+Schraenke: ${document.getElementById("schraenke").value || "0"}
+Montage: ${yesNo("montage")}
+Express-Umzug: ${yesNo("express")}
+
+Weitere Angaben:
+Keller: ${yesNo("keller")}
+Dachboden: ${yesNo("dachboden")}
+Balkon: ${yesNo("balkon")}
+Garage: ${yesNo("garage")}
+Halteverbotszone: ${yesNo("halteverbot")}
+Parken direkt vor der Tuer: ${yesNo("parken")}
+Betten: ${document.getElementById("betten").value || "0"}
+Sofas: ${document.getElementById("sofas").value || "0"}
+Tische: ${document.getElementById("tische").value || "0"}
+Stuehle: ${document.getElementById("stuehle").value || "0"}
+Waschmaschinen: ${document.getElementById("waschmaschine").value || "0"}
+Kuehlschraenke: ${document.getElementById("kuehlschrank").value || "0"}
+Fernseher: ${document.getElementById("fernseher").value || "0"}
+Aquarium: ${yesNo("aquarium")}
+Klavier oder Fluegel: ${yesNo("klavier")}
+Tresor: ${yesNo("tresor")}
+Kueche abbauen: ${yesNo("kueche_ab")}
+Kueche aufbauen: ${yesNo("kueche_auf")}
+Einpackservice: ${yesNo("einpack")}
+Auspackservice: ${yesNo("auspack")}
+Entsorgung alter Moebel: ${yesNo("entsorgung")}
+Rabattcode: ${document.getElementById("rabattcode").value.trim() || "-"}
+
+Hinweise:
+${document.getElementById("hinweise").value.trim() || "-"}
+    `;
   }
 
-  async function berechnen() {
+  function sendWhatsApp() {
+    if (!hasCalculatedEstimate()) {
+      setLeadHint("Bitte zuerst den Preis berechnen.", "text-warning");
+      return;
+    }
+
+    if (!document.getElementById("acceptAgb").checked || !document.getElementById("acceptPrivacy").checked) {
+      setLeadHint("Bitte AGB und Datenschutzerklaerung akzeptieren.", "text-warning");
+      return;
+    }
+
+    const text = encodeURIComponent(getFormDataText().trim());
+    const phone = "491636157234";
+    window.open("https://wa.me/" + phone + "?text=" + text, "_blank");
+    setLeadHint("WhatsApp wurde geoeffnet. Sie koennen Ihre Anfrage dort direkt senden.", "text-success");
+  }
+
+  async function sendInquiryDirectly() {
+    if (!hasCalculatedEstimate()) {
+      setLeadHint("Bitte zuerst den Preis berechnen.", "text-warning");
+      return;
+    }
+
+    const payload = getLeadPayload();
+    if (!payload.name || !payload.phone || !payload.email) {
+      setLeadHint("Bitte Name, Telefon und E-Mail ausfuellen.", "text-warning");
+      return;
+    }
+
+    if (!payload.accepted_agb || !payload.accepted_privacy) {
+      setLeadHint("Bitte AGB und Datenschutzerklaerung akzeptieren.", "text-warning");
+      return;
+    }
+
+    const directSendButton = document.getElementById("directSendButton");
+    const originalLabel = directSendButton.innerHTML;
+    directSendButton.disabled = true;
+    directSendButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Wird gesendet...';
+
+    try {
+      await submitLead(payload);
+      setLeadHint("Vielen Dank. Ihre Anfrage wurde erfolgreich gesendet. Wir antworten in der Regel innerhalb von 1 Tag.", "text-success");
+    } catch (error) {
+      setLeadHint("Die Anfrage konnte gerade nicht gesendet werden. Bitte versuchen Sie es erneut.", "text-danger");
+    } finally {
+      directSendButton.disabled = false;
+      directSendButton.innerHTML = originalLabel;
+    }
+  }
+  function berechnen() {
+    const requiredFieldIds = ["qm", "zimmer", "stockwerk", "distanz", "entfernung", "kartons", "schraenke"];
+    const firstMissing = requiredFieldIds.find((id) => !document.getElementById(id).value.trim());
+    if (firstMissing) {
+      document.getElementById(firstMissing).focus();
+      setLeadHint("Bitte fuellen Sie zuerst die wichtigsten Angaben fuer die Preis-Schaetzung aus.", "text-warning");
+      return;
+    }
+
     const qm = getNonNegativeNumber("qm");
     const zimmer = getNonNegativeNumber("zimmer");
     const haustyp = document.getElementById("haustyp").value;
@@ -540,7 +972,6 @@
 
     let preis = 0;
 
-    // Basis
     preis += qm * 4;
     preis += zimmer * 20;
 
@@ -552,7 +983,6 @@
     preis += balkon * 20;
     preis += garage * 20;
 
-    // Zugang & Distanz
     preis += stockwerk * 10;
     preis += distanz * 0.5;
     preis += entfernung * 1.2;
@@ -561,7 +991,6 @@
     if (halteverbot === 1) preis += 60;
     if (parken === 0) preis += 30;
 
-    // Möbel & Kartons
     preis += kartons * 1.5;
     preis += schraenke * 15;
     preis += betten * 20;
@@ -569,7 +998,6 @@
     preis += tische * 10;
     preis += stuehle * 3;
 
-    // Geräte & Spezial
     preis += waschmaschine * 25;
     preis += kuehlschrank * 25;
     preis += fernseher * 10;
@@ -578,7 +1006,6 @@
     if (klavier === 1) preis += 150;
     if (tresor === 1) preis += 120;
 
-    // Service
     if (montage === 1) preis += 80;
     if (kueche_ab === 1) preis += 120;
     if (kueche_auf === 1) preis += 150;
@@ -586,12 +1013,10 @@
     if (auspack === 1) preis += kartons * 0.8 + 40;
     if (entsorgung === 1) preis += 100;
 
-    // Express-Aufschlag
     if (express === 1) {
-      preis *= 1.2; // +20 %
+      preis *= 1.2;
     }
 
-    // Rabatt
     let rabattText = "";
     if (rabattcode === "NEUKUNDE10") {
       preis *= 0.9;
@@ -603,137 +1028,52 @@
       preis *= 0.8;
       rabattText = "Rabattcode VIP20 angewendet (20 %). ";
     } else if (rabattcode !== "") {
-      rabattText = "Unbekannter Rabattcode – es wurde kein Rabatt abgezogen. ";
+      rabattText = "Unbekannter Rabattcode - es wurde kein Rabatt abgezogen. ";
     }
 
     const minPreis = preis * 0.9;
     const maxPreis = preis * 1.15;
 
     document.getElementById("ergebnis").textContent =
-      "Geschätzter Preis: " + minPreis.toFixed(0) + " € – " + maxPreis.toFixed(0) + " €";
+      "Geschaetzter Preis: " + minPreis.toFixed(0) + " EUR - " + maxPreis.toFixed(0) + " EUR";
 
     document.getElementById("zusatzinfo").textContent =
-      rabattText + "Dies ist eine unverbindliche Schätzung. Für ein verbindliches Angebot kontaktieren Sie uns bitte direkt.";
-    const apiHinweis = document.getElementById("apiHinweis");
-    apiHinweis.className = "text-center mt-1 text-warning";
-    apiHinweis.textContent = "ML-Modell wird geladen...";
+      rabattText + "Dies ist eine unverbindliche Schaetzung. Fuer ein verbindliches Angebot kontaktieren Sie uns bitte direkt.";
 
-    const leadHinweis = document.getElementById("leadHinweis");
-    const leadStatus = await submitLead();
-    if (leadHinweis) {
-      if (leadStatus.ok) {
-        leadHinweis.className = "text-center mt-1 text-success";
-        leadHinweis.textContent = "Lead gespeichert. Anfrage-ID: " + (leadStatus.leadId ?? "?");
-      } else if (leadStatus.reason === "missing") {
-        leadHinweis.className = "text-center mt-1 text-secondary";
-        leadHinweis.textContent = "Lead nicht gespeichert: bitte Name, Telefon und E-Mail ausfüllen.";
-      } else {
-        leadHinweis.className = "text-center mt-1 text-danger";
-        leadHinweis.textContent = "Lead konnte nicht gespeichert werden.";
-      }
+    document.getElementById("resultPanel").classList.add("is-visible");
+    setActionButtonsEnabled(true);
+
+    const hasContactValues =
+      document.getElementById("name").value.trim() &&
+      document.getElementById("telefon").value.trim() &&
+      document.getElementById("email").value.trim();
+
+    if (hasContactValues) {
+      setLeadHint("Ihre Schaetzung ist bereit. Sie koennen die Anfrage jetzt senden.", "text-info");
+    } else {
+      setLeadHint("Preis berechnet. Tragen Sie jetzt Ihre Kontaktdaten ein und bestaetigen Sie AGB und Datenschutz.", "text-info");
     }
 
-    try {
-      const modelPreis = await fetchModelEstimate({
-        qm,
-        kartons,
-        fahrstuhl,
-        stockwerk,
-        distanz_meter: distanz,
-        schraenke,
-        waschmaschine,
-        fernseher,
-        montage,
-      });
+    document.getElementById("resultPanel").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 
-      if (Number.isFinite(modelPreis)) {
-        const mlMin = modelPreis * 0.9;
-        const mlMax = modelPreis * 1.15;
-        apiHinweis.className = "text-center mt-1 text-info";
-        apiHinweis.textContent =
-          "ML-Modell: " + mlMin.toFixed(0) + " EUR - " + mlMax.toFixed(0) + " EUR";
-      } else {
-        apiHinweis.className = "text-center mt-1 text-secondary";
-        apiHinweis.textContent = "ML-Modell derzeit nicht verfuegbar.";
+  window.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("form")?.addEventListener("submit", (event) => {
+      event.preventDefault();
+    });
+
+    document.querySelectorAll('input[type="number"]').forEach((input) => {
+      if (!input.hasAttribute("min")) {
+        input.setAttribute("min", "0");
       }
-    } catch (error) {
-      apiHinweis.className = "text-center mt-1 text-secondary";
-      apiHinweis.textContent = "ML-Modell derzeit nicht erreichbar.";
-    }
-  }
+      if (!input.hasAttribute("step")) {
+        input.setAttribute("step", "1");
+      }
+    });
 
-  function getFormDataText() {
-    return `
-Umzugsanfrage – Klarumzug24
-
-Name: ${document.getElementById("name").value}
-Telefon: ${document.getElementById("telefon").value}
-E-Mail: ${document.getElementById("email").value}
-Datum: ${document.getElementById("datum").value}
-
-Wohnfläche: ${document.getElementById("qm").value} qm
-Zimmer: ${document.getElementById("zimmer").value}
-Haustyp: ${document.getElementById("haustyp").value}
-Keller: ${document.getElementById("keller").value == "1" ? "Ja" : "Nein"}
-Dachboden: ${document.getElementById("dachboden").value == "1" ? "Ja" : "Nein"}
-Balkon: ${document.getElementById("balkon").value == "1" ? "Ja" : "Nein"}
-Garage: ${document.getElementById("garage").value == "1" ? "Ja" : "Nein"}
-
-Stockwerk: ${document.getElementById("stockwerk").value}
-Fahrstuhl: ${document.getElementById("fahrstuhl").value == "1" ? "Ja" : "Nein"}
-Distanz Wohnung–Auto: ${document.getElementById("distanz").value} m
-Entfernung alt ? neu: ${document.getElementById("entfernung").value} km
-Halteverbotszone: ${document.getElementById("halteverbot").value == "1" ? "Ja" : "Nein"}
-Parken vor der Tür: ${document.getElementById("parken").value == "1" ? "Ja" : "Nein"}
-
-Kartons: ${document.getElementById("kartons").value}
-Schränke: ${document.getElementById("schraenke").value}
-Betten: ${document.getElementById("betten").value}
-Sofas: ${document.getElementById("sofas").value}
-Tische: ${document.getElementById("tische").value}
-Stühle: ${document.getElementById("stuehle").value}
-
-Waschmaschinen: ${document.getElementById("waschmaschine").value}
-Kühlschränke: ${document.getElementById("kuehlschrank").value}
-Fernseher: ${document.getElementById("fernseher").value}
-Aquarium: ${document.getElementById("aquarium").value == "1" ? "Ja" : "Nein"}
-Klavier: ${document.getElementById("klavier").value == "1" ? "Ja" : "Nein"}
-Tresor: ${document.getElementById("tresor").value == "1" ? "Ja" : "Nein"}
-
-Montage: ${document.getElementById("montage").value == "1" ? "Ja" : "Nein"}
-Küche abbauen: ${document.getElementById("kueche_ab").value == "1" ? "Ja" : "Nein"}
-Küche aufbauen: ${document.getElementById("kueche_auf").value == "1" ? "Ja" : "Nein"}
-Einpackservice: ${document.getElementById("einpack").value == "1" ? "Ja" : "Nein"}
-Auspackservice: ${document.getElementById("auspack").value == "1" ? "Ja" : "Nein"}
-Entsorgung: ${document.getElementById("entsorgung").value == "1" ? "Ja" : "Nein"}
-
-Rabattcode: ${document.getElementById("rabattcode").value}
-Express-Umzug: ${document.getElementById("express").value == "1" ? "Ja" : "Nein"}
-
-Hinweise:
-${document.getElementById("hinweise").value}
-
-Preis-Schätzung:
-${document.getElementById("ergebnis").textContent}
-    `;
-  }
-
-  function sendWhatsApp() {
-    const text = encodeURIComponent(getFormDataText());
-    const phone = "491636157234";
-    window.open(`https://wa.me/${phone}?text=${text}`, "_blank");
-  }
-
-  function sendEmail() {
-    const subject = encodeURIComponent("Umzugsanfrage – Klarumzug24");
-    const body = encodeURIComponent(getFormDataText());
-    window.location.href = `mailto:info@klarumzug24.de?subject=${subject}&body=${body}`;
-  }
+    setActionButtonsEnabled(false);
+  });
 </script>
 
 </body>
 </html>
-
-
-
-
