@@ -21,3 +21,6 @@ Thumbs.db
 # Editor
 .vscode/settings.json
 *.swp
+
+# Local test scripts
+test_dialogs.ps1
