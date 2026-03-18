@@ -33,6 +33,10 @@ CITY_PATTERN = re.compile(
     r"(?:von|aus)\s+([A-Za-zÄÖÜäöüß][A-Za-zÄÖÜäöüß .-]{1,80}?)\s+(?:nach|in)\s+([A-Za-zÄÖÜäöüß][A-Za-zÄÖÜäöüß .-]{1,80})(?:[,.!?]|$)",
     re.IGNORECASE,
 )
+_TRAILING_VERB = re.compile(
+    r"\s+(?:umziehen|umzuziehen|ziehen|fahren|gehen)\s*$",
+    re.IGNORECASE,
+)
 CITY_ONLY_PATTERN = re.compile(
     r"^[A-Za-zÄÖÜäöüß][A-Za-zÄÖÜäöüß .-]{1,80}$"
 )
@@ -81,6 +85,75 @@ ESTIMATE_REPLY_PATTERN = re.compile(
     r"unverbindlich\w*\s+schaetz\w+.*\b(?:eur|euro)\b",
     re.IGNORECASE,
 )
+
+DONT_KNOW_DISTANCE_PATTERN = re.compile(
+    r"\b(?:weiss nicht|weiß nicht|keine ahnung|keine angabe|unbekannt|nicht sicher|kp|keine km)\b",
+    re.IGNORECASE,
+)
+
+# Approximate distances (km) between common German city pairs.
+# Key: frozenset of lowercased city names.
+CITY_DISTANCES: dict[frozenset, int] = {
+    frozenset({"berlin", "hamburg"}): 290,
+    frozenset({"berlin", "muenchen"}): 585,
+    frozenset({"berlin", "münchen"}): 585,
+    frozenset({"berlin", "frankfurt"}): 545,
+    frozenset({"berlin", "koeln"}): 570,
+    frozenset({"berlin", "köln"}): 570,
+    frozenset({"berlin", "duesseldorf"}): 560,
+    frozenset({"berlin", "düsseldorf"}): 560,
+    frozenset({"berlin", "leipzig"}): 185,
+    frozenset({"berlin", "dresden"}): 195,
+    frozenset({"berlin", "hannover"}): 285,
+    frozenset({"berlin", "bremen"}): 390,
+    frozenset({"hamburg", "muenchen"}): 775,
+    frozenset({"hamburg", "münchen"}): 775,
+    frozenset({"hamburg", "frankfurt"}): 490,
+    frozenset({"hamburg", "koeln"}): 425,
+    frozenset({"hamburg", "köln"}): 425,
+    frozenset({"hamburg", "bremen"}): 120,
+    frozenset({"hamburg", "hannover"}): 150,
+    frozenset({"hamburg", "duesseldorf"}): 400,
+    frozenset({"hamburg", "düsseldorf"}): 400,
+    frozenset({"muenchen", "frankfurt"}): 390,
+    frozenset({"münchen", "frankfurt"}): 390,
+    frozenset({"muenchen", "stuttgart"}): 220,
+    frozenset({"münchen", "stuttgart"}): 220,
+    frozenset({"muenchen", "nuernberg"}): 165,
+    frozenset({"münchen", "nürnberg"}): 165,
+    frozenset({"muenchen", "augsburg"}): 70,
+    frozenset({"münchen", "augsburg"}): 70,
+    frozenset({"frankfurt", "koeln"}): 190,
+    frozenset({"frankfurt", "köln"}): 190,
+    frozenset({"frankfurt", "stuttgart"}): 205,
+    frozenset({"frankfurt", "mannheim"}): 85,
+    frozenset({"frankfurt", "duesseldorf"}): 235,
+    frozenset({"frankfurt", "düsseldorf"}): 235,
+    frozenset({"koeln", "duesseldorf"}): 45,
+    frozenset({"köln", "düsseldorf"}): 45,
+    frozenset({"koeln", "dortmund"}): 75,
+    frozenset({"köln", "dortmund"}): 75,
+    frozenset({"koeln", "bonn"}): 30,
+    frozenset({"köln", "bonn"}): 30,
+    frozenset({"stuttgart", "nuernberg"}): 220,
+    frozenset({"stuttgart", "nürnberg"}): 220,
+    frozenset({"stuttgart", "mannheim"}): 95,
+    frozenset({"dresden", "leipzig"}): 115,
+    frozenset({"hannover", "bremen"}): 120,
+    frozenset({"hannover", "dortmund"}): 200,
+    frozenset({"kiel", "hamburg"}): 90,
+    frozenset({"luebeck", "hamburg"}): 65,
+    frozenset({"lübeck", "hamburg"}): 65,
+    frozenset({"freiburg", "stuttgart"}): 200,
+    frozenset({"freiburg", "muenchen"}): 340,
+    frozenset({"freiburg", "münchen"}): 340,
+}
+
+
+def _lookup_distance(from_city: str, to_city: str) -> int | None:
+    key = frozenset({from_city.lower(), to_city.lower()})
+    return CITY_DISTANCES.get(key)
+
 
 NUMBER_WORDS = {
     "null": 0,
@@ -182,6 +255,7 @@ def _as_chat_turn(message: Any) -> ChatTurn:
 
 def _normalize_city(value: str) -> str:
     cleaned = " ".join(value.split()).strip(" ,.;:!?")
+    cleaned = _TRAILING_VERB.sub("", cleaned).strip()
     if not cleaned:
         return cleaned
     return cleaned[:1].upper() + cleaned[1:]
@@ -436,6 +510,17 @@ def _extract_move_details(messages: Sequence[ChatTurn]) -> MoveDetails:
             details.distance_km = distance_value
             if expected_field == "distance_km":
                 expected_field = None
+        elif (
+            expected_field == "distance_km"
+            and DONT_KNOW_DISTANCE_PATTERN.search(text)
+            and details.from_city
+            and details.to_city
+        ):
+            # User says they don't know the distance — use lookup if available.
+            looked_up = _lookup_distance(details.from_city, details.to_city)
+            if looked_up:
+                details.distance_km = float(looked_up)
+                expected_field = None
 
         date_match = MOVE_DATE_PATTERN.search(text)
         if date_match:
@@ -513,6 +598,17 @@ def _build_follow_up_question(
 
     question = _choose_variant(FOLLOW_UP_VARIANTS[key], last_assistant_text)
     intro = _choose_variant(FOLLOW_UP_INTROS, last_assistant_text)
+
+    # Distance assistance: if both cities are known, add a helpful km hint.
+    if key == "distance_km" and move_details.from_city and move_details.to_city:
+        known_km = _lookup_distance(move_details.from_city, move_details.to_city)
+        if known_km:
+            return (
+                f"{intro} {question} "
+                f"(Orientierung: {move_details.from_city} nach {move_details.to_city} "
+                f"sind ungefaehr {known_km} km.)"
+            )
+
     return f"{intro} {question}"
 
 

@@ -1,5 +1,10 @@
 ﻿# Klarumzug24 with Dode AI (v1)
 
+![Python](https://img.shields.io/badge/Python-3.12-blue)
+![FastAPI](https://img.shields.io/badge/FastAPI-latest-green)
+![OpenAI](https://img.shields.io/badge/AI-gpt--4.1--mini-orange)
+![Status](https://img.shields.io/badge/status-stable--v2-brightgreen)
+
 ## 1. Project Overview
 Klarumzug24 is a digital moving platform that combines a traditional pricing backend with an AI-powered chat assistant (Dode).
 
