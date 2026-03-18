@@ -521,11 +521,24 @@ def _build_estimate_reply(move_details: MoveDetails, estimate_result) -> str:
     if move_details.move_date:
         move_date_note = f" Fuer den Termin {move_details.move_date} kann die Planung spaeter noch konkretisiert werden."
 
+    same_city_note = ""
+    if (
+        move_details.from_city
+        and move_details.to_city
+        and _normalize_for_compare(move_details.from_city) == _normalize_for_compare(move_details.to_city)
+    ):
+        same_city_note = " Hinweis: Start- und Zielort sind identisch. Bitte pruefen Sie die Eingabe der Strecke."
+
+    if estimate_result.price_min == estimate_result.price_max:
+        price_text = f"ca. {estimate_result.price_min} EUR"
+    else:
+        price_text = f"ca. {estimate_result.price_min} bis {estimate_result.price_max} EUR"
+
     return (
         f"Fuer Ihren Umzug von {move_details.from_city} nach {move_details.to_city} "
-        f"liegt die unverbindliche Schaetzung aktuell bei ca. {estimate_result.price_min} bis {estimate_result.price_max} EUR. "
+        f"liegt die unverbindliche Schaetzung aktuell bei {price_text}. "
         f"{estimate_result.explanation} "
-        f"Das ist kein verbindliches Festpreisangebot.{move_date_note}"
+        f"Das ist kein verbindliches Festpreisangebot.{same_city_note}{move_date_note}"
     )
 
 
