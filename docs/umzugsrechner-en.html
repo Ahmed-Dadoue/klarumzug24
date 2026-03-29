@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Moving Calculator - Klarumzug24</title>
+  <meta name="description" content="Get a non-binding moving estimate with the Klarumzug24 moving calculator.">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://klarumzug24.de/umzugsrechner-en.html">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link href="assets/site.css" rel="stylesheet">
+  <link href="assets/dode-chat.css?v=20260309b" rel="stylesheet">
+  <style>
+    body { background:#000; color:#fff; font-family:Arial, sans-serif; }
+    .gold { color:#FFD700; }
+    .content { padding:60px 20px 80px; max-width:980px; margin:auto; }
+    .hero-panel, .calc-card, .result-panel { background:#0d0d0d; border:1px solid rgba(255,215,0,.18); border-radius:24px; padding:28px; box-shadow:0 16px 44px rgba(0,0,0,.22); }
+    .hero-panel { margin-bottom:24px; background:radial-gradient(circle at top right, rgba(255,215,0,.16), transparent 32%), linear-gradient(145deg, #131313, #080808); }
+    .hero-title { color:#FFD700; font-size:clamp(2rem, 5vw, 3.4rem); }
+    .hero-copy { color:#f4f4f4; max-width:760px; }
+    .calc-card { margin-bottom:22px; }
+    .result-panel { display:none; text-align:center; }
+    .result-panel.is-visible { display:block; }
+    .result-price { color:#FFD700; font-size:clamp(2rem, 5vw, 3.6rem); }
+    .form-control, .form-select { min-height:54px; border-radius:14px; background:#f2f4f7; }
+    .checkbox-panel { margin-top:10px; padding:18px; border:1px solid rgba(255,255,255,.08); border-radius:18px; background:#0f0f0f; }
+    .form-check-label a { color:#FFD700; }
+    footer { background:#111; padding:20px; text-align:center; border-top:2px solid #FFD700; margin-top:40px; }
+  </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark" style="background:#000; border-bottom:2px solid #FFD700; padding:10px 0;">
+  <div class="container d-flex justify-content-between align-items-center">
+    <a class="navbar-brand gold d-flex align-items-center" href="index-en.html"><img src="assets/logo-navbar.png" class="navbar-logo" alt="Klarumzug24 logo"></a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu"><span class="navbar-toggler-icon"></span></button>
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav ms-auto d-flex align-items-center" style="gap:20px;">
+        <li class="nav-item"><a class="nav-link gold" href="index-en.html">Home</a></li>
+        <li class="nav-item"><a class="nav-link gold" href="umzugsrechner-en.html">Moving Calculator</a></li>
+        <li class="nav-item"><a class="nav-link gold" href="kontakt-en.html">Contact</a></li>
+        <li class="nav-item"><a class="nav-link gold" href="agb-en.html">Terms</a></li>
+        <li class="nav-item"><a class="nav-link gold" href="datenschutz-en.html">Privacy</a></li>
+        <li class="nav-item"><a class="nav-link gold" href="impressum-en.html">Legal Notice</a></li>
+        <li class="nav-item"><a class="nav-link gold" href="ueber-uns-en.html">About Us</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="content">
+  <section class="hero-panel">
+    <div class="small text-uppercase gold mb-2">Fast and non-binding</div>
+    <h1 class="hero-title">Calculate your moving estimate</h1>
+    <p class="hero-copy">Enter the key details of your move. You will receive an immediate estimate and can then send your request directly to Klarumzug24.</p>
+  </section>
+
+  <section class="calc-card">
+    <h2 class="gold mb-3">Moving details</h2>
+    <div class="row g-3">
+      <div class="col-md-4"><label class="form-label">Living space (sqm)</label><input type="number" id="qm" class="form-control" required></div>
+      <div class="col-md-4"><label class="form-label">Rooms</label><input type="number" id="zimmer" class="form-control" required></div>
+      <div class="col-md-4"><label class="form-label">Floor</label><input type="number" id="stockwerk" class="form-control" required></div>
+      <div class="col-md-4"><label class="form-label">Elevator available?</label><select id="fahrstuhl" class="form-select"><option value="1">Yes</option><option value="0">No</option></select></div>
+      <div class="col-md-4"><label class="form-label">Distance to vehicle (m)</label><input type="number" id="distanz" class="form-control" required></div>
+      <div class="col-md-4"><label class="form-label">Distance old to new address (km)</label><input type="number" id="entfernung" class="form-control" required></div>
+      <div class="col-md-4"><label class="form-label">Boxes</label><input type="number" id="kartons" class="form-control" required></div>
+      <div class="col-md-4"><label class="form-label">Wardrobes</label><input type="number" id="schraenke" class="form-control" required></div>
+      <div class="col-md-4"><label class="form-label">Furniture assembly?</label><select id="montage" class="form-select"><option value="1">Yes</option><option value="0">No</option></select></div>
+    </div>
+    <div class="text-center mt-4"><button type="button" class="btn btn-warning btn-lg" onclick="calculateEstimate()"><i class="fa-solid fa-calculator"></i> Calculate estimate</button></div>
+  </section>
+
+  <section id="resultPanel" class="result-panel">
+    <div class="small text-uppercase gold mb-2">Estimate ready</div>
+    <h2 id="ergebnis" class="result-price"></h2>
+    <p id="zusatzinfo" class="mb-0"></p>
+  </section>
+
+  <section class="calc-card">
+    <h2 class="gold mb-3">Send your request</h2>
+    <div class="row g-3">
+      <div class="col-md-4"><label class="form-label">Name</label><input type="text" id="name" class="form-control"></div>
+      <div class="col-md-4"><label class="form-label">Phone</label><input type="text" id="telefon" class="form-control"></div>
+      <div class="col-md-4"><label class="form-label">E-mail</label><input type="email" id="email" class="form-control"></div>
+      <div class="col-12"><label class="form-label">Additional notes</label><textarea id="hinweise" class="form-control" rows="5"></textarea></div>
+    </div>
+
+    <div class="checkbox-panel">
+      <div class="form-check mb-2"><input class="form-check-input" type="checkbox" id="acceptAgb"><label class="form-check-label" for="acceptAgb">I accept the <a href="agb-en.html" target="_blank" rel="noopener">terms and conditions</a>.</label></div>
+      <div class="form-check"><input class="form-check-input" type="checkbox" id="acceptPrivacy"><label class="form-check-label" for="acceptPrivacy">I have read and accept the <a href="datenschutz-en.html" target="_blank" rel="noopener">privacy policy</a>.</label></div>
+    </div>
+
+    <p id="leadHinweis" class="text-secondary text-center mt-3">Please calculate your estimate first.</p>
+
+    <div class="d-flex justify-content-center gap-3 flex-wrap mt-3">
+      <button id="whatsAppButton" type="button" class="btn btn-success" onclick="sendWhatsApp()" disabled><i class="fa-brands fa-whatsapp"></i> Send via WhatsApp</button>
+      <button id="directSendButton" type="button" class="btn btn-primary" onclick="sendInquiryDirectly()" disabled><i class="fa-solid fa-paper-plane"></i> Send request</button>
+    </div>
+  </section>
+</div>
+
+<footer>
+  &copy; 2026 Klarumzug24 - Luettbarten 8b, 24582 Bordesholm
+  <br> Phone: 0163 615 7234 - E-Mail: info@klarumzug24.de
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="assets/dode-chat.js?v=20260327a" defer></script>
+<script>
+  const isLocalHost = ["localhost", "127.0.0.1"].includes(window.location.hostname);
+  function normalizeGermanPhoneSoft(value) { const digits = (value || "").replace(/\D+/g, ""); if (!digits) return ""; if (digits.startsWith("0049")) return "+49" + digits.slice(4).replace(/^0+/, ""); if (digits.startsWith("49")) return "+49" + digits.slice(2).replace(/^0+/, ""); if (digits.startsWith("0")) return "+49" + digits.slice(1); return value.trim(); }
+  function getNonNegativeNumber(id) { const input = document.getElementById(id); const value = Number(input.value); if (!Number.isFinite(value) || value < 0) { input.value = "0"; return 0; } return value; }
+  function setLeadHint(message, tone) { const el = document.getElementById("leadHinweis"); el.className = "text-center mt-3 " + (tone || "text-secondary"); el.textContent = message; }
+  function setActionButtonsEnabled(enabled) { document.getElementById("whatsAppButton").disabled = !enabled; document.getElementById("directSendButton").disabled = !enabled; }
+  function hasCalculatedEstimate() { return Boolean(document.getElementById("ergebnis").textContent.trim()); }
+  function getEstimateText() { return document.getElementById("ergebnis").textContent || "-"; }
+  function getLeadPayload() { return { name: document.getElementById("name").value.trim(), phone: normalizeGermanPhoneSoft(document.getElementById("telefon").value), email: document.getElementById("email").value.trim(), message: "Estimate: " + getEstimateText() + "\n\nNotes:\n" + (document.getElementById("hinweise").value.trim() || "-"), rooms: getNonNegativeNumber("zimmer"), distance_km: getNonNegativeNumber("entfernung"), express: false, accepted_agb: document.getElementById("acceptAgb").checked, accepted_privacy: document.getElementById("acceptPrivacy").checked }; }
+  async function submitLead(payload) { const endpoints = ["/api/leads", "https://api.klarumzug24.de/api/leads"]; if (isLocalHost) endpoints.unshift("http://127.0.0.1:8000/api/leads"); let lastError = null; for (const endpoint of endpoints) { try { const response = await fetch(endpoint, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }); let data = null; try { data = await response.json(); } catch (_) { data = null; } if (!response.ok || data?.ok === false) throw new Error(data?.message || ("HTTP " + response.status)); return data; } catch (error) { lastError = error; } } throw lastError || new Error("API unavailable"); }
+  function calculateEstimate() { const requiredIds = ["qm", "zimmer", "stockwerk", "distanz", "entfernung", "kartons", "schraenke"]; const firstMissing = requiredIds.find((id) => !document.getElementById(id).value.trim()); if (firstMissing) { document.getElementById(firstMissing).focus(); return setLeadHint("Please complete the required moving details first.", "text-warning"); } let price = 0; price += getNonNegativeNumber("qm") * 4; price += getNonNegativeNumber("zimmer") * 20; price += getNonNegativeNumber("stockwerk") * 10; price += getNonNegativeNumber("distanz") * 0.5; price += getNonNegativeNumber("entfernung") * 1.2; price += getNonNegativeNumber("kartons") * 1.5; price += getNonNegativeNumber("schraenke") * 15; if (document.getElementById("fahrstuhl").value === "0") price += 50; if (document.getElementById("montage").value === "1") price += 80; const minPrice = price * 0.9; const maxPrice = price * 1.15; document.getElementById("ergebnis").textContent = "Estimated price: " + minPrice.toFixed(0) + " EUR - " + maxPrice.toFixed(0) + " EUR"; document.getElementById("zusatzinfo").textContent = "This is a non-binding estimate. Please contact us directly for a binding quote."; document.getElementById("resultPanel").classList.add("is-visible"); setActionButtonsEnabled(true); setLeadHint("Estimate calculated. You can now send your request.", "text-info"); }
+  function sendWhatsApp() { if (!hasCalculatedEstimate()) return setLeadHint("Please calculate the estimate first.", "text-warning"); if (!document.getElementById("acceptAgb").checked || !document.getElementById("acceptPrivacy").checked) return setLeadHint("Please accept the terms and privacy policy.", "text-warning"); const text = encodeURIComponent("Moving request\n" + getEstimateText() + "\n\nName: " + (document.getElementById("name").value.trim() || "-") + "\nPhone: " + (document.getElementById("telefon").value.trim() || "-") + "\nE-mail: " + (document.getElementById("email").value.trim() || "-") + "\n\nNotes:\n" + (document.getElementById("hinweise").value.trim() || "-")); window.open("https://wa.me/491636157234?text=" + text, "_blank"); setLeadHint("WhatsApp has been opened.", "text-success"); }
+  async function sendInquiryDirectly() { if (!hasCalculatedEstimate()) return setLeadHint("Please calculate the estimate first.", "text-warning"); const payload = getLeadPayload(); if (!payload.name || !payload.phone || !payload.email) return setLeadHint("Please enter your name, phone number and e-mail.", "text-warning"); if (!payload.accepted_agb || !payload.accepted_privacy) return setLeadHint("Please accept the terms and privacy policy.", "text-warning"); const button = document.getElementById("directSendButton"); const originalLabel = button.innerHTML; button.disabled = true; button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...'; try { await submitLead(payload); setLeadHint("Thank you. Your request has been sent successfully.", "text-success"); } catch (_) { setLeadHint("Your request could not be sent at the moment. Please try again.", "text-danger"); } finally { button.disabled = false; button.innerHTML = originalLabel; } }
+  window.addEventListener("DOMContentLoaded", () => { setActionButtonsEnabled(false); document.querySelectorAll('input[type="number"]').forEach((input) => { if (!input.hasAttribute("min")) input.setAttribute("min", "0"); if (!input.hasAttribute("step")) input.setAttribute("step", "1"); }); });
+</script>
+</body>
+</html>

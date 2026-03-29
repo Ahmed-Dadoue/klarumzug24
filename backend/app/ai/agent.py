@@ -12,7 +12,7 @@ from .prompts import build_dode_system_prompt, build_general_chat_prompt
 from .prompts_v2 import build_dode_system_prompt_v2
 from .schemas import ChatLanguage, ChatTurn, MoveDetails
 from .tools import calculate_move_price
-from .pricing_tool import get_pricing_tool
+from .intent_classifier import ClassifiedIntent, classify_intent, is_pricing_related_intent
 
 DODE_MODEL = os.getenv("DODE_MODEL", "gpt-4.1-mini").strip()
 DODE_MAX_MESSAGES = int(os.getenv("DODE_MAX_MESSAGES", "12"))
@@ -363,6 +363,13 @@ def _last_user_message(messages: Sequence[ChatTurn]) -> str | None:
     return None
 
 
+def _classify_last_user_intent(messages: Sequence[ChatTurn], lang: ChatLanguage) -> ClassifiedIntent | None:
+    last_user_text = _last_user_message(messages)
+    if not last_user_text:
+        return None
+    return classify_intent(last_user_text, lang=lang)
+
+
 def _is_reuse_estimate_request(messages: Sequence[ChatTurn], lang: ChatLanguage) -> bool:
     user_messages = [" ".join(message.content.lower().split()) for message in messages if message.role == "user"]
     if not user_messages:
@@ -489,7 +496,7 @@ def _extract_move_details(messages: Sequence[ChatTurn], lang: ChatLanguage) -> M
     return details
 
 
-def _has_estimate_intent(messages: Sequence[ChatTurn], lang: ChatLanguage) -> bool:
+def _has_estimate_intent_legacy(messages: Sequence[ChatTurn], lang: ChatLanguage) -> bool:
     user_messages = [" ".join(message.content.lower().split()) for message in messages if message.role == "user"]
     user_text = " ".join(user_messages)
     if any(keyword in user_text for keyword in _lang_config(lang)["estimate_keywords"]):
@@ -501,6 +508,32 @@ def _has_estimate_intent(messages: Sequence[ChatTurn], lang: ChatLanguage) -> bo
     mentions_move = any(any(marker in text for marker in move_markers) for text in user_messages)
     has_city_like_answer = any(_is_city_like_answer(text) for text in user_messages)
     return has_route_pattern or (mentions_move and (has_rooms or has_distance)) or (has_city_like_answer and (has_rooms or has_distance))
+
+
+def _has_estimate_intent(
+    messages: Sequence[ChatTurn],
+    lang: ChatLanguage,
+    classified_intent: ClassifiedIntent | None = None,
+) -> bool:
+    if not classified_intent:
+        return _has_estimate_intent_legacy(messages, lang)
+
+    # Klarer Nicht-Umzug soll nie in den Umzugs-Preisflow laufen.
+    if is_pricing_related_intent(classified_intent.intent_type) and classified_intent.service_type not in (None, "umzug"):
+        return False
+
+    if classified_intent.intent_type in ("feedback", "clarification"):
+        return False
+
+    # Legacy-Heuristik bleibt fuer Umzug/unklare Faelle aktiv.
+    if _has_estimate_intent_legacy(messages, lang):
+        return True
+
+    if not is_pricing_related_intent(classified_intent.intent_type):
+        return False
+
+    # Nur den Umzugs-Flow als Schaetzungs-Flow behandeln.
+    return classified_intent.service_type in (None, "umzug")
 
 
 def _is_single_item_transport_request(messages: Sequence[ChatTurn], lang: ChatLanguage) -> bool:
@@ -695,6 +728,7 @@ def _handle_new_service_inquiry(
     messages: Sequence[ChatTurn],
     page: str | None,
     lang: ChatLanguage,
+    classified_intent: ClassifiedIntent | None = None,
     logger: logging.Logger | None = None,
     request_id: str | None = None,
     conversation_id: str | None = None,
@@ -705,15 +739,14 @@ def _handle_new_service_inquiry(
         if not last_user_text:
             return None
         
-        pricing_tool = get_pricing_tool()
-        classified = pricing_tool.classify_user_message(last_user_text)
+        classified = classified_intent or classify_intent(last_user_text, lang=lang)
         
         # Only handle if a specific service is detected (not umzug or generic)
         if not classified.service_type or classified.service_type == "umzug":
             return None
         
         # Check if this looks like a pricing inquiry
-        if classified.intent_type not in ("PRICING_INQUIRY", "SERVICE_DETAILS"):
+        if not is_pricing_related_intent(classified.intent_type):
             return None
         
         # Log the new service path
@@ -788,10 +821,17 @@ def generate_dode_reply(
         active_turns = chat_turns[estimate_reply_idx + 1 :]
 
     move_details = _extract_move_details(active_turns, lang)
+    classified_intent = _classify_last_user_intent(active_turns, lang)
     
     # Try new service handler first (Entsorgung, Laminat, Möbelmontage, Einzeltransport, etc.)
     new_service_reply = _handle_new_service_inquiry(
-        active_turns, page, lang, logger, request_id, conversation_id
+        active_turns,
+        page,
+        lang,
+        classified_intent=classified_intent,
+        logger=logger,
+        request_id=request_id,
+        conversation_id=conversation_id,
     )
     if new_service_reply:
         return new_service_reply
@@ -808,7 +848,7 @@ def generate_dode_reply(
         )
         return _lang_config(lang)["single_transport_reply"]
 
-    if _has_estimate_intent(active_turns, lang):
+    if _has_estimate_intent(active_turns, lang, classified_intent=classified_intent):
         active_user_message_count = sum(1 for message in active_turns if message.role == "user")
         if active_user_message_count == 1:
             log_chat_event(

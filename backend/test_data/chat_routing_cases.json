@@ -1,0 +1,62 @@
+[
+  {
+    "id": "umzug_basic",
+    "input": "Ich ziehe von Kiel nach Hamburg, 3 Zimmer, 90 km.",
+    "expected_intent": "pricing_inquiry/umzug",
+    "lang": "de"
+  },
+  {
+    "id": "entsorgung_price",
+    "input": "Ich möchte 2 Sofas in Kiel entsorgen, was kostet das?",
+    "expected_intent": "pricing_inquiry/entsorgung",
+    "lang": "de"
+  },
+  {
+    "id": "laminat_price",
+    "input": "Preis für Laminat abbauen und entsorgen in Hamburg.",
+    "expected_intent": "pricing_inquiry/laminat",
+    "lang": "de"
+  },
+  {
+    "id": "moebelmontage_details",
+    "input": "Ich brauche Möbelmontage für einen IKEA Schrank in Kiel.",
+    "expected_intent": "service_details/moebelmontage",
+    "lang": "de"
+  },
+  {
+    "id": "meta_question",
+    "input": "Warum fragst du das?",
+    "expected_intent": "feedback",
+    "lang": "de"
+  },
+  {
+    "id": "einzeltransport",
+    "input": "Transport einer Waschmaschine von Kiel nach Lübeck.",
+    "expected_intent": "service_details/einzeltransport",
+    "lang": "de"
+  },
+  {
+    "id": "short_price_ambiguous",
+    "input": "Was kostet das?",
+    "expected_intent": "pricing_inquiry",
+    "lang": "de"
+  },
+  {
+    "id": "short_entsorgung",
+    "input": "Nur Entsorgung.",
+    "expected_intent": "service_details/entsorgung",
+    "lang": "de"
+  },
+  {
+    "id": "short_transport",
+    "input": "Transport einer Waschmaschine",
+    "expected_intent": "service_details/einzeltransport",
+    "lang": "de"
+  },
+  {
+    "id": "short_laminat",
+    "input": "Preis für Laminat",
+    "expected_intent": "pricing_inquiry/laminat",
+    "lang": "de"
+  }
+]

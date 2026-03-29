@@ -1,3 +1,10 @@
 __pycache__/
 *.py[cod]
 .env
+*.log
+*.db
+*.db-journal
+reports/*.csv
+reports/*.md
+.venv/
+venv/

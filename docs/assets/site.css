@@ -2,3 +2,31 @@
     height: 60px;
     width: auto;
 }
+
+.language-switcher {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border: 1px solid rgba(255, 215, 0, 0.28);
+    border-radius: 999px;
+    background: rgba(255, 215, 0, 0.08);
+}
+
+.language-switcher .nav-link {
+    padding: 0;
+    line-height: 1;
+    opacity: 0.75;
+}
+
+.language-switcher .nav-link.active {
+    opacity: 1;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.language-switcher span {
+    color: rgba(255, 215, 0, 0.8);
+    font-size: 0.9rem;
+}

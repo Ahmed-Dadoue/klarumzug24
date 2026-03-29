@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Contact - Klarumzug24</title>
+  <meta name="description" content="Contact Klarumzug24 for your moving request via form, e-mail or WhatsApp.">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://klarumzug24.de/kontakt-en.html">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link href="assets/site.css" rel="stylesheet">
+  <link href="assets/dode-chat.css?v=20260309b" rel="stylesheet">
+  <style>
+    body { background:#000; color:white; font-family:Arial, sans-serif; }
+    .gold { color:#FFD700; }
+    .content { padding:60px 20px; max-width:900px; margin:auto; }
+    footer { background:#111; padding:20px; text-align:center; border-top:2px solid #FFD700; margin-top:40px; }
+  </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark" style="background:#000; border-bottom:2px solid #FFD700; padding:10px 0;">
+  <div class="container d-flex justify-content-between align-items-center">
+    <a class="navbar-brand gold d-flex align-items-center" href="index-en.html"><img src="assets/logo-navbar.png" class="navbar-logo" alt="Klarumzug24 logo"></a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu"><span class="navbar-toggler-icon"></span></button>
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav ms-auto d-flex align-items-center" style="gap:20px;">
+        <li class="nav-item"><a class="nav-link gold" href="index-en.html">Home</a></li>
+        <li class="nav-item"><a class="nav-link gold" href="umzugsrechner-en.html">Moving Calculator</a></li>
+        <li class="nav-item"><a class="nav-link gold" href="kontakt-en.html">Contact</a></li>
+        <li class="nav-item"><a class="nav-link gold" href="agb-en.html">Terms</a></li>
+        <li class="nav-item"><a class="nav-link gold" href="datenschutz-en.html">Privacy</a></li>
+        <li class="nav-item"><a class="nav-link gold" href="impressum-en.html">Legal Notice</a></li>
+        <li class="nav-item"><a class="nav-link gold" href="ueber-uns-en.html">About Us</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="content">
+  <h1 class="gold text-center mb-4">Contact</h1>
+  <p class="text-center mb-4">Do you have questions or would you like a quote? We look forward to your message.</p>
+
+  <form id="contactForm" class="row g-4">
+    <div class="col-md-6"><label class="form-label gold">Name</label><input type="text" id="contactName" name="name" class="form-control" placeholder="Your name" required></div>
+    <div class="col-md-6"><label class="form-label gold">E-mail</label><input type="email" id="contactEmail" name="email" class="form-control" placeholder="Your e-mail" required></div>
+    <div class="col-md-6"><label class="form-label gold">Phone number</label><input type="tel" id="contactPhone" name="phone" class="form-control" placeholder="Your phone number" required></div>
+    <div class="col-md-6"><label class="form-label gold">Upload photo (optional)</label><input type="file" id="contactPhoto" name="photo" class="form-control" accept="image/*"><small class="text-secondary">Tip: for multiple photos, WhatsApp is often the easiest option.</small></div>
+    <div class="col-12"><label class="form-label gold">Message</label><textarea id="contactMessage" name="message" class="form-control" rows="4" placeholder="Your message to us"></textarea></div>
+    <div class="col-12">
+      <div class="form-check mb-2"><input class="form-check-input" type="checkbox" id="contactAcceptAgb" required><label class="form-check-label" for="contactAcceptAgb">I accept the <a href="agb-en.html" class="gold">terms and conditions</a>.</label></div>
+      <div class="form-check"><input class="form-check-input" type="checkbox" id="contactAcceptPrivacy" required><label class="form-check-label" for="contactAcceptPrivacy">I have read and accept the <a href="datenschutz-en.html" class="gold">privacy policy</a>.</label></div>
+    </div>
+    <p id="kontaktStatus" class="text-center mt-3"></p>
+    <div class="col-12 text-center mt-3"><button id="contactSubmit" type="submit" class="btn btn-warning btn-lg"><i class="fa-solid fa-paper-plane"></i> Send</button></div>
+  </form>
+</div>
+
+<footer>
+  &copy; 2026 Klarumzug24 - Luettbarten 8b, 24582 Bordesholm
+  <br> Phone: 0163 615 7234 - E-Mail: info@klarumzug24.de
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="assets/dode-chat.js?v=20260327a" defer></script>
+<script>
+  const contactForm = document.getElementById("contactForm");
+  const kontaktStatus = document.getElementById("kontaktStatus");
+  const contactSubmit = document.getElementById("contactSubmit");
+  const isLocalHost = ["localhost", "127.0.0.1"].includes(window.location.hostname);
+  function normalizeGermanPhoneSoft(value) { const digits = (value || "").replace(/\D+/g, ""); if (!digits) return ""; if (digits.startsWith("0049")) return "+49" + digits.slice(4).replace(/^0+/, ""); if (digits.startsWith("49")) return "+49" + digits.slice(2).replace(/^0+/, ""); if (digits.startsWith("0")) return "+49" + digits.slice(1); return value.trim(); }
+  async function sendContactRequest(formData) { const endpoints = ["/api/leads", "https://api.klarumzug24.de/api/leads"]; if (isLocalHost) endpoints.unshift("http://127.0.0.1:8000/api/leads"); let lastError = null; for (const endpoint of endpoints) { try { const response = await fetch(endpoint, { method: "POST", body: formData }); let result = null; try { result = await response.json(); } catch (_) { result = null; } if (!response.ok || result?.ok === false) throw new Error(result?.message || ("HTTP " + response.status)); return result; } catch (error) { lastError = error; } } throw lastError || new Error("Unknown error"); }
+  contactForm.addEventListener("submit", async (event) => { event.preventDefault(); kontaktStatus.className = "text-center mt-3 text-warning"; kontaktStatus.textContent = "Sending request..."; contactSubmit.disabled = true; const selectedPhoto = document.getElementById("contactPhoto").files[0]; const normalizedPhone = normalizeGermanPhoneSoft(document.getElementById("contactPhone").value); const acceptedAgb = document.getElementById("contactAcceptAgb").checked; const acceptedPrivacy = document.getElementById("contactAcceptPrivacy").checked; if (!acceptedAgb || !acceptedPrivacy) { kontaktStatus.className = "text-center mt-3 text-danger"; kontaktStatus.textContent = "Please accept the terms and privacy policy."; contactSubmit.disabled = false; return; } const formData = new FormData(); formData.set("name", document.getElementById("contactName").value.trim()); formData.set("email", document.getElementById("contactEmail").value.trim()); formData.set("phone", normalizedPhone); formData.set("message", document.getElementById("contactMessage").value.trim()); formData.set("accepted_agb", String(acceptedAgb)); formData.set("accepted_privacy", String(acceptedPrivacy)); if (selectedPhoto) formData.set("photo", selectedPhoto, selectedPhoto.name); document.getElementById("contactPhone").value = normalizedPhone; try { await sendContactRequest(formData); kontaktStatus.className = "text-center mt-3 text-success"; kontaktStatus.textContent = "Thank you. Your request has been sent successfully. We usually reply within 1 day."; contactForm.reset(); } catch (error) { kontaktStatus.className = "text-center mt-3 text-danger"; kontaktStatus.textContent = error?.message || "Sending failed. Please try again later."; } finally { contactSubmit.disabled = false; } });
+</script>
+</body>
+</html>
