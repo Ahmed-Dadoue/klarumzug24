@@ -1,0 +1,9 @@
+﻿{
+  "messages": [
+    {
+      "role": "user",
+      "content": "Ich möchte eine Waschmaschine von IKEA zum Exerzierplatz 12 in Kiel transportieren."
+    }
+  ],
+  "lang": "de"
+}

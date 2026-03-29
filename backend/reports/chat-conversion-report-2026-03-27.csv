@@ -1,0 +1,15 @@
+scope,stage,count,rate,lang,page
+overall,chat_started,1,100.0,,
+overall,entered_price_flow,0,0.0,,
+overall,contact_intent,1,100.0,,
+overall,lead_created,0,0.0,,
+lang,chat_started,1,100.0,en,
+page,chat_started,1,100.0,,/kontakt-en.html
+lang,contact_intent,1,100.0,en,
+page,contact_intent,1,100.0,,/kontakt-en.html
+lang_metric,entered_price_flow,0,0.0%,en,
+lang_metric,contact_intent,1,100.0%,en,
+lang_metric,lead_created,0,0.0%,en,
+page_metric,bounce_rate,1,100.0%,,/kontakt-en.html
+page_metric,lead_conversion_rate,0,0.0%,,/kontakt-en.html
+top_page,lead_conversion_rate,0,0.0%,,/kontakt-en.html

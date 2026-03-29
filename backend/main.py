@@ -4,9 +4,16 @@ import io
 import logging
 import mimetypes
 import os
+import re
 import secrets
+import time
+import uuid
 from datetime import datetime, timedelta
+from pathlib import Path
 from typing import Any, Literal
+
+from dotenv import load_dotenv
+load_dotenv()
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
 from fastapi.exceptions import RequestValidationError
@@ -29,6 +36,8 @@ from starlette.datastructures import UploadFile
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.ai import generate_dode_reply
+from app.ai.logging_utils import log_chat_event
+from app.ai.schemas import ChatLanguage
 from app.services.emailer import send_lead_notification
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./klarumzug.db")
@@ -52,6 +61,18 @@ engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 Base = declarative_base()
 LOGGER = logging.getLogger("klarumzug24")
+LOGGER.setLevel(logging.INFO)
+CHAT_LOG_PATH = Path(__file__).resolve().parent / "chat-events.log"
+
+if not any(
+    isinstance(handler, logging.FileHandler)
+    and Path(getattr(handler, "baseFilename", "")) == CHAT_LOG_PATH
+    for handler in LOGGER.handlers
+):
+    chat_file_handler = logging.FileHandler(CHAT_LOG_PATH, encoding="utf-8")
+    chat_file_handler.setLevel(logging.INFO)
+    chat_file_handler.setFormatter(logging.Formatter("%(message)s"))
+    LOGGER.addHandler(chat_file_handler)
 
 
 class CompanyDB(Base):
@@ -167,6 +188,7 @@ class LeadIn(BaseModel):
     name: str
     phone: str
     email: EmailStr
+    conversation_id: str | None = None
     from_city: str | None = None
     to_city: str | None = None
     rooms: int | None = None
@@ -223,6 +245,8 @@ class ChatMessageIn(BaseModel):
 class ChatRequestIn(BaseModel):
     messages: list[ChatMessageIn] = Field(min_length=1, max_length=20)
     page: str | None = Field(default=None, max_length=200)
+    lang: ChatLanguage = "de"
+    conversation_id: str | None = Field(default=None, max_length=80)
 
 
 app = FastAPI(title="Klarumzug24 API")
@@ -328,6 +352,35 @@ async def handle_unexpected_error(_: Request, exc: Exception) -> JSONResponse:
 def normalize_text(value: str | None) -> str | None:
     cleaned = (value or "").strip()
     return cleaned or None
+
+
+EMAIL_LOG_PATTERN = re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b")
+PHONE_LOG_PATTERN = re.compile(r"(?<!\w)(?:\+?\d[\d\s()./-]{6,}\d)(?!\w)")
+
+
+def sanitize_chat_log_text(value: str | None, max_length: int = 160) -> str:
+    text = " ".join((value or "").split()).strip()
+    if not text:
+        return ""
+    text = EMAIL_LOG_PATTERN.sub("[redacted-email]", text)
+    text = PHONE_LOG_PATTERN.sub("[redacted-phone]", text)
+    if len(text) > max_length:
+        return text[:max_length].rstrip() + "..."
+    return text
+
+
+CONTACT_INTENT_KEYWORDS = {
+    "de": ("kontakt", "telefon", "anrufen", "email", "e-mail", "whatsapp"),
+    "en": ("contact", "phone", "call", "email", "whatsapp"),
+}
+
+
+def is_contact_intent(text: str | None, lang: ChatLanguage) -> bool:
+    normalized = " ".join((text or "").lower().split())
+    if not normalized:
+        return False
+    keywords = CONTACT_INTENT_KEYWORDS.get(lang, CONTACT_INTENT_KEYWORDS["de"])
+    return any(keyword in normalized for keyword in keywords)
 
 
 def normalize_phone(value: str) -> str:
@@ -442,6 +495,7 @@ async def _parse_lead_request(request: Request) -> tuple[LeadIn, dict[str, Any] 
             "name": _normalize_form_value(form.get("name")),
             "phone": _normalize_form_value(form.get("phone")),
             "email": _normalize_form_value(form.get("email")),
+            "conversation_id": _normalize_form_value(form.get("conversation_id")),
             "from_city": _normalize_form_value(form.get("from_city")),
             "to_city": _normalize_form_value(form.get("to_city")),
             "rooms": _normalize_form_value(form.get("rooms")),
@@ -823,16 +877,96 @@ def predict_price(payload: PredictIn):
 
 @app.post("/api/chat")
 def dode_chat(payload: ChatRequestIn):
+    started_at = time.perf_counter()
+    request_id = f"req_{uuid.uuid4().hex[:12]}"
+    conversation_id = normalize_text(payload.conversation_id) or f"conv_{uuid.uuid4().hex[:12]}"
     page = normalize_text(payload.page)
-    reply = generate_dode_reply(
-        messages=payload.messages,
-        page=page,
-        session_factory=SessionLocal,
-        assigned_price_calculator=calculate_assigned_price,
-        logger=LOGGER,
+    last_user_message = next(
+        (
+            " ".join(message.content.split())
+            for message in reversed(payload.messages)
+            if message.role == "user"
+        ),
+        "",
+    )
+    sanitized_last_user_message = sanitize_chat_log_text(last_user_message)
+    user_message_count = sum(1 for message in payload.messages if message.role == "user")
+    log_chat_event(
+        LOGGER,
+        "chat_request_received",
+        request_id=request_id,
+        conversation_id=conversation_id,
+        lang=payload.lang,
+        page=page or "-",
+        last_user_message=sanitized_last_user_message,
+        success=None,
+    )
+    if user_message_count == 1:
+        log_chat_event(
+            LOGGER,
+            "chat_conversion",
+            request_id=request_id,
+            conversation_id=conversation_id,
+            lang=payload.lang,
+            page=page or "-",
+            conversion_step="chat_started",
+            success=True,
+        )
+    if is_contact_intent(last_user_message, payload.lang):
+        log_chat_event(
+            LOGGER,
+            "chat_conversion",
+            request_id=request_id,
+            conversation_id=conversation_id,
+            lang=payload.lang,
+            page=page or "-",
+            conversion_step="contact_intent",
+            success=True,
+        )
+    try:
+        reply = generate_dode_reply(
+            messages=payload.messages,
+            page=page,
+            lang=payload.lang,
+            session_factory=SessionLocal,
+            assigned_price_calculator=calculate_assigned_price,
+            logger=LOGGER,
+            request_id=request_id,
+            conversation_id=conversation_id,
+        )
+    except Exception:
+        duration_ms = round((time.perf_counter() - started_at) * 1000, 2)
+        log_chat_event(
+            LOGGER,
+            "chat_request_failed",
+            request_id=request_id,
+            conversation_id=conversation_id,
+            lang=payload.lang,
+            page=page or "-",
+            duration_ms=duration_ms,
+            last_user_message=sanitized_last_user_message,
+            success=False,
+        )
+        raise
+
+    duration_ms = round((time.perf_counter() - started_at) * 1000, 2)
+    log_chat_event(
+        LOGGER,
+        "chat_request_completed",
+        request_id=request_id,
+        conversation_id=conversation_id,
+        lang=payload.lang,
+        page=page or "-",
+        duration_ms=duration_ms,
+        response_length=len(reply or ""),
+        success=True,
     )
 
-    reply_data = {"reply": reply}
+    reply_data = {
+        "reply": reply,
+        "request_id": request_id,
+        "conversation_id": conversation_id,
+    }
     return success_response(
         "Dode reply generated",
         data=reply_data,
@@ -1002,6 +1136,7 @@ def list_pricing_rules(
 def _create_lead(
     payload: LeadIn,
     photo_attachment: dict[str, Any] | None = None,
+    source: str = "lead_form",
 ):
     db = SessionLocal()
     try:
@@ -1013,6 +1148,7 @@ def _create_lead(
         rooms = payload.rooms
         distance_km = payload.distance_km
         express = bool(payload.express)
+        conversation_id = normalize_text(payload.conversation_id)
         message = normalize_text(payload.message)
         photo_name = normalize_text(payload.photo_name)
         accepted_agb = bool(payload.accepted_agb)
@@ -1078,6 +1214,15 @@ def _create_lead(
                 "status": duplicate.status,
                 "assigned_price_eur": duplicate.assigned_price_eur,
             }
+            log_chat_event(
+                LOGGER,
+                "chat_conversion",
+                conversation_id=conversation_id,
+                lead_id=duplicate.id,
+                source=source,
+                conversion_step="lead_created",
+                success=True,
+            )
             return success_response(
                 "Lead updated (deduplicated)",
                 data=lead_result,
@@ -1123,6 +1268,15 @@ def _create_lead(
             "status": lead.status,
             "assigned_price_eur": lead.assigned_price_eur,
         }
+        log_chat_event(
+            LOGGER,
+            "chat_conversion",
+            conversation_id=conversation_id,
+            lead_id=lead.id,
+            source=source,
+            conversion_step="lead_created",
+            success=True,
+        )
         return success_response(
             "Lead created",
             data=lead_result,
@@ -1135,13 +1289,13 @@ def _create_lead(
 @app.post("/contact")
 async def submit_contact(request: Request):
     payload, photo_attachment = await _parse_lead_request(request)
-    return _create_lead(payload, photo_attachment=photo_attachment)
+    return _create_lead(payload, photo_attachment=photo_attachment, source="contact")
 
 
 @app.post("/api/leads")
 async def create_lead(request: Request):
     payload, photo_attachment = await _parse_lead_request(request)
-    return _create_lead(payload, photo_attachment=photo_attachment)
+    return _create_lead(payload, photo_attachment=photo_attachment, source="api_leads")
 
 
 @app.get("/api/leads")

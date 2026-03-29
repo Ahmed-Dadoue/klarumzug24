@@ -1,0 +1,250 @@
+[
+  {
+    "id": "general_001",
+    "category": "general",
+    "question_variants": ["What is Klarumzug24?", "Who is Klarumzug24?"],
+    "answer": "Klarumzug24 is a moving and transport service based in Bordesholm. The company supports moves, transports and additional services such as assembly, packing and request handling.",
+    "keywords": ["klarumzug24", "company", "moving", "transport"],
+    "source_page": "/index-en.html"
+  },
+  {
+    "id": "general_002",
+    "category": "general",
+    "question_variants": ["Where are you based?", "Which city are you in?"],
+    "answer": "Klarumzug24 is based in Bordesholm in Schleswig-Holstein. The address shown on the website is Luettbarten 8b, 24582 Bordesholm.",
+    "keywords": ["bordesholm", "address", "location"],
+    "source_page": "/index-en.html"
+  },
+  {
+    "id": "general_003",
+    "category": "general",
+    "question_variants": ["What is your service area?", "Where do you offer moves?"],
+    "answer": "Klarumzug24 operates in Bordesholm, Schleswig-Holstein and the surrounding region. For longer distances or special requests, a direct enquiry is still worthwhile.",
+    "keywords": ["region", "service area", "schleswig-holstein"],
+    "source_page": "/ueber-uns-en.html"
+  },
+  {
+    "id": "price_001",
+    "category": "pricing",
+    "question_variants": ["How much does a move cost?", "What does a move cost with you?"],
+    "answer": "The moving price depends on the details of the job, for example living space, number of rooms, distance, floors, walking distance and additional services. The moving calculator provides a non-binding estimate.",
+    "keywords": ["price", "cost", "move", "estimate"],
+    "source_page": "/umzugsrechner-en.html"
+  },
+  {
+    "id": "price_002",
+    "category": "pricing",
+    "question_variants": ["Is the calculator price binding?", "Is this a fixed price?"],
+    "answer": "No. The calculation in the moving calculator is a non-binding cost estimate and not a binding fixed-price offer.",
+    "keywords": ["fixed price", "binding", "non-binding"],
+    "source_page": "/agb-en.html"
+  },
+  {
+    "id": "price_003",
+    "category": "pricing",
+    "question_variants": ["Why can the final price change?", "Why can the final price be different?"],
+    "answer": "The final price depends on the actual scope of services. Differences can arise from moving volume, boxes, furniture, floors, elevator access, walking routes, distance or additional services.",
+    "keywords": ["final price", "difference", "volume", "additional services"],
+    "source_page": "/agb-en.html"
+  },
+  {
+    "id": "price_004",
+    "category": "pricing",
+    "question_variants": ["Does the distance matter?", "Are the kilometres important?"],
+    "answer": "Yes. The distance between the moving addresses is an important factor for the non-binding estimate.",
+    "keywords": ["distance", "kilometres", "route"],
+    "source_page": "/agb-en.html"
+  },
+  {
+    "id": "service_001",
+    "category": "service",
+    "question_variants": ["Which services do you offer?", "What do you handle?"],
+    "answer": "Klarumzug24 supports moves and transports and, on request, also assembly, disassembly, packing, disposal and other services related to the moving process.",
+    "keywords": ["services", "assembly", "transport", "packing"],
+    "source_page": "/index-en.html"
+  },
+  {
+    "id": "service_002",
+    "category": "service",
+    "question_variants": ["Do you offer packing service?", "Can you help with packing?"],
+    "answer": "Yes, a packing service can be requested. Packing support and packing materials are part of the possible additional services.",
+    "keywords": ["packing service", "boxes", "packing materials"],
+    "source_page": "/umzugsrechner-en.html"
+  },
+  {
+    "id": "service_003",
+    "category": "service",
+    "question_variants": ["Do you offer unpacking service?", "Can you help after the move?"],
+    "answer": "Yes, an unpacking service can be selected in the moving calculator as an additional service.",
+    "keywords": ["unpacking service", "after the move"],
+    "source_page": "/umzugsrechner-en.html"
+  },
+  {
+    "id": "service_004",
+    "category": "service",
+    "question_variants": ["Do you assemble furniture?", "Do you do assembly and disassembly?"],
+    "answer": "Yes, assembly and disassembly are among the offered services. Relevant extras can be specified in the moving calculator.",
+    "keywords": ["assembly", "disassembly", "furniture"],
+    "source_page": "/index-en.html"
+  },
+  {
+    "id": "service_005",
+    "category": "service",
+    "question_variants": ["Do you offer disposal?", "Can you dispose of old furniture?"],
+    "answer": "Yes, the disposal of old furniture or other items can be requested as an additional service. Such services are usually considered separately.",
+    "keywords": ["disposal", "old furniture"],
+    "source_page": "/umzugsrechner-en.html"
+  },
+  {
+    "id": "service_006",
+    "category": "service",
+    "question_variants": ["Is an express move possible?", "Can I move at short notice?"],
+    "answer": "Yes, an express move can be selected in the moving calculator. Short-notice requests should be submitted directly so availability and effort can be checked.",
+    "keywords": ["express", "short notice", "fast"],
+    "source_page": "/umzugsrechner-en.html"
+  },
+  {
+    "id": "kitchen_001",
+    "category": "kitchen",
+    "question_variants": ["Can you dismantle my kitchen?", "Do you handle kitchen disassembly?"],
+    "answer": "Yes, kitchen disassembly can be selected as an additional service in the moving calculator. For the exact scope, the request should include as many kitchen details as possible.",
+    "keywords": ["kitchen", "disassembly", "dismantle"],
+    "source_page": "/umzugsrechner-en.html"
+  },
+  {
+    "id": "kitchen_002",
+    "category": "kitchen",
+    "question_variants": ["Can you reassemble the kitchen?", "Do you do kitchen assembly?"],
+    "answer": "Yes, kitchen assembly can be selected as an additional service in the moving calculator. Kitchens often require detailed coordination.",
+    "keywords": ["kitchen", "assembly", "reassemble"],
+    "source_page": "/umzugsrechner-en.html"
+  },
+  {
+    "id": "appliance_001",
+    "category": "appliances",
+    "question_variants": ["Do you transport washing machines?", "Can my washing machine be moved?"],
+    "answer": "Yes, washing machines can be included in the moving calculator. If disconnection or reconnection is relevant, that should be mentioned clearly in the request.",
+    "keywords": ["washing machine", "appliance", "transport"],
+    "source_page": "/umzugsrechner-en.html"
+  },
+  {
+    "id": "appliance_002",
+    "category": "appliances",
+    "question_variants": ["Do you transport fridges?", "Can my fridge be moved?"],
+    "answer": "Yes, fridges can be included in the moving calculator. Before transport, the appliance should be emptied and properly prepared.",
+    "keywords": ["fridge", "appliance", "transport"],
+    "source_page": "/umzugsrechner-en.html"
+  },
+  {
+    "id": "special_001",
+    "category": "special items",
+    "question_variants": ["Do you transport a piano?", "Can you handle a grand piano?"],
+    "answer": "Pianos and grand pianos are treated as special transport items in the moving calculator. For such items, a direct request with exact details is important.",
+    "keywords": ["piano", "grand piano", "special transport"],
+    "source_page": "/umzugsrechner-en.html"
+  },
+  {
+    "id": "special_002",
+    "category": "special items",
+    "question_variants": ["Do you transport a safe?", "Can you move a heavy safe?"],
+    "answer": "Safes are considered special transport items in the moving calculator. Heavy or unusual objects should always be requested with clear details.",
+    "keywords": ["safe", "heavy", "special item"],
+    "source_page": "/umzugsrechner-en.html"
+  },
+  {
+    "id": "booking_001",
+    "category": "booking",
+    "question_variants": ["How do I send a request?", "How can I book you?"],
+    "answer": "You can use the moving calculator and then send the request directly. Alternatively, you can contact Klarumzug24 via the contact form, e-mail or WhatsApp.",
+    "keywords": ["request", "book", "contact form", "whatsapp"],
+    "source_page": "/umzugsrechner-en.html"
+  },
+  {
+    "id": "booking_002",
+    "category": "booking",
+    "question_variants": ["Which information do you need?", "What do I have to provide?"],
+    "answer": "For a useful estimate, the moving details are most important, for example living space, rooms, distance and special services. For a direct request, contact details such as name, phone and e-mail are also required.",
+    "keywords": ["information", "name", "phone", "email", "moving details"],
+    "source_page": "/umzugsrechner-en.html"
+  },
+  {
+    "id": "booking_003",
+    "category": "booking",
+    "question_variants": ["Do I need to accept terms and privacy?", "Do I need consent before sending?"],
+    "answer": "Yes, when sending a direct request through the website, consent to the terms and the privacy policy is required.",
+    "keywords": ["terms", "privacy", "consent"],
+    "source_page": "/umzugsrechner-en.html"
+  },
+  {
+    "id": "booking_004",
+    "category": "booking",
+    "question_variants": ["How quickly do you reply?", "When will I get a response?"],
+    "answer": "The website states that replies to enquiries are usually sent within 1 day.",
+    "keywords": ["response time", "reply", "1 day"],
+    "source_page": "/kontakt-en.html"
+  },
+  {
+    "id": "contact_001",
+    "category": "contact",
+    "question_variants": ["What is your phone number?", "How can I call you?", "Can I call you?", "What number can I call?"],
+    "answer": "You can reach Klarumzug24 by phone at +49 163 615 7234.",
+    "keywords": ["phone", "telephone", "call"],
+    "source_page": "/kontakt-en.html"
+  },
+  {
+    "id": "contact_002",
+    "category": "contact",
+    "question_variants": ["What is your e-mail address?", "Which email can I use?", "What is your email address?", "How can I email you?"],
+    "answer": "The contact e-mail address of Klarumzug24 is info@klarumzug24.de.",
+    "keywords": ["email", "mail", "contact"],
+    "source_page": "/kontakt-en.html"
+  },
+  {
+    "id": "contact_003",
+    "category": "contact",
+    "question_variants": ["Do you have WhatsApp?", "Can I reach you via WhatsApp?", "Can I contact you on WhatsApp?"],
+    "answer": "Yes, Klarumzug24 can be reached via WhatsApp. The website presents WhatsApp as a fast contact option.",
+    "keywords": ["whatsapp", "contact", "chat"],
+    "source_page": "/index-en.html"
+  },
+  {
+    "id": "contact_004",
+    "category": "contact",
+    "question_variants": ["How can I contact you?", "How can I reach you?", "What is the best way to contact you?"],
+    "answer": "You can contact Klarumzug24 by phone at +49 163 615 7234, by e-mail at info@klarumzug24.de, via WhatsApp or through the contact form.",
+    "keywords": ["contact", "reach", "phone", "email", "whatsapp", "contact form"],
+    "source_page": "/kontakt-en.html"
+  },
+  {
+    "id": "legal_001",
+    "category": "legal",
+    "question_variants": ["Where can I find your terms?", "Do you have terms and conditions?"],
+    "answer": "Yes, the terms and conditions can be found on /agb-en.html.",
+    "keywords": ["terms", "conditions", "legal"],
+    "source_page": "/agb-en.html"
+  },
+  {
+    "id": "legal_002",
+    "category": "legal",
+    "question_variants": ["Do you have a privacy policy?", "What about GDPR?"],
+    "answer": "The privacy policy is available on /datenschutz-en.html. It contains information about the processing of personal data.",
+    "keywords": ["privacy", "gdpr", "personal data"],
+    "source_page": "/datenschutz-en.html"
+  },
+  {
+    "id": "process_001",
+    "category": "process",
+    "question_variants": ["How does the moving calculator work?", "How do I use the calculator?"],
+    "answer": "In the moving calculator, you first enter the key moving details and immediately receive a non-binding estimate. Afterwards, you can add more details and send the request directly or via WhatsApp.",
+    "keywords": ["moving calculator", "process", "estimate", "request"],
+    "source_page": "/umzugsrechner-en.html"
+  },
+  {
+    "id": "process_002",
+    "category": "process",
+    "question_variants": ["Do I have to fill out everything?", "Can I give more details later?"],
+    "answer": "No, not every detail is required immediately. The calculator page includes additional optional fields if they are relevant for your move.",
+    "keywords": ["optional", "more details", "later"],
+    "source_page": "/umzugsrechner-en.html"
+  }
+]

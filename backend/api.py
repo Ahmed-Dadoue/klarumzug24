@@ -1,6 +1,15 @@
+"""
+Deprecated legacy API module.
+
+This file is kept temporarily to avoid breaking older local workflows, but
+`backend/main.py` is the only active API entrypoint that should be used going
+forward.
+"""
+
 import json
 import os
 import smtplib
+import warnings
 from datetime import datetime, timezone
 from email.message import EmailMessage
 from pathlib import Path
@@ -15,7 +24,13 @@ import joblib
 import numpy as np
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-app = FastAPI()
+warnings.warn(
+    "backend.api is deprecated. Use backend.main:app as the active API entrypoint.",
+    DeprecationWarning,
+    stacklevel=2,
+)
+
+app = FastAPI(title="Klarumzug24 Deprecated API")
 
 ALLOWED_ORIGINS = [
     origin.strip()

@@ -1,0 +1,1138 @@
+[
+  {
+    "id": "general_001",
+    "category": "allgemein",
+    "question_variants": ["Was ist Klarumzug24?", "Wer ist Klarumzug24?"],
+    "answer": "Klarumzug24 ist ein Umzugs- und Transportservice aus Bordesholm. Das Unternehmen unterstuetzt bei Umzuegen, Transporten und zusaetzlichen Leistungen wie Montage, Verpackung und Anfrageabwicklung.",
+    "keywords": ["klarumzug24", "unternehmen", "umzug", "transport"],
+    "source_page": "/index.html"
+  },
+  {
+    "id": "general_002",
+    "category": "allgemein",
+    "question_variants": ["Wo sitzt Klarumzug24?", "In welcher Stadt seid ihr?"],
+    "answer": "Klarumzug24 sitzt in Bordesholm in Schleswig-Holstein. Die Adresse auf der Website lautet Luettbarten 8b, 24582 Bordesholm.",
+    "keywords": ["bordesholm", "adresse", "standort"],
+    "source_page": "/index.html"
+  },
+  {
+    "id": "general_003",
+    "category": "allgemein",
+    "question_variants": ["Was ist euer Einsatzgebiet?", "Wo bietet ihr Umzuege an?"],
+    "answer": "Klarumzug24 arbeitet in Bordesholm, Schleswig-Holstein und der Region. Bei laengeren Strecken oder besonderen Anfragen lohnt sich trotzdem eine direkte Anfrage.",
+    "keywords": ["region", "einsatzgebiet", "schleswig-holstein"],
+    "source_page": "/ueber-uns.html"
+  },
+  {
+    "id": "general_004",
+    "category": "allgemein",
+    "question_variants": ["Macht ihr Privatumzuege?", "Bietet ihr Firmenumzuege an?"],
+    "answer": "Ja, auf der Website werden sowohl Privat- als auch Firmenumzuege genannt. Bei groesseren oder komplexeren Projekten ist eine direkte Anfrage sinnvoll.",
+    "keywords": ["privatumzug", "firmenumzug", "bueroumzug"],
+    "source_page": "/ueber-uns.html"
+  },
+  {
+    "id": "price_001",
+    "category": "preise",
+    "question_variants": ["Wie viel kostet ein Umzug?", "Was kostet ein Umzug bei euch?"],
+    "answer": "Der Umzugspreis haengt von den Angaben zum Auftrag ab, zum Beispiel von Wohnflaeche, Zimmerzahl, Strecke, Etagen, Laufwegen und Zusatzleistungen. Ueber den Umzugsrechner erhalten Sie eine unverbindliche Preis-Schaetzung.",
+    "keywords": ["preis", "kosten", "umzug", "schaetzung"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "price_002",
+    "category": "preise",
+    "question_variants": ["Ist der Preis im Rechner verbindlich?", "Ist das ein Festpreis?"],
+    "answer": "Nein. Die Berechnung im Umzugsrechner ist eine unverbindliche Kostenschaetzung und kein verbindliches Festpreisangebot.",
+    "keywords": ["festpreis", "verbindlich", "unverbindlich"],
+    "source_page": "/agb.html"
+  },
+  {
+    "id": "price_003",
+    "category": "preise",
+    "question_variants": ["Warum kann sich der Preis aendern?", "Wieso kann der Endpreis abweichen?"],
+    "answer": "Der endgueltige Preis richtet sich nach dem tatsaechlichen Leistungsumfang. Abweichungen koennen zum Beispiel durch Umzugsvolumen, Kartons, Moebel, Etagen, Aufzug, Laufwege, Entfernung oder Zusatzleistungen entstehen.",
+    "keywords": ["abweichung", "endpreis", "volumen", "zusatzleistungen"],
+    "source_page": "/agb.html"
+  },
+  {
+    "id": "price_004",
+    "category": "preise",
+    "question_variants": ["Spielt die Entfernung eine Rolle?", "Sind die Kilometer wichtig?"],
+    "answer": "Ja. Die Entfernung zwischen den Umzugsadressen ist ein wichtiger Faktor fuer die unverbindliche Preis-Schaetzung.",
+    "keywords": ["entfernung", "kilometer", "strecke"],
+    "source_page": "/agb.html"
+  },
+  {
+    "id": "price_005",
+    "category": "preise",
+    "question_variants": ["Machen Etagen und Aufzug einen Unterschied?", "Spielt das Stockwerk eine Rolle?"],
+    "answer": "Ja. Etage, vorhandener Aufzug und Laufwege zwischen Wohnung und Fahrzeug koennen den Aufwand und damit die Preis-Schaetzung beeinflussen.",
+    "keywords": ["stockwerk", "etage", "aufzug", "laufweg"],
+    "source_page": "/agb.html"
+  },
+  {
+    "id": "price_006",
+    "category": "preise",
+    "question_variants": ["Gibt es Rabattcodes?", "Kann ich einen Rabattcode eingeben?"],
+    "answer": "Im Umzugsrechner gibt es ein Feld fuer Rabattcodes. Ob ein Code gueltig ist, wird dort bei der Berechnung beruecksichtigt.",
+    "keywords": ["rabattcode", "gutschein", "rabatt"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "service_001",
+    "category": "service",
+    "question_variants": ["Welche Leistungen bietet ihr an?", "Was uebernehmt ihr alles?"],
+    "answer": "Klarumzug24 unterstuetzt bei Umzuegen und Transporten sowie auf Wunsch bei Montage, Demontage, Verpackung, Entsorgung und weiteren Leistungen rund um den Umzugsablauf.",
+    "keywords": ["leistungen", "service", "montage", "transport", "verpackung"],
+    "source_page": "/index.html"
+  },
+  {
+    "id": "service_002",
+    "category": "service",
+    "question_variants": ["Bietet ihr Verpackungsservice an?", "Koennt ihr beim Einpacken helfen?"],
+    "answer": "Ja, auf Wunsch kann ein Einpackservice angefragt werden. Verpackungsservice und Verpackungsmaterial gehoeren zu den moeglichen Zusatzleistungen.",
+    "keywords": ["einpackservice", "verpackungsservice", "kartons"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "service_003",
+    "category": "service",
+    "question_variants": ["Gibt es Auspackservice?", "Koennt ihr nach dem Umzug auch auspacken?"],
+    "answer": "Ja, im Umzugsrechner kann ein Auspackservice als Zusatzleistung angegeben werden. Ob und wie dies umgesetzt wird, haengt vom Auftrag ab.",
+    "keywords": ["auspackservice", "auspacken"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "service_004",
+    "category": "service",
+    "question_variants": ["Bietet ihr Moebelmontage an?", "Macht ihr Montage und Demontage?"],
+    "answer": "Ja, Montage und Demontage gehoeren zu den angebotenen Leistungen. Im Umzugsrechner koennen entsprechende Zusatzleistungen angegeben werden.",
+    "keywords": ["montage", "demontage", "moebel"],
+    "source_page": "/index.html"
+  },
+  {
+    "id": "service_005",
+    "category": "service",
+    "question_variants": ["Bietet ihr Entsorgung an?", "Koennt ihr alte Moebel entsorgen?"],
+    "answer": "Ja, die Entsorgung alter Moebel oder Gegenstaende kann als Zusatzleistung angefragt werden. Solche Leistungen werden in der Regel gesondert beruecksichtigt.",
+    "keywords": ["entsorgung", "alte moebel"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "service_006",
+    "category": "service",
+    "question_variants": ["Geht auch Express-Umzug?", "Kann ich kurzfristig umziehen?"],
+    "answer": "Ja, im Umzugsrechner kann ein Express-Umzug angegeben werden. Kurzfristige Anfragen sollten am besten direkt angefragt werden, damit Verfuegbarkeit und Aufwand geprueft werden koennen.",
+    "keywords": ["express", "kurzfristig", "schnell"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "service_007",
+    "category": "service",
+    "question_variants": ["Kann ich Fotos schicken?", "Wie sende ich Bilder vom Umzug?"],
+    "answer": "Ja, im Kontaktformular koennen Fotos optional hochgeladen werden. Auf der Website steht ausserdem der Hinweis, Fotos zusaetzlich per WhatsApp zu senden.",
+    "keywords": ["fotos", "bilder", "upload", "whatsapp"],
+    "source_page": "/kontakt.html"
+  },
+  {
+    "id": "kueche_001",
+    "category": "kueche",
+    "question_variants": ["Baut ihr meine Kueche ab?", "Uebernehmt ihr Kuechenabbau?"],
+    "answer": "Ja, im Umzugsrechner kann Kueche abbauen als Zusatzleistung angegeben werden. Fuer den genauen Umfang sollte die Anfrage moeglichst mit Details zur Kueche gestellt werden.",
+    "keywords": ["kueche", "abbauen", "demontage"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "kueche_002",
+    "category": "kueche",
+    "question_variants": ["Baut ihr die Kueche wieder auf?", "Macht ihr Kuechenaufbau?"],
+    "answer": "Ja, im Umzugsrechner kann Kueche aufbauen als Zusatzleistung angegeben werden. Bei Kuechen ist eine genaue Abstimmung wichtig, weil Aufbau und Anpassungen von der Situation vor Ort abhaengen koennen.",
+    "keywords": ["kueche", "aufbauen", "montage"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "geraete_001",
+    "category": "geraete",
+    "question_variants": ["Transportiert ihr Waschmaschinen?", "Kann meine Waschmaschine mitgenommen werden?"],
+    "answer": "Ja, Waschmaschinen koennen im Umzugsrechner als Teil des Umzugs angegeben werden. Bei Anschluss oder Abbau sollte der Wunsch moeglichst klar in der Anfrage erwaehnt werden.",
+    "keywords": ["waschmaschine", "geraet", "transport"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "geraete_002",
+    "category": "geraete",
+    "question_variants": ["Transportiert ihr Kuehlschraenke?", "Kann mein Kuehlschrank transportiert werden?"],
+    "answer": "Ja, Kuehlschraenke koennen im Umzugsrechner angegeben werden. Vor dem Transport sollte das Geraet leer und passend vorbereitet sein.",
+    "keywords": ["kuehlschrank", "geraet", "transport"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "geraete_003",
+    "category": "geraete",
+    "question_variants": ["Transportiert ihr Fernseher?", "Kann der Fernseher mit umziehen?"],
+    "answer": "Ja, Fernseher koennen im Umzugsrechner angegeben werden. Empfindliche Geraete sollten fuer den sicheren Transport besonders gut vorbereitet oder verpackt werden.",
+    "keywords": ["fernseher", "tv", "geraet"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "special_001",
+    "category": "spezialstuecke",
+    "question_variants": ["Transportiert ihr ein Klavier?", "Geht auch ein Fluegel?"],
+    "answer": "Klavier oder Fluegel werden im Umzugsrechner als besonderes Transportgut abgefragt. Bei solchen Spezialstuecken ist eine direkte Anfrage mit moeglichst genauen Angaben wichtig.",
+    "keywords": ["klavier", "fluegel", "spezialtransport"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "special_002",
+    "category": "spezialstuecke",
+    "question_variants": ["Transportiert ihr einen Tresor?", "Geht auch ein Safe?"],
+    "answer": "Tresore werden im Umzugsrechner als besonderes Transportgut beruecksichtigt. Bei schweren oder ungewoehnlichen Gegenstaenden sollte die Anfrage mit genauen Details gestellt werden.",
+    "keywords": ["tresor", "safe", "schwer"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "special_003",
+    "category": "spezialstuecke",
+    "question_variants": ["Transportiert ihr ein Aquarium?", "Kann ein Aquarium mit umziehen?"],
+    "answer": "Aquarien werden im Umzugsrechner als besonderes Transportgut abgefragt. Solche Gegenstaende sollten in der Anfrage besonders klar beschrieben werden.",
+    "keywords": ["aquarium", "spezialtransport", "empfindlich"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "zugang_001",
+    "category": "zugang",
+    "question_variants": ["Brauche ich eine Halteverbotszone?", "Koennt ihr eine Halteverbotszone organisieren?"],
+    "answer": "Falls eine Halteverbotszone noetig ist, kann sie nach vorheriger Vereinbarung durch Klarumzug24 organisiert werden. Ohne geeignete Parkmoeglichkeit koennen zusaetzliche Aufwaende entstehen.",
+    "keywords": ["halteverbotszone", "parken", "vereinbarung"],
+    "source_page": "/agb.html"
+  },
+  {
+    "id": "zugang_002",
+    "category": "zugang",
+    "question_variants": ["Was wenn man nicht direkt vor der Tuer parken kann?", "Spielt Parkmoeglichkeit eine Rolle?"],
+    "answer": "Ja, geeignete Parkmoeglichkeiten sind wichtig. Wenn das Umzugsfahrzeug nicht passend parken kann, koennen laengere Laufwege und damit zusaetzliche Aufwaende entstehen.",
+    "keywords": ["parken", "laufwege", "fahrzeug"],
+    "source_page": "/agb.html"
+  },
+  {
+    "id": "booking_001",
+    "category": "anfrage",
+    "question_variants": ["Wie sende ich eine Anfrage?", "Wie kann ich euch buchen?"],
+    "answer": "Sie koennen den Umzugsrechner nutzen und danach die Anfrage direkt senden. Alternativ erreichen Sie Klarumzug24 ueber das Kontaktformular, per E-Mail oder per WhatsApp.",
+    "keywords": ["anfrage", "buchen", "kontaktformular", "whatsapp"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "booking_002",
+    "category": "anfrage",
+    "question_variants": ["Welche Daten braucht ihr fuer eine Anfrage?", "Was muss ich angeben?"],
+    "answer": "Fuer eine gute Einschaetzung sind vor allem die Umzugsdaten wichtig, zum Beispiel Wohnflaeche, Zimmer, Strecke und besondere Leistungen. Fuer eine direkte Anfrage werden ausserdem Kontaktangaben wie Name, Telefon und E-Mail benoetigt.",
+    "keywords": ["angaben", "name", "telefon", "email", "umzugsdaten"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "booking_003",
+    "category": "anfrage",
+    "question_variants": ["Muss ich AGB und Datenschutz bestaetigen?", "Brauche ich Zustimmung zu AGB?"],
+    "answer": "Ja, fuer das direkte Senden einer Anfrage werden auf der Website die Zustimmung zu AGB und Datenschutzerklaerung abgefragt.",
+    "keywords": ["agb", "datenschutz", "zustimmung"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "booking_004",
+    "category": "anfrage",
+    "question_variants": ["Wie schnell antwortet ihr?", "Wann bekomme ich eine Rueckmeldung?"],
+    "answer": "Auf der Website steht, dass auf Anfragen in der Regel innerhalb von 1 Tag geantwortet wird.",
+    "keywords": ["antwortzeit", "rueckmeldung", "1 tag"],
+    "source_page": "/kontakt.html"
+  },
+  {
+    "id": "contact_001",
+    "category": "kontakt",
+    "question_variants": ["Was ist eure Telefonnummer?", "Wie kann ich anrufen?"],
+    "answer": "Sie erreichen Klarumzug24 telefonisch unter +49 163 615 7234.",
+    "keywords": ["telefon", "telefonnummer", "anrufen"],
+    "source_page": "/kontakt.html"
+  },
+  {
+    "id": "contact_002",
+    "category": "kontakt",
+    "question_variants": ["Wie lautet eure E-Mail?", "An welche Mail kann ich schreiben?"],
+    "answer": "Die Kontakt-E-Mail von Klarumzug24 lautet info@klarumzug24.de.",
+    "keywords": ["email", "mail", "kontakt"],
+    "source_page": "/kontakt.html"
+  },
+  {
+    "id": "contact_003",
+    "category": "kontakt",
+    "question_variants": ["Habt ihr WhatsApp?", "Seid ihr per WhatsApp erreichbar?"],
+    "answer": "Ja, Klarumzug24 ist ueber WhatsApp erreichbar. WhatsApp wird auf der Website als schneller Kontaktweg genannt.",
+    "keywords": ["whatsapp", "kontakt", "chat"],
+    "source_page": "/index.html"
+  },
+  {
+    "id": "legal_001",
+    "category": "rechtliches",
+    "question_variants": ["Wo finde ich eure AGB?", "Habt ihr allgemeine Geschaeftsbedingungen?"],
+    "answer": "Ja, die Allgemeinen Geschaeftsbedingungen finden Sie auf der Seite /agb.html.",
+    "keywords": ["agb", "rechtliches", "bedingungen"],
+    "source_page": "/agb.html"
+  },
+  {
+    "id": "legal_002",
+    "category": "rechtliches",
+    "question_variants": ["Habt ihr eine Datenschutzerklaerung?", "Was ist mit DSGVO?"],
+    "answer": "Die Datenschutzerklaerung finden Sie auf der Seite /datenschutz.html. Dort stehen Informationen zur Verarbeitung personenbezogener Daten gemaess DSGVO.",
+    "keywords": ["datenschutz", "dsgvo", "personenbezogene daten"],
+    "source_page": "/datenschutz.html"
+  },
+  {
+    "id": "legal_003",
+    "category": "rechtliches",
+    "question_variants": ["Sind meine Daten geschuetzt?", "Was passiert mit meinen Daten?"],
+    "answer": "Personenbezogene Daten werden laut Datenschutzerklaerung zur Bearbeitung der Anfrage, zur Erstellung eines Angebots oder zur Durchfuehrung eines moeglichen Auftrags verwendet. Weitere Details stehen auf /datenschutz.html.",
+    "keywords": ["daten", "datenschutz", "anfrage", "angebot"],
+    "source_page": "/datenschutz.html"
+  },
+  {
+    "id": "legal_004",
+    "category": "rechtliches",
+    "question_variants": ["Sind meine Sachen versichert?", "Gibt es eine Versicherung?"],
+    "answer": "Laut AGB sind transportierte Gueter im Rahmen der gesetzlichen Haftungsvorschriften versichert. Eine weitergehende Transportversicherung kann auf Wunsch gegen gesonderte Kosten abgeschlossen werden.",
+    "keywords": ["versicherung", "transportversicherung", "gesetzliche haftung"],
+    "source_page": "/agb.html"
+  },
+  {
+    "id": "legal_005",
+    "category": "rechtliches",
+    "question_variants": ["Kann ich stornieren?", "Bis wann kann ich absagen?"],
+    "answer": "Laut AGB ist eine kostenfreie Stornierung bis spaetestens 48 Stunden vor dem vereinbarten Umzugstermin moeglich. Bei spaeteren Stornierungen kann eine angemessene Ausfallpauschale berechnet werden.",
+    "keywords": ["stornierung", "48 stunden", "ausfallpauschale"],
+    "source_page": "/agb.html"
+  },
+  {
+    "id": "process_001",
+    "category": "ablauf",
+    "question_variants": ["Wie funktioniert der Umzugsrechner?", "Wie nutze ich den Rechner?"],
+    "answer": "Im Umzugsrechner geben Sie zuerst die wichtigsten Daten ein und erhalten direkt eine unverbindliche Preis-Schaetzung. Danach koennen Sie weitere Details ergaenzen und die Anfrage direkt senden oder per WhatsApp weitergeben.",
+    "keywords": ["umzugsrechner", "ablauf", "preis", "anfrage"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "process_002",
+    "category": "ablauf",
+    "question_variants": ["Muss ich alles ausfuellen?", "Kann ich erst spaeter mehr Details geben?"],
+    "answer": "Nein, nicht alle Angaben muessen sofort gemacht werden. Auf der Rechner-Seite gibt es einen Bereich fuer weitere optionale Angaben, falls diese fuer Ihren Umzug wichtig sind.",
+    "keywords": ["optional", "weitere angaben", "details"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "general_005",
+    "category": "allgemein",
+    "question_variants": ["Arbeitet ihr professionell?", "Seid ihr ein serioeser Umzugsservice?"],
+    "answer": "Klarumzug24 praesentiert sich als zuverlaessiger und professioneller Umzugs- und Transportservice. Auf der Website werden sorgfaeltige Planung, transparente Kommunikation und sichere Transporte betont.",
+    "keywords": ["professionell", "serioes", "zuverlaessig"],
+    "source_page": "/ueber-uns.html"
+  },
+  {
+    "id": "general_006",
+    "category": "allgemein",
+    "question_variants": ["Macht ihr nur Umzuege?", "Bietet ihr auch Transporte ohne kompletten Umzug an?"],
+    "answer": "Klarumzug24 nennt auf der Website sowohl Umzuege als auch Transporte. Fuer einzelne Transportwuensche oder besondere Faelle ist eine direkte Anfrage sinnvoll.",
+    "keywords": ["transport", "umzug", "einzeltransport"],
+    "source_page": "/ueber-uns.html"
+  },
+  {
+    "id": "price_007",
+    "category": "preise",
+    "question_variants": ["Beeinflussen Zusatzleistungen den Preis?", "Werden Montage und Verpackung extra beruecksichtigt?"],
+    "answer": "Ja, Zusatzleistungen wie Montage, Verpackung, Entsorgung oder besondere Transportbedingungen koennen den Aufwand erhoehen und werden bei der Einschaetzung beruecksichtigt.",
+    "keywords": ["zusatzleistungen", "montage", "verpackung", "entsorgung"],
+    "source_page": "/agb.html"
+  },
+  {
+    "id": "price_008",
+    "category": "preise",
+    "question_variants": ["Kann ich einen genauen Festpreis bekommen?", "Gebt ihr mir einen verbindlichen Endpreis?"],
+    "answer": "Eine verbindliche Preiszusage sollte direkt angefragt werden. Die Angaben aus dem Rechner und aus allgemeinen Chat-Antworten sind nur unverbindliche Schaetzungen.",
+    "keywords": ["festpreis", "endpreis", "verbindlich"],
+    "source_page": "/agb.html"
+  },
+  {
+    "id": "price_009",
+    "category": "preise",
+    "question_variants": ["Warum fragt ihr nach Kartons und Moebeln?", "Wieso muss ich so viele Details angeben?"],
+    "answer": "Details wie Kartons, Moebelstuecke, Etagen und Zusatzleistungen helfen dabei, den tatsaechlichen Aufwand realistischer einzuschaetzen. Je genauer die Angaben sind, desto besser wird die unverbindliche Schaetzung.",
+    "keywords": ["kartons", "moebel", "details", "aufwand"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "price_010",
+    "category": "preise",
+    "question_variants": ["Ist eine Online-Schaetzung sinnvoll?", "Wie realistisch ist die Preis-Schaetzung?"],
+    "answer": "Die Online-Schaetzung ist als erste Orientierung gedacht. Sie hilft bei der Planung, ersetzt aber kein verbindliches Angebot auf Basis des tatsaechlichen Auftragsumfangs.",
+    "keywords": ["online-schaetzung", "orientierung", "realistisch"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "service_008",
+    "category": "service",
+    "question_variants": ["Nehmt ihr den kompletten Haushalt mit?", "Koennt ihr einen ganzen Haushalt umziehen?"],
+    "answer": "Ja, Klarumzug24 unterstuetzt sowohl bei kleineren Umzuegen als auch bei kompletten Haushalten. Fuer groessere Umfaenge sind moeglichst genaue Angaben in der Anfrage hilfreich.",
+    "keywords": ["haushalt", "kompletter umzug", "umfang"],
+    "source_page": "/index.html"
+  },
+  {
+    "id": "service_009",
+    "category": "service",
+    "question_variants": ["Koennt ihr nur tragen und transportieren?", "Geht auch nur Trageservice mit Transport?"],
+    "answer": "Transport und Trageaufwand koennen Teil der Anfrage sein. Fuer reine Transport- oder Teilumzugsleistungen ist eine kurze Beschreibung des Bedarfs sinnvoll.",
+    "keywords": ["tragen", "transport", "teilumzug"],
+    "source_page": "/ueber-uns.html"
+  },
+  {
+    "id": "service_010",
+    "category": "service",
+    "question_variants": ["Koennt ihr auch beim Planen helfen?", "Unterstuetzt ihr bei der Umzugsplanung?"],
+    "answer": "Ja, auf der Website wird betont, dass Klarumzug24 Umzuege sorgfaeltig plant und begleitet. Fuer die Planung helfen klare Angaben zu Umfang, Termin und Besonderheiten.",
+    "keywords": ["planung", "begleitung", "ablauf"],
+    "source_page": "/ueber-uns.html"
+  },
+  {
+    "id": "service_011",
+    "category": "service",
+    "question_variants": ["Macht ihr auch Demontage ohne Aufbau?", "Kann ich nur Abbau buchen?"],
+    "answer": "Ja, Zusatzleistungen wie Abbau und Aufbau koennen im Rechner getrennt angegeben werden. Dadurch laesst sich die Anfrage besser an Ihren Bedarf anpassen.",
+    "keywords": ["demontage", "abbau", "aufbau getrennt"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "service_012",
+    "category": "service",
+    "question_variants": ["Kann ich mehrere Zusatzleistungen kombinieren?", "Gehen Verpackung, Montage und Entsorgung zusammen?"],
+    "answer": "Ja, im Umzugsrechner koennen mehrere Zusatzleistungen kombiniert werden. Fuer eine saubere Einschaetzung sollten relevante Leistungen gemeinsam angegeben werden.",
+    "keywords": ["kombinieren", "zusatzleistungen", "montage", "verpackung"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "kueche_003",
+    "category": "kueche",
+    "question_variants": ["Kann ich Kuechenabbau und Kuechenaufbau zusammen buchen?", "Macht ihr beides bei der Kueche?"],
+    "answer": "Ja, beide Leistungen koennen im Umzugsrechner separat angegeben werden. Fuer Kuechen sind moeglichst genaue Angaben wichtig, damit der Aufwand passend eingeschaetzt werden kann.",
+    "keywords": ["kuechenabbau", "kuechenaufbau", "beides"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "kueche_004",
+    "category": "kueche",
+    "question_variants": ["Ist Kuechenmontage im Umzug automatisch enthalten?", "Muss ich die Kueche extra angeben?"],
+    "answer": "Kuechenabbau und Kuechenaufbau sollten als Zusatzleistungen passend angegeben werden. Solche Leistungen werden nicht einfach vorausgesetzt, sondern muessen in der Anfrage beruecksichtigt werden.",
+    "keywords": ["kueche extra", "zusatzleistung", "montage"],
+    "source_page": "/agb.html"
+  },
+  {
+    "id": "kueche_005",
+    "category": "kueche",
+    "question_variants": ["Soll ich Details zur Kueche nennen?", "Wie genau muss ich die Kueche beschreiben?"],
+    "answer": "Ja, bei Kuechen helfen moeglichst genaue Angaben sehr. Besonders wichtig sind Umfang, gewuenschte Leistungen und erkennbare Besonderheiten vor Ort.",
+    "keywords": ["kueche", "details", "beschreibung"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "kueche_006",
+    "category": "kueche",
+    "question_variants": ["Ist Kuechenaufbau immer moeglich?", "Koennt ihr jede Kueche einfach wieder aufbauen?"],
+    "answer": "Ob ein Kuechenaufbau im Einzelfall ohne weitere Anpassung moeglich ist, haengt von der Kueche und der neuen Situation vor Ort ab. Deshalb ist eine genaue Anfrage bei Kuechen besonders wichtig.",
+    "keywords": ["kuechenaufbau", "anpassung", "vor ort"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "geraete_004",
+    "category": "geraete",
+    "question_variants": ["Kann ich nur eine Waschmaschine transportieren lassen?", "Geht ein Einzeltransport fuer eine Waschmaschine?"],
+    "answer": "Auch Einzeltransporte koennen grundsaetzlich angefragt werden. Fuer eine Waschmaschine sind Strecke, Etagen und gewuenschter Service wichtig.",
+    "keywords": ["waschmaschine", "einzeltransport", "etagen"],
+    "source_page": "/ueber-uns.html"
+  },
+  {
+    "id": "geraete_005",
+    "category": "geraete",
+    "question_variants": ["Kann ich nur einen Kuehlschrank transportieren lassen?", "Geht ein einzelner Kuehlschrank-Transport?"],
+    "answer": "Ja, auch ein einzelner Kuehlschrank kann angefragt werden. Fuer eine realistische Einschaetzung sollten Transportweg, Etagen und gewuenschte Zusatzleistungen genannt werden.",
+    "keywords": ["kuehlschrank", "einzeltransport", "transportweg"],
+    "source_page": "/ueber-uns.html"
+  },
+  {
+    "id": "geraete_006",
+    "category": "geraete",
+    "question_variants": ["Soll ich Geraete vorher vorbereiten?", "Muss ich Waschmaschine oder Kuehlschrank vorbereiten?"],
+    "answer": "Ja, Geraete sollten vor dem Transport passend vorbereitet sein. Auf der sicheren Seite sind Sie, wenn Sie empfindliche oder schwere Geraete in der Anfrage zusaetzlich erwaehnen.",
+    "keywords": ["vorbereiten", "geraete", "schwer", "empfindlich"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "geraete_007",
+    "category": "geraete",
+    "question_variants": ["Koennt ihr auch mehrere Geraete transportieren?", "Kann ich Waschmaschine, Kuehlschrank und Fernseher zusammen angeben?"],
+    "answer": "Ja, mehrere Geraete koennen im Umzugsrechner und in der Anfrage gemeinsam angegeben werden. Das hilft bei einer besseren Einschaetzung des Aufwands.",
+    "keywords": ["mehrere geraete", "waschmaschine", "fernseher", "kuehlschrank"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "moebel_001",
+    "category": "moebel",
+    "question_variants": ["Transportiert ihr Betten und Sofas?", "Kann ich Betten und Sofas angeben?"],
+    "answer": "Ja, im Umzugsrechner koennen verschiedene Moebelstuecke wie Betten, Sofas, Tische und Stuehle zusaetzlich angegeben werden.",
+    "keywords": ["betten", "sofas", "tische", "stuehle"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "moebel_002",
+    "category": "moebel",
+    "question_variants": ["Baut ihr Schraenke ab?", "Koennt ihr Moebel demontieren?"],
+    "answer": "Ja, Moebelmontage und -demontage werden als moegliche Zusatzleistungen genannt. Entsprechende Wuensche sollten im Rechner oder in der Anfrage angegeben werden.",
+    "keywords": ["schraenke", "demontage", "moebel"],
+    "source_page": "/agb.html"
+  },
+  {
+    "id": "moebel_003",
+    "category": "moebel",
+    "question_variants": ["Koennt ihr meine Moebel wieder aufbauen?", "Macht ihr Moebelaufbau?"],
+    "answer": "Moebelmontage kann als Zusatzleistung beruecksichtigt werden. Fuer groessere oder besondere Moebel ist eine genauere Beschreibung in der Anfrage sinnvoll.",
+    "keywords": ["moebelaufbau", "montage", "wiederaufbau"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "moebel_004",
+    "category": "moebel",
+    "question_variants": ["Kann ich einzelne Moebel transportieren lassen?", "Geht auch nur ein Sofa oder Schrank?"],
+    "answer": "Einzelne Moebeltransporte koennen angefragt werden. Je genauer Sie Moebelstueck, Strecke und Zugangssituation nennen, desto besser kann der Aufwand eingeschaetzt werden.",
+    "keywords": ["einzelne moebel", "sofa", "schrank", "transport"],
+    "source_page": "/ueber-uns.html"
+  },
+  {
+    "id": "moebel_005",
+    "category": "moebel",
+    "question_variants": ["Sind grosse Moebel wichtig fuer die Anfrage?", "Soll ich sperrige Moebel extra nennen?"],
+    "answer": "Ja, groessere oder sperrige Moebel sollten moeglichst klar genannt werden. Sie koennen den Transportaufwand und die Planung deutlich beeinflussen.",
+    "keywords": ["sperrig", "grosse moebel", "planung"],
+    "source_page": "/agb.html"
+  },
+  {
+    "id": "special_004",
+    "category": "spezialstuecke",
+    "question_variants": ["Sind Spezialstuecke teurer oder aufwendiger?", "Werden schwere Sachen extra beruecksichtigt?"],
+    "answer": "Besondere Transportbedingungen und Spezialstuecke koennen den Aufwand erhoehen. Solche Gegenstaende sollten in der Anfrage offen angegeben werden, damit sie in der Einschaetzung beruecksichtigt werden koennen.",
+    "keywords": ["spezialstuecke", "mehrkosten", "aufwand"],
+    "source_page": "/agb.html"
+  },
+  {
+    "id": "special_005",
+    "category": "spezialstuecke",
+    "question_variants": ["Soll ich schwere Gegenstaende extra melden?", "Muss ich besondere Stuecke vorher angeben?"],
+    "answer": "Ja, besondere, schwere oder empfindliche Gegenstaende sollten immer vorab genannt werden. Das ist wichtig fuer Planung, Aufwand und sichere Durchfuehrung.",
+    "keywords": ["schwere gegenstaende", "vorab", "planung", "sicherheit"],
+    "source_page": "/agb.html"
+  },
+  {
+    "id": "zugang_003",
+    "category": "zugang",
+    "question_variants": ["Ist ein Keller wichtig?", "Soll ich den Keller angeben?"],
+    "answer": "Ja, Keller kann im Umzugsrechner als zusaetzliche Angabe erfasst werden. Solche Angaben helfen bei einer genaueren Einschaetzung des Aufwands.",
+    "keywords": ["keller", "aufwand", "angabe"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "zugang_004",
+    "category": "zugang",
+    "question_variants": ["Ist ein Dachboden wichtig?", "Soll ich den Dachboden angeben?"],
+    "answer": "Ja, auch Dachboden kann im Umzugsrechner angegeben werden. Je mehr relevante Details vorliegen, desto besser kann der Aufwand eingeschaetzt werden.",
+    "keywords": ["dachboden", "angabe", "aufwand"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "zugang_005",
+    "category": "zugang",
+    "question_variants": ["Spielt ein Balkon eine Rolle?", "Soll ich den Balkon nennen?"],
+    "answer": "Ja, Balkon kann als Zusatzangabe im Umzugsrechner erfasst werden. Solche Informationen helfen, die Umzugssituation realistischer einzuschaetzen.",
+    "keywords": ["balkon", "zugang", "umzugssituation"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "zugang_006",
+    "category": "zugang",
+    "question_variants": ["Ist eine Garage wichtig?", "Muss ich die Garage angeben?"],
+    "answer": "Ja, Garage kann im Umzugsrechner angegeben werden. Diese Information kann fuer die Planung des Zugangs und der Laufwege relevant sein.",
+    "keywords": ["garage", "zugang", "laufweg"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "zugang_007",
+    "category": "zugang",
+    "question_variants": ["Was sind Laufwege?", "Warum ist die Distanz zwischen Wohnung und Auto wichtig?"],
+    "answer": "Laufwege sind die Wege zwischen Wohnung und Umzugsfahrzeug. Laengere Wege koennen den Aufwand erhoehen und sollten deshalb moeglichst realistisch angegeben werden.",
+    "keywords": ["laufwege", "wohnung auto", "distanz"],
+    "source_page": "/agb.html"
+  },
+  {
+    "id": "zugang_008",
+    "category": "zugang",
+    "question_variants": ["Soll ich angeben, ob ein Aufzug vorhanden ist?", "Warum fragt ihr nach dem Fahrstuhl?"],
+    "answer": "Ja, ein vorhandener Aufzug ist fuer die Einschaetzung wichtig. Er kann den Trageaufwand und die gesamte Planung beeinflussen.",
+    "keywords": ["aufzug", "fahrstuhl", "trageaufwand"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "vorbereitung_001",
+    "category": "vorbereitung",
+    "question_variants": ["Wie bereite ich meinen Umzug am besten vor?", "Wie sollte ich mich vor dem Umzug vorbereiten?"],
+    "answer": "Wichtig sind moeglichst genaue Angaben zu Umfang, Strecke, Zugangssituation und Zusatzleistungen. Besonders bei Kuechen, Geraeten oder Spezialstuecken hilft eine fruehe und klare Beschreibung.",
+    "keywords": ["vorbereitung", "umfang", "zugangssituation", "beschreibung"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "vorbereitung_002",
+    "category": "vorbereitung",
+    "question_variants": ["Soll ich empfindliche Sachen besonders nennen?", "Muss ich zerbrechliche Gegenstaende kennzeichnen?"],
+    "answer": "Ja, empfindliche oder besonders wertvolle Gegenstaende sollten moeglichst klar gekennzeichnet oder in der Anfrage erwaehnt werden. Das wird auch in den AGB angesprochen.",
+    "keywords": ["empfindlich", "wertvoll", "kennzeichnen"],
+    "source_page": "/agb.html"
+  },
+  {
+    "id": "vorbereitung_003",
+    "category": "vorbereitung",
+    "question_variants": ["Soll ich Wertgegenstaende selbst transportieren?", "Was ist mit Bargeld und Schmuck?"],
+    "answer": "Laut AGB sollte der Kunde persoenliche Wertgegenstaende, Bargeld, Schmuck und wichtige Dokumente selbst transportieren.",
+    "keywords": ["wertgegenstaende", "bargeld", "schmuck", "dokumente"],
+    "source_page": "/agb.html"
+  },
+  {
+    "id": "vorbereitung_004",
+    "category": "vorbereitung",
+    "question_variants": ["Was soll ich bei fehlenden Parkplaetzen tun?", "Wie bereite ich die Parksituation vor?"],
+    "answer": "Wenn vor Ort keine gute Parkmoeglichkeit besteht, sollte das fruehzeitig angegeben werden. In solchen Faellen kann je nach Situation auch eine Halteverbotszone sinnvoll sein.",
+    "keywords": ["parkplaetze", "parksituation", "halteverbotszone"],
+    "source_page": "/agb.html"
+  },
+  {
+    "id": "vorbereitung_005",
+    "category": "vorbereitung",
+    "question_variants": ["Soll ich Fotos vorab schicken?", "Sind Bilder fuer die Planung hilfreich?"],
+    "answer": "Ja, Bilder koennen bei besonderen Situationen oder grossen Gegenstaenden hilfreich sein. Auf der Website ist vorgesehen, Fotos optional hochzuladen und zusaetzlich per WhatsApp zu senden.",
+    "keywords": ["fotos", "bilder", "planung", "whatsapp"],
+    "source_page": "/kontakt.html"
+  },
+  {
+    "id": "booking_005",
+    "category": "anfrage",
+    "question_variants": ["Kann ich auch ohne Rechner direkt anfragen?", "Muss ich den Rechner zuerst benutzen?"],
+    "answer": "Nein, Sie muessen nicht zwingend zuerst den Rechner benutzen. Eine direkte Anfrage ist auch ueber das Kontaktformular, per E-Mail oder per WhatsApp moeglich.",
+    "keywords": ["direkte anfrage", "rechner", "kontaktformular", "whatsapp"],
+    "source_page": "/kontakt.html"
+  },
+  {
+    "id": "booking_006",
+    "category": "anfrage",
+    "question_variants": ["Kann ich erst beraten werden und dann anfragen?", "Geht auch erst eine Rueckfrage vor der Buchung?"],
+    "answer": "Ja, allgemeine Rueckfragen sind moeglich. Fuer eine konkrete Einschaetzung oder ein verbindlicheres Angebot sind aber moeglichst genaue Umzugsangaben wichtig.",
+    "keywords": ["beratung", "rueckfrage", "buchung"],
+    "source_page": "/kontakt.html"
+  },
+  {
+    "id": "booking_007",
+    "category": "anfrage",
+    "question_variants": ["Welche Kontaktangaben sind fuer eine direkte Anfrage noetig?", "Was braucht ihr fuer das Absenden?"],
+    "answer": "Fuer das direkte Senden der Anfrage werden auf der Website Name, Telefon und E-Mail benoetigt. Zusaetzlich muessen AGB und Datenschutzerklaerung bestaetigt werden.",
+    "keywords": ["name", "telefon", "email", "absenden"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "booking_008",
+    "category": "anfrage",
+    "question_variants": ["Kann ich die Anfrage mit Hinweisen ergaenzen?", "Wo schreibe ich besondere Infos dazu?"],
+    "answer": "Ja, auf der Website gibt es ein Feld fuer besondere Hinweise. Dort koennen wichtige Zusatzinformationen fuer den Umzug eingetragen werden.",
+    "keywords": ["hinweise", "besondere infos", "nachricht"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "booking_009",
+    "category": "anfrage",
+    "question_variants": ["Muss ich der Wahrheit entsprechende Angaben machen?", "Was ist mit falschen Angaben?"],
+    "answer": "Ja, laut Website und AGB sollten Angaben vollstaendig und wahrheitsgemaess gemacht werden. Starke Abweichungen koennen Auswirkungen auf Planung und Preis haben.",
+    "keywords": ["wahrheitsgemaess", "vollstaendig", "angaben"],
+    "source_page": "/agb.html"
+  },
+  {
+    "id": "contact_004",
+    "category": "kontakt",
+    "question_variants": ["Wo finde ich das Kontaktformular?", "Habt ihr ein Formular?"],
+    "answer": "Das Kontaktformular finden Sie auf der Seite /kontakt.html. Dort koennen Sie Ihre Nachricht und optional auch ein Foto mitsenden.",
+    "keywords": ["kontaktformular", "formular", "foto"],
+    "source_page": "/kontakt.html"
+  },
+  {
+    "id": "contact_005",
+    "category": "kontakt",
+    "question_variants": ["Kann ich Bilder per WhatsApp schicken?", "Wohin mit Fotos vom Umzug?"],
+    "answer": "Ja, auf der Kontaktseite wird darauf hingewiesen, Fotos zusaetzlich per WhatsApp zu senden.",
+    "keywords": ["bilder", "fotos", "whatsapp"],
+    "source_page": "/kontakt.html"
+  },
+  {
+    "id": "contact_006",
+    "category": "kontakt",
+    "question_variants": ["Kann ich euch per E-Mail statt Formular schreiben?", "Geht Kontakt auch per Mail?"],
+    "answer": "Ja, eine Kontaktaufnahme per E-Mail ist moeglich. Die auf der Website genannte Adresse lautet info@klarumzug24.de.",
+    "keywords": ["email", "mail", "formular"],
+    "source_page": "/kontakt.html"
+  },
+  {
+    "id": "contact_007",
+    "category": "kontakt",
+    "question_variants": ["Kann ich euch direkt anrufen?", "Geht Beratung telefonisch?"],
+    "answer": "Ja, Klarumzug24 ist telefonisch unter +49 163 615 7234 erreichbar. Fuer konkrete Umzugsfragen sind moeglichst klare Angaben hilfreich.",
+    "keywords": ["telefon", "anrufen", "beratung"],
+    "source_page": "/kontakt.html"
+  },
+  {
+    "id": "legal_006",
+    "category": "rechtliches",
+    "question_variants": ["Wie ist das mit Haftung?", "Gibt es Haftungsregeln?"],
+    "answer": "Die Haftung richtet sich laut AGB nach den gesetzlichen Bestimmungen, insbesondere nach den Vorschriften des HGB fuer Umzugsvertraege. Details und Ausnahmen finden Sie auf /agb.html.",
+    "keywords": ["haftung", "hgb", "umzugsvertraege"],
+    "source_page": "/agb.html"
+  },
+  {
+    "id": "legal_007",
+    "category": "rechtliches",
+    "question_variants": ["Wann muss bezahlt werden?", "Wie erfolgt die Zahlung?"],
+    "answer": "Laut AGB erfolgt die Zahlung grundsaetzlich unmittelbar nach Abschluss der Dienstleistung, sofern nichts anderes vereinbart wurde. Genannt werden zum Beispiel Barzahlung, Ueberweisung oder individuell vereinbarte Zahlungsmethoden.",
+    "keywords": ["zahlung", "barzahlung", "ueberweisung"],
+    "source_page": "/agb.html"
+  },
+  {
+    "id": "legal_008",
+    "category": "rechtliches",
+    "question_variants": ["Wie lange speichert ihr Daten?", "Wann werden Daten geloescht?"],
+    "answer": "Laut Datenschutzerklaerung werden personenbezogene Daten nur so lange gespeichert, wie dies fuer den jeweiligen Zweck oder fuer gesetzliche Pflichten erforderlich ist.",
+    "keywords": ["speicherung", "loeschung", "daten"],
+    "source_page": "/datenschutz.html"
+  },
+  {
+    "id": "legal_009",
+    "category": "rechtliches",
+    "question_variants": ["Kann ich meine Daten loeschen lassen?", "Welche Datenschutzrechte habe ich?"],
+    "answer": "Ja, in der Datenschutzerklaerung werden Rechte wie Auskunft, Berichtigung, Loeschung, Einschraenkung, Datenuebertragbarkeit und Widerspruch genannt. Zur Ausuebung dieser Rechte koennen Sie Klarumzug24 kontaktieren.",
+    "keywords": ["rechte", "loeschung", "auskunft", "dsgvo"],
+    "source_page": "/datenschutz.html"
+  },
+  {
+    "id": "legal_010",
+    "category": "rechtliches",
+    "question_variants": ["Was ist wenn ich selbst falsch verpacke?", "Haftet ihr fuer falsch verpackte Sachen?"],
+    "answer": "In den AGB steht, dass bestimmte Haftungsausschluesse zum Beispiel bei unsachgemaesser Verpackung durch den Kunden gelten koennen. Bei empfindlichen Gegenstaenden ist deshalb eine klare Abstimmung wichtig.",
+    "keywords": ["falsch verpackt", "haftungsausschluss", "kunde"],
+    "source_page": "/agb.html"
+  },
+  {
+    "id": "legal_011",
+    "category": "rechtliches",
+    "question_variants": ["Was passiert bei Wartezeiten?", "Koennen Verzoegerungen extra kosten?"],
+    "answer": "Ja, laut AGB koennen Wartezeiten gesondert berechnet werden, wenn der Umzug durch Umstaende verzoegert wird, die nicht von Klarumzug24 zu vertreten sind, zum Beispiel fehlender Zugang oder fehlende Parkmoeglichkeiten.",
+    "keywords": ["wartezeiten", "verzoegerung", "kosten"],
+    "source_page": "/agb.html"
+  },
+  {
+    "id": "process_003",
+    "category": "ablauf",
+    "question_variants": ["Bekomme ich erst den Preis und dann sende ich ab?", "Sehe ich die Schaetzung vor dem Versand?"],
+    "answer": "Ja, auf der Rechner-Seite erhalten Sie zuerst eine unverbindliche Preis-Schaetzung und koennen die Anfrage danach direkt senden oder per WhatsApp weitergeben.",
+    "keywords": ["preis zuerst", "versand", "schaetzung"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "process_004",
+    "category": "ablauf",
+    "question_variants": ["Muss ich Name und Kontakt direkt angeben?", "Wann kommen Name und Telefon dazu?"],
+    "answer": "Fuer die Preis-Schaetzung stehen zunaechst die Umzugsdaten im Vordergrund. Fuer das direkte Senden der Anfrage werden danach Name, Telefon und E-Mail benoetigt.",
+    "keywords": ["kontaktdaten", "name", "telefon", "email"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "process_005",
+    "category": "ablauf",
+    "question_variants": ["Kann ich erst rechnen und spaeter absenden?", "Muss ich direkt abschicken?"],
+    "answer": "Ja, zuerst wird die unverbindliche Preis-Schaetzung angezeigt. Danach koennen Sie entscheiden, ob Sie die Anfrage direkt senden oder per WhatsApp weitergeben moechten.",
+    "keywords": ["erst rechnen", "spaeter absenden", "whatsapp"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "process_006",
+    "category": "ablauf",
+    "question_variants": ["Was wenn Angaben unvollstaendig sind?", "Kann ich mit wenig Infos anfragen?"],
+    "answer": "Je genauer die Angaben sind, desto besser kann der Aufwand eingeschaetzt werden. Wenn noch Details fehlen, ist trotzdem eine Anfrage moeglich, aber die wichtigsten Umzugsdaten helfen fuer eine gute Orientierung.",
+    "keywords": ["unvollstaendig", "angaben", "orientierung"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "general_007",
+    "category": "allgemein",
+    "question_variants": ["Macht ihr das komplett fuer mich?", "Uebernehmt ihr den Umzug komplett?"],
+    "answer": "Klarumzug24 unterstuetzt bei Planung, Transport und zusaetzlichen Leistungen rund um den Umzug. Welche Teile komplett uebernommen werden, richtet sich nach Ihrem konkreten Auftrag.",
+    "keywords": ["komplett", "uebernehmen", "auftrag"],
+    "source_page": "/index.html"
+  },
+  {
+    "id": "general_008",
+    "category": "allgemein",
+    "question_variants": ["Kann ich euch einfach schreiben was ich brauche?", "Reicht es wenn ich kurz meinen Fall erklaere?"],
+    "answer": "Ja, Sie koennen Ihren Fall kurz beschreiben. Fuer eine bessere Einschaetzung sind aber Angaben zu Strecke, Umfang, Zugangssituation und gewuenschten Zusatzleistungen hilfreich.",
+    "keywords": ["kurz beschreiben", "fall", "einschaetzung"],
+    "source_page": "/kontakt.html"
+  },
+  {
+    "id": "price_011",
+    "category": "preise",
+    "question_variants": ["Warum fragt ihr nach dem Stockwerk?", "Wieso ist das Stockwerk wichtig?"],
+    "answer": "Das Stockwerk ist wichtig, weil es den Trageaufwand und die Planung beeinflussen kann. Besonders ohne Aufzug kann sich das deutlich auf den Aufwand auswirken.",
+    "keywords": ["stockwerk", "trageaufwand", "aufzug"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "price_012",
+    "category": "preise",
+    "question_variants": ["Zaehlt der Weg von der Wohnung bis zum Auto?", "Ist die Distanz bis zum Transporter wichtig?"],
+    "answer": "Ja, auch der Weg zwischen Wohnung und Fahrzeug ist fuer die Einschaetzung relevant. Längere Laufwege koennen den Aufwand erhoehen.",
+    "keywords": ["wohnung auto", "transporter", "laufwege"],
+    "source_page": "/agb.html"
+  },
+  {
+    "id": "price_013",
+    "category": "preise",
+    "question_variants": ["Warum ist meine Schaetzung nur ungefaehr?", "Wieso bekommt man keinen festen Preis direkt im Chat?"],
+    "answer": "Eine erste Schaetzung kann nur auf den bisher vorliegenden Angaben beruhen. Ein verbindlicher Preis braucht eine genauere Grundlage als eine allgemeine Chat-Anfrage.",
+    "keywords": ["ungefaehr", "chat", "verbindlicher preis"],
+    "source_page": "/agb.html"
+  },
+  {
+    "id": "price_014",
+    "category": "preise",
+    "question_variants": ["Muss ich alle Sonderfaelle angeben?", "Soll ich besondere Sachen wegen dem Preis nennen?"],
+    "answer": "Ja, besondere Gegenstaende, schwierige Zugangswege oder Zusatzleistungen sollten moeglichst frueh genannt werden. Sie koennen den Aufwand und damit die Einschaetzung beeinflussen.",
+    "keywords": ["sonderfaelle", "besondere sachen", "einschaetzung"],
+    "source_page": "/agb.html"
+  },
+  {
+    "id": "service_013",
+    "category": "service",
+    "question_variants": ["Macht ihr auch nur einen kleinen Umzug?", "Koennt ihr auch bei wenig Sachen helfen?"],
+    "answer": "Ja, auch kleinere Umzuege oder Teilumzuege koennen angefragt werden. Entscheidend ist, dass der Bedarf moeglichst klar beschrieben wird.",
+    "keywords": ["kleiner umzug", "wenig sachen", "teilumzug"],
+    "source_page": "/ueber-uns.html"
+  },
+  {
+    "id": "service_014",
+    "category": "service",
+    "question_variants": ["Kann ich nur Verpackung buchen?", "Geht auch nur Einpackservice?"],
+    "answer": "Verpackungsservice gehoert zu den moeglichen Zusatzleistungen. Ob er einzeln oder in Kombination sinnvoll ist, sollte direkt mit den Umzugsdetails angefragt werden.",
+    "keywords": ["nur verpackung", "einpackservice", "zusatzleistung"],
+    "source_page": "/agb.html"
+  },
+  {
+    "id": "service_015",
+    "category": "service",
+    "question_variants": ["Kann ich nur Entsorgung buchen?", "Geht nur alte Moebel wegbringen?"],
+    "answer": "Entsorgung wird als moegliche Zusatzleistung genannt. Fuer reine Entsorgungs- oder Abholfaelle ist eine direkte Anfrage mit den wichtigsten Details sinnvoll.",
+    "keywords": ["nur entsorgung", "wegbringen", "alte moebel"],
+    "source_page": "/agb.html"
+  },
+  {
+    "id": "service_016",
+    "category": "service",
+    "question_variants": ["Macht ihr auch Wochenendumzuege?", "Geht ein Umzug am Wochenende?"],
+    "answer": "Ob ein Wunschtermin verfuegbar ist, haengt von der Planung und Auslastung ab. Solche Terminwuensche sollten direkt angefragt werden.",
+    "keywords": ["wochenende", "wunschtermin", "verfuegbar"],
+    "source_page": "/kontakt.html"
+  },
+  {
+    "id": "service_017",
+    "category": "service",
+    "question_variants": ["Geht auch kurzfristig morgen?", "Kann ich sehr spontan anfragen?"],
+    "answer": "Kurzfristige und Express-Anfragen sind grundsaetzlich moeglich, aber von der Verfuegbarkeit abhaengig. Am besten wird so ein Fall direkt und moeglichst schnell angefragt.",
+    "keywords": ["morgen", "spontan", "express", "kurzfristig"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "kueche_007",
+    "category": "kueche",
+    "question_variants": ["Muss ich bei der Kueche Fotos schicken?", "Sind Bilder von der Kueche hilfreich?"],
+    "answer": "Bei Kuechen koennen Bilder und genaue Beschreibungen sehr hilfreich sein. Sie erleichtern die Einschaetzung von Aufbau, Abbau und moeglichen Besonderheiten.",
+    "keywords": ["kueche", "bilder", "beschreibung"],
+    "source_page": "/kontakt.html"
+  },
+  {
+    "id": "kueche_008",
+    "category": "kueche",
+    "question_variants": ["Ist Kueche komplizierter als normale Moebel?", "Warum soll ich die Kueche extra erwaehnen?"],
+    "answer": "Ja, Kuechen sind meist aufwendiger als normale Einzelmoebel, weil sie haeufig aus mehreren Teilen bestehen und der Aufbau von den Gegebenheiten vor Ort abhaengen kann.",
+    "keywords": ["kueche", "kompliziert", "mehrere teile", "vor ort"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "kueche_009",
+    "category": "kueche",
+    "question_variants": ["Kann ich nur den Abbau der Kueche machen lassen?", "Nur Kueche abbauen ohne Aufbau moeglich?"],
+    "answer": "Ja, Kuechenabbau und Kuechenaufbau koennen getrennt angegeben werden. Dadurch kann die Anfrage genau auf Ihren Bedarf abgestimmt werden.",
+    "keywords": ["nur abbau", "kuechenabbau", "getrennt"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "kueche_010",
+    "category": "kueche",
+    "question_variants": ["Kann ich nur den Aufbau der Kueche buchen?", "Nur Kueche aufbauen lassen geht das?"],
+    "answer": "Kuechenaufbau kann als eigene Zusatzleistung angegeben werden. Fuer eine passende Einschaetzung helfen moeglichst genaue Angaben zur vorhandenen Kueche und zur Situation am Zielort.",
+    "keywords": ["nur aufbau", "kuechenaufbau", "zielort"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "geraete_008",
+    "category": "geraete",
+    "question_variants": ["Ist die Waschmaschine ein Problem?", "Sind schwere Geraete schwierig?"],
+    "answer": "Schwere Geraete wie Waschmaschinen sollten auf jeden Fall in der Anfrage genannt werden. So kann der Aufwand realistischer geplant werden.",
+    "keywords": ["schwere geraete", "waschmaschine", "planung"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "geraete_009",
+    "category": "geraete",
+    "question_variants": ["Soll der Kuehlschrank vorher leer sein?", "Muss ich den Kuehlschrank vorbereiten?"],
+    "answer": "Ja, vor dem Transport sollte der Kuehlschrank leer und passend vorbereitet sein. So wird der Transport sicherer und einfacher planbar.",
+    "keywords": ["kuehlschrank", "leer", "vorbereiten"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "geraete_010",
+    "category": "geraete",
+    "question_variants": ["Soll ich sagen wenn ein Geraet empfindlich ist?", "Muss ich empfindliche Elektronik extra nennen?"],
+    "answer": "Ja, empfindliche oder besonders schutzbeduerftige Geraete sollten immer zusaetzlich genannt werden. Das hilft bei Verpackung und Planung.",
+    "keywords": ["empfindliche elektronik", "extra nennen", "schutz"],
+    "source_page": "/agb.html"
+  },
+  {
+    "id": "geraete_011",
+    "category": "geraete",
+    "question_variants": ["Kann ich nur Fernseher transportieren lassen?", "Geht auch TV-Transport allein?"],
+    "answer": "Einzeltransporte koennen grundsaetzlich angefragt werden. Bei empfindlichen Geraeten wie Fernsehern sind genaue Angaben zum Umfang und zur Verpackung besonders sinnvoll.",
+    "keywords": ["fernseher", "tv", "einzeltransport"],
+    "source_page": "/ueber-uns.html"
+  },
+  {
+    "id": "moebel_006",
+    "category": "moebel",
+    "question_variants": ["Was ist mit grossen Schraenken?", "Soll ich grosse Schrankwaende extra nennen?"],
+    "answer": "Ja, grosse oder sperrige Moebel wie Schrankwaende sollten moeglichst genau in der Anfrage beschrieben werden. Sie koennen Aufbau, Trageaufwand und Planung deutlich beeinflussen.",
+    "keywords": ["schrankwaende", "sperrig", "planung"],
+    "source_page": "/agb.html"
+  },
+  {
+    "id": "moebel_007",
+    "category": "moebel",
+    "question_variants": ["Muss ich alle Moebel einzeln aufzahlen?", "Soll ich die grossen Moebel nennen?"],
+    "answer": "Nicht jedes kleine Teil muss einzeln beschrieben werden, aber groessere, schwere oder besondere Moebel sollten moeglichst genannt werden. Das verbessert die Einschaetzung.",
+    "keywords": ["moebel einzeln", "grosse moebel", "einschaetzung"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "moebel_008",
+    "category": "moebel",
+    "question_variants": ["Macht ihr auch Bett abbauen und aufbauen?", "Koennt ihr Schlafzimmermoebel montieren?"],
+    "answer": "Moebelmontage und -demontage gehoeren zu den moeglichen Zusatzleistungen. Solche Wuensche sollten in der Anfrage oder im Rechner passend angegeben werden.",
+    "keywords": ["bett", "schlafzimmer", "montage", "demontage"],
+    "source_page": "/agb.html"
+  },
+  {
+    "id": "special_006",
+    "category": "spezialstuecke",
+    "question_variants": ["Kann ich ein sehr schweres Teil anfragen?", "Geht auch etwas besonders Schweres?"],
+    "answer": "Besonders schwere oder ungewoehnliche Gegenstaende sollten immer direkt und moeglichst genau angefragt werden. Solche Faelle brauchen eine sorgfaeltige Einschaetzung.",
+    "keywords": ["sehr schwer", "ungewoehnlich", "genau anfragen"],
+    "source_page": "/agb.html"
+  },
+  {
+    "id": "special_007",
+    "category": "spezialstuecke",
+    "question_variants": ["Muss ich Spezialstuecke vorher sagen?", "Soll ich schwere und empfindliche Sachen vorher melden?"],
+    "answer": "Ja, Spezialstuecke sollten immer vorab genannt werden. Das ist wichtig fuer Planung, Sicherheit und eine realistische Aufwandseinschaetzung.",
+    "keywords": ["vorab", "spezialstuecke", "sicherheit"],
+    "source_page": "/agb.html"
+  },
+  {
+    "id": "zugang_009",
+    "category": "zugang",
+    "question_variants": ["Was wenn der Zugang eng ist?", "Soll ich enge Treppen oder schwierigen Zugang angeben?"],
+    "answer": "Ja, schwierige Zugangsbedingungen sollten in der Anfrage genannt werden. Solche Faktoren koennen den Trageaufwand und die Planung beeinflussen.",
+    "keywords": ["enger zugang", "treppen", "schwierige bedingungen"],
+    "source_page": "/agb.html"
+  },
+  {
+    "id": "zugang_010",
+    "category": "zugang",
+    "question_variants": ["Muss ich sagen wenn kein Aufzug da ist?", "Soll ich fehlenden Fahrstuhl extra angeben?"],
+    "answer": "Ja, ob ein Aufzug vorhanden ist oder nicht, ist fuer die Einschaetzung wichtig. Gerade ohne Aufzug kann der Aufwand deutlich hoeher sein.",
+    "keywords": ["kein aufzug", "fahrstuhl", "hoeherer aufwand"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "zugang_011",
+    "category": "zugang",
+    "question_variants": ["Ist Parken direkt vor der Tuer gut?", "Warum fragt ihr nach Parken vor der Tuer?"],
+    "answer": "Ja, Parken direkt vor der Tuer erleichtert die Durchfuehrung. Wenn das nicht moeglich ist, koennen Laufwege und Aufwand steigen.",
+    "keywords": ["parken vor der tuer", "laufwege", "aufwand"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "zugang_012",
+    "category": "zugang",
+    "question_variants": ["Was wenn ich keinen Parkplatz habe?", "Was wenn man schlecht parken kann?"],
+    "answer": "Fehlende oder schlechte Parkmoeglichkeiten sollten fruehzeitig genannt werden. Je nach Situation koennen dadurch zusaetzliche Aufwaende oder eine Halteverbotszone relevant werden.",
+    "keywords": ["kein parkplatz", "schlecht parken", "halteverbotszone"],
+    "source_page": "/agb.html"
+  },
+  {
+    "id": "vorbereitung_006",
+    "category": "vorbereitung",
+    "question_variants": ["Was soll ich euch vorab schicken?", "Welche Infos helfen euch vor dem Umzug am meisten?"],
+    "answer": "Besonders hilfreich sind Angaben zu Strecke, Wohnungsgröße, Etagen, Aufzug, grossen oder schweren Gegenstaenden und gewuenschten Zusatzleistungen. Bei speziellen Faellen helfen auch Fotos.",
+    "keywords": ["vorab schicken", "infos", "fotos", "zusatzleistungen"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "vorbereitung_007",
+    "category": "vorbereitung",
+    "question_variants": ["Soll ich die genaue Strecke wissen?", "Was wenn ich die Kilometer nicht genau kenne?"],
+    "answer": "Eine ungefaehre Strecke hilft fuer die erste Einschaetzung schon weiter. Wenn noch nicht alles exakt feststeht, sollten Sie zumindest die wichtigsten Eckdaten nennen.",
+    "keywords": ["strecke", "kilometer", "ungefaehr", "eckdaten"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "vorbereitung_008",
+    "category": "vorbereitung",
+    "question_variants": ["Muss ich alles perfekt vorbereitet haben um anzufragen?", "Kann ich auch anfragen wenn noch nicht alles feststeht?"],
+    "answer": "Ja, eine Anfrage ist auch moeglich, wenn noch nicht jedes Detail feststeht. Fuer eine bessere Orientierung helfen aber moeglichst klare Grundangaben.",
+    "keywords": ["nicht alles fest", "anfragen", "grundangaben"],
+    "source_page": "/kontakt.html"
+  },
+  {
+    "id": "vorbereitung_009",
+    "category": "vorbereitung",
+    "question_variants": ["Soll ich sagen wenn etwas sehr empfindlich ist?", "Muss ich empfindliche Sachen vorher melden?"],
+    "answer": "Ja, empfindliche oder besonders wertvolle Gegenstaende sollten klar genannt oder gekennzeichnet werden. Das wird auch in den AGB empfohlen.",
+    "keywords": ["empfindlich", "wertvoll", "vorher melden"],
+    "source_page": "/agb.html"
+  },
+  {
+    "id": "booking_010",
+    "category": "anfrage",
+    "question_variants": ["Kann ich erst per WhatsApp schreiben und spaeter buchen?", "Geht erst WhatsApp und dann Anfrage?"],
+    "answer": "Ja, WhatsApp ist ein vorgesehener Kontaktweg. Sie koennen dort erste Infos senden und spaeter die Anfrage weiter konkretisieren.",
+    "keywords": ["whatsapp", "spaeter buchen", "erste infos"],
+    "source_page": "/index.html"
+  },
+  {
+    "id": "booking_011",
+    "category": "anfrage",
+    "question_variants": ["Kann ich auch nur fragen ohne direkt zu buchen?", "Geht erst eine Info-Anfrage?"],
+    "answer": "Ja, allgemeine Fragen und erste Rueckfragen sind moeglich. Fuer eine konkrete Einschaetzung oder Beauftragung werden spaeter genauere Angaben benoetigt.",
+    "keywords": ["info-anfrage", "rueckfrage", "nicht direkt buchen"],
+    "source_page": "/kontakt.html"
+  },
+  {
+    "id": "booking_012",
+    "category": "anfrage",
+    "question_variants": ["Kann ich meine Anfrage mit Foto und Text senden?", "Geht Anfrage mit Bild?"],
+    "answer": "Ja, auf der Kontaktseite koennen Sie eine Nachricht eingeben und optional ein Foto hochladen. Zusaetzlich koennen Bilder per WhatsApp gesendet werden.",
+    "keywords": ["foto", "bild", "nachricht", "whatsapp"],
+    "source_page": "/kontakt.html"
+  },
+  {
+    "id": "booking_013",
+    "category": "anfrage",
+    "question_variants": ["Braucht ihr Telefonnummer und E-Mail zusammen?", "Muss ich alle Kontaktdaten angeben?"],
+    "answer": "Fuer das direkte Senden der Anfrage werden auf der Website Name, Telefon und E-Mail abgefragt. Diese Daten helfen bei der Bearbeitung Ihrer Anfrage.",
+    "keywords": ["telefonnummer", "email", "kontaktdaten"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "booking_014",
+    "category": "anfrage",
+    "question_variants": ["Kann ich spaeter noch etwas zur Anfrage dazuschreiben?", "Wo gebe ich besondere Umzugsdetails an?"],
+    "answer": "Ja, auf der Website gibt es Felder fuer Hinweise und Nachrichten. Dort koennen Sie zusaetzliche Details oder Besonderheiten ergaenzen.",
+    "keywords": ["hinweise", "details", "nachricht"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "contact_008",
+    "category": "kontakt",
+    "question_variants": ["Was ist schneller, WhatsApp oder Formular?", "Wie erreiche ich euch am schnellsten?"],
+    "answer": "Beides ist moeglich. Fuer schnelle Rueckfragen oder Fotos ist WhatsApp oft praktisch, fuer formale Anfragen stehen Formular und E-Mail zur Verfuegung.",
+    "keywords": ["schneller kontakt", "whatsapp", "formular", "email"],
+    "source_page": "/kontakt.html"
+  },
+  {
+    "id": "contact_009",
+    "category": "kontakt",
+    "question_variants": ["Kann ich euch einfach meine Nummer schicken?", "Reicht es wenn ich Kontaktdaten sende?"],
+    "answer": "Sie koennen Kontakt aufnehmen, aber fuer eine sinnvolle Rueckmeldung sind zusaetzlich ein paar Umzugsdetails hilfreich. Besonders wichtig sind Strecke, Umfang und gewuenschte Leistungen.",
+    "keywords": ["nummer schicken", "kontaktdaten", "umzugsdetails"],
+    "source_page": "/kontakt.html"
+  },
+  {
+    "id": "legal_012",
+    "category": "rechtliches",
+    "question_variants": ["Gebt ihr eine Garantie auf den Preis?", "Koennt ihr den Preis garantieren?"],
+    "answer": "Allgemeine Preisangaben und Rechnerwerte sind laut Website und AGB unverbindlich. Eine verbindliche Preiszusage sollte immer direkt und auf Basis genauer Auftragsdaten erfolgen.",
+    "keywords": ["garantie", "preis garantieren", "unverbindlich"],
+    "source_page": "/agb.html"
+  },
+  {
+    "id": "legal_013",
+    "category": "rechtliches",
+    "question_variants": ["Ist meine Online-Anfrage schon ein Vertrag?", "Bin ich nach dem Absenden schon gebunden?"],
+    "answer": "Die Website spricht bei Online-Angaben zunaechst von Anfrage und unverbindlicher Kostenschaetzung. Fuer rechtlich verbindliche Details sollten Sie sich an die konkreten Vertragsunterlagen und AGB halten.",
+    "keywords": ["vertrag", "absenden", "unverbindliche anfrage"],
+    "source_page": "/agb.html"
+  },
+  {
+    "id": "legal_014",
+    "category": "rechtliches",
+    "question_variants": ["Duerft ihr meine Daten an Dritte geben?", "Werden meine Daten weitergegeben?"],
+    "answer": "In der Datenschutzerklaerung steht, dass die Daten zur Bearbeitung der Anfrage und moeglicher Auftragsabwicklung verwendet werden. Weitere Informationen stehen auf /datenschutz.html.",
+    "keywords": ["daten weitergeben", "dritte", "datenschutzerklaerung"],
+    "source_page": "/datenschutz.html"
+  },
+  {
+    "id": "process_007",
+    "category": "ablauf",
+    "question_variants": ["Wie laeuft das von Anfang bis Ende?", "Wie ist der normale Ablauf?"],
+    "answer": "Ueblich ist: erst die wichtigsten Umzugsdaten angeben, dann eine unverbindliche Preis-Schaetzung erhalten und danach bei Bedarf weitere Details ergaenzen und die Anfrage senden.",
+    "keywords": ["ablauf", "von anfang bis ende", "preis-schaetzung"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "process_008",
+    "category": "ablauf",
+    "question_variants": ["Kann ich Schritt fuer Schritt vorgehen?", "Muss ich alles auf einmal wissen?"],
+    "answer": "Ja, die Website ist genau dafuer aufgebaut. Sie koennen zuerst die wichtigsten Angaben machen und weitere Details anschliessend ergaenzen.",
+    "keywords": ["schritt fuer schritt", "weitere details", "nicht alles auf einmal"],
+    "source_page": "/umzugsrechner.html"
+  },
+  {
+    "id": "process_009",
+    "category": "ablauf",
+    "question_variants": ["Kann ich erst grob anfragen und spaeter genau?", "Geht zuerst grob und dann detailliert?"],
+    "answer": "Ja, eine grobe erste Anfrage ist moeglich. Fuer eine genauere Einschaetzung oder verbindlichere Abstimmung sollten spaeter weitere Details nachgereicht werden.",
+    "keywords": ["grob anfragen", "spaeter genau", "details nachreichen"],
+    "source_page": "/kontakt.html"
+  }
+]

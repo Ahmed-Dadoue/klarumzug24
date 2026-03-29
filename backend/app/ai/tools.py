@@ -1,7 +1,9 @@
 from collections.abc import Callable
+import logging
 from typing import Any
 
-from .schemas import MoveDetails, PriceEstimateResult
+from .logging_utils import log_chat_event, log_chat_exception
+from .schemas import ChatLanguage, MoveDetails, PriceEstimateResult
 
 
 def calculate_move_price(
@@ -9,6 +11,10 @@ def calculate_move_price(
     *,
     session_factory: Callable[[], Any],
     assigned_price_calculator: Callable[..., int],
+    logger: logging.Logger | None = None,
+    request_id: str | None = None,
+    conversation_id: str | None = None,
+    lang: ChatLanguage = "de",
 ) -> PriceEstimateResult:
     if not move_details.from_city or not move_details.to_city:
         raise ValueError("from_city and to_city are required")
@@ -19,6 +25,15 @@ def calculate_move_price(
 
     db = session_factory()
     try:
+        log_chat_event(
+            logger,
+            "chat_tool_started",
+            request_id=request_id,
+            conversation_id=conversation_id,
+            lang=lang,
+            tool="calculate_move_price",
+            success=None,
+        )
         baseline_price = int(
             assigned_price_calculator(
                 db,
@@ -30,9 +45,32 @@ def calculate_move_price(
                 express=False,
             )
         )
+    except Exception as exc:
+        log_chat_exception(
+            logger,
+            "chat_tool_failed",
+            request_id=request_id,
+            conversation_id=conversation_id,
+            lang=lang,
+            tool="calculate_move_price",
+            error_type=type(exc).__name__,
+            success=False,
+        )
+        raise
     finally:
         db.close()
 
+    log_chat_event(
+        logger,
+        "chat_tool_completed",
+        request_id=request_id,
+        conversation_id=conversation_id,
+        lang=lang,
+        tool="calculate_move_price",
+        price_min=baseline_price,
+        price_max=baseline_price,
+        success=True,
+    )
     return PriceEstimateResult(
         price_min=baseline_price,
         price_max=baseline_price,
