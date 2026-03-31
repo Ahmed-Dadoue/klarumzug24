@@ -1,32 +1,87 @@
-# Secrets
-backend/.env
+# ========================
+# Secrets & Environment
+# ========================
 .env
+backend/.env
+*.env.local
+*.env.production
+*.env.staging
+*.env.tmp
 
+# ========================
 # Python
+# ========================
 __pycache__/
 *.py[cod]
 *.pyo
 .venv/
 venv/
 *.egg-info/
+*.egg
+dist/
+build/
+.mypy_cache/
+.pytest_cache/
 
-# DB
+# ========================
+# Database
+# ========================
 *.db
 *.sqlite3
 *.db-journal
 
+# ========================
 # OS
+# ========================
 .DS_Store
 Thumbs.db
+Desktop.ini
 
-# Editor
+# ========================
+# Editor / IDE
+# ========================
 .vscode/settings.json
+.vscode/launch.json
+.idea/
 *.swp
+*.swo
+*~
 
-# Local test scripts
-test_dialogs.ps1
-
-# Runtime artifacts
+# ========================
+# Runtime, Logs & Reports
+# ========================
 *.log
+*.pid
 backend/reports/*.csv
 backend/reports/*.md
+backend/chat-conversion-report*.csv
+
+# ========================
+# Local scripts & temp
+# ========================
+test_dialogs.ps1
+*.save
+*.tmp
+
+# ========================
+# Server-side backups (created by deploy.sh)
+# ========================
+backups/
+*.backup.*
+backend/app/ai.backup.*
+
+# ========================
+# SSH keys & certificates (never commit)
+# ========================
+*.pem
+*.key
+id_rsa*
+id_ed25519*
+known_hosts
+
+# ========================
+# ML model artifacts
+# ========================
+*.pkl
+*.h5
+*.onnx

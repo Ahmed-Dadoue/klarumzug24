@@ -1,0 +1,14 @@
+scope,stage,count,rate,lang,page
+overall,chat_started,2,100.0,,
+overall,entered_price_flow,1,50.0,,
+overall,contact_intent,1,50.0,,
+overall,lead_created,1,50.0,,
+lang,chat_started,2,100.0,en,
+page,chat_started,1,50.0,,/kontakt-en.html
+page,chat_started,1,50.0,,/umzugsrechner-en.html
+lang,entered_price_flow,1,100.0,en,
+page,entered_price_flow,1,100.0,,/umzugsrechner-en.html
+lang,contact_intent,1,100.0,en,
+page,contact_intent,1,100.0,,/kontakt-en.html
+lang,lead_created,1,100.0,en,
+page,lead_created,1,100.0,,/kontakt-en.html

@@ -8,3 +8,6 @@ reports/*.csv
 reports/*.md
 .venv/
 venv/
+*.save
+*.tmp
+.env.tmp
