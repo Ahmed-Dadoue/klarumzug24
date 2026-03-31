@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import Boolean, Column, DateTime, Float, ForeignKey, Integer
 
@@ -17,4 +17,4 @@ class PricingRuleDB(Base):
     max_price_eur = Column(Float, nullable=False, default=120)
     express_multiplier = Column(Float, nullable=False, default=1.25)
     active = Column(Boolean, nullable=False, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))

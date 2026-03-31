@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import Boolean, Column, DateTime, Float, ForeignKey, Integer, String
 
@@ -24,4 +24,4 @@ class LeadDB(Base):
     company_id = Column(Integer, ForeignKey("companies.id"), nullable=True, index=True)
     status = Column(String(40), nullable=False, default="new")
     assigned_price_eur = Column(Integer, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))

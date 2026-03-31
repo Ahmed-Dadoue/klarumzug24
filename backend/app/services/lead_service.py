@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from fastapi import HTTPException
@@ -171,7 +171,7 @@ def _create_lead(
         validate_non_negative_int("rooms", rooms)
         validate_non_negative_float("distance_km", distance_km)
 
-        dedup_from = datetime.utcnow() - timedelta(hours=DEDUP_HOURS)
+        dedup_from = datetime.now(timezone.utc) - timedelta(hours=DEDUP_HOURS)
         duplicate = (
             db.query(LeadDB)
             .filter(LeadDB.phone == phone, LeadDB.created_at >= dedup_from)

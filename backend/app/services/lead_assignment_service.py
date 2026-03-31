@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from app.models import CompanyDB, LeadDB
 from app.services.pricing_service import calculate_assigned_price
@@ -27,7 +27,7 @@ def pick_company_for_lead(
         ).all()
     )
 
-    day_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+    day_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
 
     for company in companies:
         max_daily = company.max_leads_per_day or 0
@@ -92,7 +92,7 @@ def assign_lead_to_company(
     lead.company_id = company.id
     lead.status = "assigned"
     lead.assigned_price_eur = int(quoted_price or 0)
-    company.last_assigned_at = datetime.utcnow()
+    company.last_assigned_at = datetime.now(timezone.utc)
     if lead.id:
         event_type = (
             "lead_reassigned"

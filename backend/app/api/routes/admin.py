@@ -1,6 +1,6 @@
 import csv
 import io
-from datetime import datetime
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, Query
 from fastapi.responses import HTMLResponse, StreamingResponse
@@ -92,7 +92,7 @@ def export_leads_csv(
             writer.writerow({field: serialized.get(field) for field in LEAD_EXPORT_FIELDNAMES})
 
         csv_bytes = output.getvalue().encode("utf-8")
-        filename = f"klarumzug24-leads-{datetime.utcnow().strftime('%Y%m%d-%H%M%S')}.csv"
+        filename = f"klarumzug24-leads-{datetime.now(timezone.utc).strftime('%Y%m%d-%H%M%S')}.csv"
         return StreamingResponse(
             io.BytesIO(csv_bytes),
             media_type="text/csv",

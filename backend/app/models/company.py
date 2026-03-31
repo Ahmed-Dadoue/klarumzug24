@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import Boolean, Column, DateTime, Float, Integer, String
 
@@ -15,7 +15,7 @@ class CompanyDB(Base):
     daily_budget_eur = Column(Float, nullable=True)
     max_leads_per_day = Column(Integer, nullable=True)
     is_active = Column(Boolean, nullable=False, default=True)
-    last_assigned_at = Column(DateTime, nullable=True)
+    last_assigned_at = Column(DateTime(timezone=True), nullable=True)
     balance_eur = Column(Float, nullable=False, default=0)
     api_key = Column(String(120), nullable=True, unique=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
