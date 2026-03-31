@@ -48,54 +48,48 @@ jobs:
           fi
           echo "All required secrets are configured ✓"
 
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          # Verify host fingerprint against stored value
+          SCAN=$(ssh-keyscan -p ${{ secrets.SERVER_PORT || 22 }} ${{ secrets.SERVER_HOST }} 2>/dev/null)
+          echo "$SCAN" >> ~/.ssh/known_hosts
+          ACTUAL_FP=$(echo "$SCAN" | ssh-keygen -lf - 2>/dev/null | head -1 | awk '{print $2}')
+          echo "Server fingerprint: $ACTUAL_FP"
+          if [ -n "${{ secrets.SERVER_FINGERPRINT }}" ]; then
+            echo "${{ secrets.SERVER_FINGERPRINT }}" | grep -qF "$ACTUAL_FP" \
+              || { echo "::error::Fingerprint mismatch! Expected contains $ACTUAL_FP"; exit 1; }
+            echo "Fingerprint verified ✓"
+          fi
+
       - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER || 'root' }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_PORT || 22 }}
-          fingerprint: ${{ secrets.SERVER_FINGERPRINT }}
-          command_timeout: 5m
-          script: |
-            set -euo pipefail
+        run: |
+          ssh -i ~/.ssh/deploy_key -p ${{ secrets.SERVER_PORT || 22 }} \
+            ${{ secrets.SERVER_USER || 'root' }}@${{ secrets.SERVER_HOST }} \
+            'set -euo pipefail
             echo "=== Klarumzug24 Deployment ==="
             echo "Triggered by: ${{ github.actor }}"
             echo "Commit: ${{ github.sha }}"
-
             cd /opt/klarumzug24
-
-            # Run the deploy script
-            bash deploy.sh
+            bash deploy.sh'
 
       - name: Verify deployment
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER || 'root' }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_PORT || 22 }}
-          fingerprint: ${{ secrets.SERVER_FINGERPRINT }}
-          command_timeout: 2m
-          script: |
-            set -euo pipefail
+        run: |
+          ssh -i ~/.ssh/deploy_key -p ${{ secrets.SERVER_PORT || 22 }} \
+            ${{ secrets.SERVER_USER || 'root' }}@${{ secrets.SERVER_HOST }} \
+            'set -euo pipefail
             echo "=== Post-Deployment Verification ==="
-
-            # Check systemd service
             echo "Service status:"
             systemctl is-active klarumzug24-api
-
-            # Health check
             echo "Health check:"
             curl -sf http://127.0.0.1:8000/health | head -c 200
             echo ""
-
-            # Show current commit
             echo "Active commit:"
             cd /opt/klarumzug24 && git log --oneline -1
-
             echo ""
-            echo "=== Deployment verified ✓ ==="
+            echo "=== Deployment verified ✓ ==="'
 
       - name: Deployment summary
         if: always()
