@@ -9,8 +9,31 @@ Group=www-data
 WorkingDirectory=/opt/klarumzug24/backend
 EnvironmentFile=/opt/klarumzug24/backend/.env
 ExecStart=/opt/klarumzug24/backend/.venv/bin/uvicorn main:app --host 127.0.0.1 --port 8000 --workers 3
+
+# --- Restart policy ---
 Restart=always
 RestartSec=5
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+# --- Graceful shutdown ---
+TimeoutStopSec=30
+KillSignal=SIGTERM
+
+# --- Resource limits ---
+LimitNOFILE=4096
+# MemoryMax and MemoryHigh: uncomment after measuring actual usage
+# with: systemctl status klarumzug24-api  (RSS column)
+# 3 uvicorn workers + model loading can spike beyond 512M
+# MemoryMax=1G
+# MemoryHigh=768M
+
+# --- Security hardening ---
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/klarumzug24/backend /opt/klarumzug24/logs
+PrivateTmp=true
 
 [Install]
 WantedBy=multi-user.target
