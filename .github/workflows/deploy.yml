@@ -53,15 +53,26 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          # Add server to known_hosts
-          ssh-keyscan -p ${{ secrets.SERVER_PORT || 22 }} -T 10 ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
-          echo "Known hosts configured ✓"
+          cat > ~/.ssh/config <<EOF
+          Host deploy-target
+            HostName ${{ secrets.SERVER_HOST }}
+            User ${{ secrets.SERVER_USER || 'root' }}
+            Port ${{ secrets.SERVER_PORT || 22 }}
+            IdentityFile ~/.ssh/deploy_key
+            StrictHostKeyChecking no
+            UserKnownHostsFile /dev/null
+            LogLevel ERROR
+          EOF
+          chmod 600 ~/.ssh/config
+          echo "SSH config ready ✓"
+
+      - name: Test SSH connectivity
+        run: |
+          ssh deploy-target "echo 'SSH connection OK — $(hostname) — $(date -u)'"
 
       - name: Deploy via SSH
         run: |
-          ssh -i ~/.ssh/deploy_key -p ${{ secrets.SERVER_PORT || 22 }} \
-            ${{ secrets.SERVER_USER || 'root' }}@${{ secrets.SERVER_HOST }} \
-            'set -euo pipefail
+          ssh deploy-target 'set -euo pipefail
             echo "=== Klarumzug24 Deployment ==="
             echo "Triggered by: ${{ github.actor }}"
             echo "Commit: ${{ github.sha }}"
@@ -70,9 +81,7 @@ jobs:
 
       - name: Verify deployment
         run: |
-          ssh -i ~/.ssh/deploy_key -p ${{ secrets.SERVER_PORT || 22 }} \
-            ${{ secrets.SERVER_USER || 'root' }}@${{ secrets.SERVER_HOST }} \
-            'set -euo pipefail
+          ssh deploy-target 'set -euo pipefail
             echo "=== Post-Deployment Verification ==="
             echo "Service status:"
             systemctl is-active klarumzug24-api
