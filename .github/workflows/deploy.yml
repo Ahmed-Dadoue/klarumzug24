@@ -4,12 +4,12 @@
 # Deploys to production VPS on push to main branch.
 #
 # Required GitHub Secrets:
-#   SERVER_HOST        – VPS IP or hostname (e.g. 123.45.67.89)
-#   SERVER_USER        – SSH user (e.g. root or deploy)
-#   SERVER_SSH_KEY     – Private SSH key for authentication
-#   SERVER_PORT        – SSH port (optional, default 22)
-#   SERVER_FINGERPRINT – Server SSH fingerprint (ssh-keyscan output)
-#                        Get it with: ssh-keyscan -H YOUR_SERVER_IP
+#   SERVER_HOST    – VPS IP or hostname (e.g. 123.45.67.89)
+#   SERVER_USER    – SSH user (e.g. root or deploy)
+#   SERVER_SSH_KEY – Private SSH key for authentication
+#   SERVER_PORT    – SSH port (optional, default 22)
+#
+# SSH uses StrictHostKeyChecking=no (fingerprint verification disabled).
 # =============================================================================
 
 name: Deploy to Production

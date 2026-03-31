@@ -316,16 +316,11 @@ Push auf `main` → GitHub Actions verbindet per SSH → führt `deploy.sh` aus:
 | `SERVER_HOST` | VPS IP-Adresse oder Hostname | `123.45.67.89` |
 | `SERVER_USER` | SSH-Benutzer | `root` |
 | `SERVER_SSH_KEY` | Privater SSH-Schlüssel (vollständiger Inhalt) | `-----BEGIN OPENSSH...` |
-| `SERVER_PORT` | SSH-Port (optional) | `22` |
-| `SERVER_FINGERPRINT` | SSH-Fingerprint des Servers (MITM-Schutz) | `ssh-keyscan -H DEIN-SERVER` |
+| `SERVER_PORT` | SSH-Port (optional, Standard: 22) | `22` |
 
 Einrichtung: GitHub Repo → **Settings** → **Secrets and variables** → **Actions** → **New repository secret**
 
-**Fingerprint ermitteln:**
-```bash
-ssh-keyscan -H DEIN-SERVER-IP
-# Gesamte Ausgabe als Secret SERVER_FINGERPRINT eintragen
-```
+> **Hinweis:** SSH nutzt `StrictHostKeyChecking=no` — kein Fingerprint-Secret erforderlich.
 
 ### Server erstmalig einrichten
 
