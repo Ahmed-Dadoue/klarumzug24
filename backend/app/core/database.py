@@ -1,50 +1,49 @@
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 from .config import DATABASE_URL
 
-engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+_is_sqlite = DATABASE_URL.startswith("sqlite")
+
+_connect_args = {"check_same_thread": False} if _is_sqlite else {}
+engine = create_engine(DATABASE_URL, connect_args=_connect_args)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 Base = declarative_base()
+
+
+def _get_columns(conn, table_name: str) -> set[str]:
+    """Get column names for a table, works with both SQLite and PostgreSQL."""
+    insp = inspect(conn)
+    return {col["name"] for col in insp.get_columns(table_name)}
+
+
+def _add_column_if_missing(conn, table: str, column: str, col_type: str, columns: set[str]) -> None:
+    if column not in columns:
+        conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {column} {col_type}"))
 
 
 def ensure_schema() -> None:
     Base.metadata.create_all(bind=engine)
 
     with engine.begin() as conn:
-        lead_columns = {row[1] for row in conn.execute(text("PRAGMA table_info(leads)"))}
-        if "company_id" not in lead_columns:
-            conn.execute(text("ALTER TABLE leads ADD COLUMN company_id INTEGER"))
-        if "status" not in lead_columns:
-            conn.execute(text("ALTER TABLE leads ADD COLUMN status VARCHAR(40) DEFAULT 'new'"))
-        if "assigned_price_eur" not in lead_columns:
-            conn.execute(text("ALTER TABLE leads ADD COLUMN assigned_price_eur INTEGER"))
-        if "rooms" not in lead_columns:
-            conn.execute(text("ALTER TABLE leads ADD COLUMN rooms INTEGER"))
-        if "distance_km" not in lead_columns:
-            conn.execute(text("ALTER TABLE leads ADD COLUMN distance_km FLOAT"))
-        if "express" not in lead_columns:
-            conn.execute(text("ALTER TABLE leads ADD COLUMN express BOOLEAN DEFAULT 0"))
-        if "message" not in lead_columns:
-            conn.execute(text("ALTER TABLE leads ADD COLUMN message VARCHAR(5000)"))
-        if "photo_name" not in lead_columns:
-            conn.execute(text("ALTER TABLE leads ADD COLUMN photo_name VARCHAR(255)"))
-        if "accepted_agb" not in lead_columns:
-            conn.execute(text("ALTER TABLE leads ADD COLUMN accepted_agb BOOLEAN DEFAULT 0"))
-        if "accepted_privacy" not in lead_columns:
-            conn.execute(text("ALTER TABLE leads ADD COLUMN accepted_privacy BOOLEAN DEFAULT 0"))
+        lead_columns = _get_columns(conn, "leads")
+        _add_column_if_missing(conn, "leads", "company_id", "INTEGER", lead_columns)
+        _add_column_if_missing(conn, "leads", "status", "VARCHAR(40) DEFAULT 'new'", lead_columns)
+        _add_column_if_missing(conn, "leads", "assigned_price_eur", "INTEGER", lead_columns)
+        _add_column_if_missing(conn, "leads", "rooms", "INTEGER", lead_columns)
+        _add_column_if_missing(conn, "leads", "distance_km", "FLOAT", lead_columns)
+        _add_column_if_missing(conn, "leads", "express", "BOOLEAN DEFAULT false", lead_columns)
+        _add_column_if_missing(conn, "leads", "message", "VARCHAR(5000)", lead_columns)
+        _add_column_if_missing(conn, "leads", "photo_name", "VARCHAR(255)", lead_columns)
+        _add_column_if_missing(conn, "leads", "accepted_agb", "BOOLEAN DEFAULT false", lead_columns)
+        _add_column_if_missing(conn, "leads", "accepted_privacy", "BOOLEAN DEFAULT false", lead_columns)
         conn.execute(text("UPDATE leads SET status = 'new' WHERE status IS NULL OR status = ''"))
-        conn.execute(text("UPDATE leads SET express = 0 WHERE express IS NULL"))
-        conn.execute(text("UPDATE leads SET accepted_agb = 0 WHERE accepted_agb IS NULL"))
-        conn.execute(text("UPDATE leads SET accepted_privacy = 0 WHERE accepted_privacy IS NULL"))
+        conn.execute(text("UPDATE leads SET express = false WHERE express IS NULL"))
+        conn.execute(text("UPDATE leads SET accepted_agb = false WHERE accepted_agb IS NULL"))
+        conn.execute(text("UPDATE leads SET accepted_privacy = false WHERE accepted_privacy IS NULL"))
 
-        company_columns = {
-            row[1] for row in conn.execute(text("PRAGMA table_info(companies)"))
-        }
-        if "last_assigned_at" not in company_columns:
-            conn.execute(text("ALTER TABLE companies ADD COLUMN last_assigned_at DATETIME"))
-        if "balance_eur" not in company_columns:
-            conn.execute(text("ALTER TABLE companies ADD COLUMN balance_eur FLOAT DEFAULT 0"))
-        if "api_key" not in company_columns:
-            conn.execute(text("ALTER TABLE companies ADD COLUMN api_key VARCHAR(120)"))
+        company_columns = _get_columns(conn, "companies")
+        _add_column_if_missing(conn, "companies", "last_assigned_at", "TIMESTAMP", company_columns)
+        _add_column_if_missing(conn, "companies", "balance_eur", "FLOAT DEFAULT 0", company_columns)
+        _add_column_if_missing(conn, "companies", "api_key", "VARCHAR(120)", company_columns)
         conn.execute(text("UPDATE companies SET balance_eur = 0 WHERE balance_eur IS NULL"))
