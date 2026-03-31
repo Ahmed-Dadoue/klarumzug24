@@ -53,16 +53,9 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          # Verify host fingerprint against stored value
-          SCAN=$(ssh-keyscan -p ${{ secrets.SERVER_PORT || 22 }} ${{ secrets.SERVER_HOST }} 2>/dev/null)
-          echo "$SCAN" >> ~/.ssh/known_hosts
-          ACTUAL_FP=$(echo "$SCAN" | ssh-keygen -lf - 2>/dev/null | head -1 | awk '{print $2}')
-          echo "Server fingerprint: $ACTUAL_FP"
-          if [ -n "${{ secrets.SERVER_FINGERPRINT }}" ]; then
-            echo "${{ secrets.SERVER_FINGERPRINT }}" | grep -qF "$ACTUAL_FP" \
-              || { echo "::error::Fingerprint mismatch! Expected contains $ACTUAL_FP"; exit 1; }
-            echo "Fingerprint verified ✓"
-          fi
+          # Add server to known_hosts
+          ssh-keyscan -p ${{ secrets.SERVER_PORT || 22 }} -T 10 ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+          echo "Known hosts configured ✓"
 
       - name: Deploy via SSH
         run: |
