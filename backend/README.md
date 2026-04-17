@@ -20,7 +20,7 @@ Klarumzug24 ist ein modernes B2B2C-System zur Umzugspreiskalkulierung und Lead-G
 | **Backend-Framework** | FastAPI 0.115+ (Python 3.11) |
 | **Datenbank** | SQLite (Entwicklung), PostgreSQL 3.1+ (Produktion) |
 | **ORM** | SQLAlchemy 2.0+ |
-| **AI/LLM** | OpenAI GPT-4o-mini (Dode Assistant) |
+| **AI/LLM** | OpenAI GPT-4.1-mini (Dode Assistant) |
 | **Server** | Uvicorn 0.30+ |
 | **Containerisierung** | Docker, Docker Compose |
 | **E-Mail** | SMTP (Hostinger SSL 465) |
@@ -129,24 +129,74 @@ backend/
 │   │
 │   ├── ai/                           # AI/LLM Integration
 │   │   ├── __init__.py
-│   │   ├── agent.py                  # Dode Chat Agent Logik
+│   │   ├── agent.py                  # Dode Chat Agent (OpenAI Responses API)
 │   │   ├── tools.py                  # Backend-Tool Integration
-│   │   ├── prompts.py                # System Prompts
+│   │   ├── prompts.py                # System Prompts (v1)
+│   │   ├── prompts_v2.py             # System Prompts (v2, Service-aware)
 │   │   ├── schemas.py                # Pydantic Datenmodelle
-│   │   ├── faq_store.py              # FAQ Knowledge Base
+│   │   ├── pricing_calculator.py     # Regelbasierte Preisberechnung
+│   │   ├── pricing_tool.py           # Pricing-Tool Orchestrierung
+│   │   ├── intent_classifier.py      # Strukturierte Intent-Erkennung
+│   │   ├── faq_store.py              # FAQ Knowledge Base (DE/EN)
+│   │   ├── services.py               # Service-Typ-Erkennung
 │   │   ├── logging_utils.py          # Event Logging & Analytics
 │   │   └── knowledge/                # FAQ Wissensdatenbanken
-│   │       └── faq_de.json
+│   │       ├── faq_de.json           # Deutsche FAQ
+│   │       └── faq_en.json           # Englische FAQ
 │   │
-│   └── services/                     # Business Services
-│       ├── __init__.py
-│       └── emailer.py                # SMTP E-Mail Versand
+│   ├── api/                          # REST API Layer
+│   │   ├── __init__.py
+│   │   ├── dependencies.py           # Dependency Injection
+│   │   ├── error_handlers.py         # Fehlerbehandlung
+│   │   └── routes/
+│   │       ├── admin.py              # Admin-Dashboard
+│   │       ├── chat.py               # Chat-Interaktion
+│   │       ├── companies.py          # Unternehmens-Verwaltung
+│   │       ├── company_portal.py     # Unternehmens-Portal
+│   │       ├── health.py             # Health Check
+│   │       ├── leads.py              # Lead-Management
+│   │       ├── pricing.py            # Preis-Endpoints
+│   │       └── transactions.py       # Transaktionen
+│   │
+│   ├── models/                       # SQLAlchemy ORM Modelle
+│   │   ├── company.py                # Unternehmen
+│   │   ├── lead.py                   # Leads
+│   │   ├── lead_event.py             # Lead-Status-Events
+│   │   ├── pricing_rule.py           # Preisregeln
+│   │   ├── transaction.py            # Transaktionen
+│   │   └── chat_submission.py        # Chat-Nachrichten
+│   │
+│   ├── schemas/                      # Pydantic Validierung
+│   │   ├── chat.py
+│   │   ├── companies.py
+│   │   ├── leads.py
+│   │   └── pricing.py
+│   │
+│   ├── services/                     # Business Services
+│   │   ├── chat_service.py           # Chat-Orchestrierung
+│   │   ├── chat_booking_service.py   # Chat-to-Booking Flow
+│   │   ├── lead_service.py           # Lead CRUD
+│   │   ├── lead_assignment_service.py# Round-Robin Verteilung
+│   │   ├── pricing_service.py        # Preisberechnung
+│   │   └── emailer.py                # SMTP E-Mail-Versand
+│   │
+│   ├── core/                         # Konfiguration & Sicherheit
+│   │   ├── config.py                 # Zentrale Konfiguration
+│   │   ├── database.py               # Datenbankverbindung
+│   │   ├── security.py               # Authentifizierung
+│   │   └── serialization.py          # Serialisierung
+│   │
+│   └── utils/                        # Hilfsfunktionen
+│       ├── masking.py                # PII-Maskierung
+│       ├── normalization.py          # Daten-Normalisierung
+│       ├── parsing.py                # NLP-Parsing
+│       └── validation.py             # Input-Validierung
 │
 ├── deploy/
 │   ├── nginx/
-│   │   └── api.klarumzug24.de.conf   # Nginx Reverse Proxy Config
+│   │   └── api.klarumzug24.de.conf  # Nginx Reverse Proxy Config
 │   └── systemd/
-│       └── klarumzug24-api.service   # Systemd Service File
+│       └── klarumzug24-api.service  # Systemd Service File
 │
 └── klarumzug.db                      # SQLite DB (dev only)
 ```
@@ -210,7 +260,7 @@ MAIL_FROM=info@klarumzug24.de
 
 # === DODE AI CHATBOT ===
 OPENAI_API_KEY=YOUR_OPENAI_API_KEY
-DODE_MODEL=gpt-4o-mini
+DODE_MODEL=gpt-4.1-mini
 DODE_MAX_MESSAGES=12
 DODE_MAX_OUTPUT_TOKENS=220
 ```
@@ -424,10 +474,24 @@ Dode ist der intelligente, mehrsprachige Chat-Assistent für Kunden:
 
 - **Natürlichsprachige Interaktion**: Konversatives Interface ohne Formulare
 - **Strukturdatenextraktion**: Erkennt Umzugsdetails aus freien Texten (Städte, Zimmer, Entfernungen)
+- **Intent-Erkennung**: Dedizierter Intent-Classifier für strukturierte Absichtserkennung
+- **Service-Typ-Erkennung**: Unterscheidet Umzug, Entrümpelung, Transport etc.
 - **Intelligent Pricing**: Ruft Backend-Preislogik auf (NICHT erfunden)
-- **FAQ Integration**: Zugriff auf Wissensdatenbank
+- **FAQ Integration**: Zugriff auf zweisprachige Wissensdatenbank (DE/EN)
 - **Multi-Language**: Deutsch und Englisch
 - **Audit Trail**: Alle Interaktionen werden geloggt
+
+### KI-Architektur (v2)
+
+| Modul | Funktion |
+|-------|----------|
+| `agent.py` | Chat-Agent Orchestrierung & OpenAI Responses API |
+| `prompts_v2.py` | Service-aware System Prompts |
+| `intent_classifier.py` | Strukturierte Intent-Erkennung |
+| `pricing_calculator.py` | Regelbasierte Preisberechnung |
+| `pricing_tool.py` | Pricing-Tool Orchestrierung |
+| `faq_store.py` | FAQ-Wissensdatenbank (DE/EN) |
+| `services.py` | Service-Typ-Erkennung |
 
 ### Gesprächsablauf
 

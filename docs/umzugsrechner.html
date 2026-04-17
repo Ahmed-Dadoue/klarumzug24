@@ -818,6 +818,77 @@
 
     throw lastError || new Error("API nicht erreichbar");
   }
+  async function fetchMoveEstimate(payload) {
+    const endpoints = ["/api/move-estimate", "https://api.klarumzug24.de/api/move-estimate"];
+    if (isLocalHost) {
+      endpoints.unshift("http://127.0.0.1:8000/api/move-estimate");
+    }
+
+    let lastError = null;
+
+    for (const endpoint of endpoints) {
+      try {
+        const response = await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        let data = null;
+        try {
+          data = await response.json();
+        } catch (_) {
+          data = null;
+        }
+
+        if (!response.ok || data?.ok === false) {
+          throw new Error(data?.message || ("HTTP " + response.status));
+        }
+
+        return data?.data || data;
+      } catch (error) {
+        lastError = error;
+      }
+    }
+
+    throw lastError || new Error("Preisdienst nicht erreichbar");
+  }
+  function getEstimatePayload() {
+    return {
+      qm: getNonNegativeNumber("qm"),
+      rooms: getNonNegativeNumber("zimmer"),
+      haustyp: document.getElementById("haustyp").value,
+      stockwerk: getNonNegativeNumber("stockwerk"),
+      fahrstuhl: document.getElementById("fahrstuhl").value === "1",
+      walking_distance_m: getNonNegativeNumber("distanz"),
+      distance_km: getNonNegativeNumber("entfernung"),
+      kartons: getNonNegativeNumber("kartons"),
+      schraenke: getNonNegativeNumber("schraenke"),
+      betten: getNonNegativeNumber("betten"),
+      sofas: getNonNegativeNumber("sofas"),
+      tische: getNonNegativeNumber("tische"),
+      stuehle: getNonNegativeNumber("stuehle"),
+      waschmaschine: getNonNegativeNumber("waschmaschine"),
+      kuehlschrank: getNonNegativeNumber("kuehlschrank"),
+      fernseher: getNonNegativeNumber("fernseher"),
+      aquarium: document.getElementById("aquarium").value === "1",
+      klavier: document.getElementById("klavier").value === "1",
+      tresor: document.getElementById("tresor").value === "1",
+      keller: document.getElementById("keller").value === "1",
+      dachboden: document.getElementById("dachboden").value === "1",
+      balkon: document.getElementById("balkon").value === "1",
+      garage: document.getElementById("garage").value === "1",
+      halteverbot: document.getElementById("halteverbot").value === "1",
+      parken: document.getElementById("parken").value === "1",
+      montage: document.getElementById("montage").value === "1",
+      kueche_ab: document.getElementById("kueche_ab").value === "1",
+      kueche_auf: document.getElementById("kueche_auf").value === "1",
+      einpack: document.getElementById("einpack").value === "1",
+      auspack: document.getElementById("auspack").value === "1",
+      entsorgung: document.getElementById("entsorgung").value === "1",
+      express: document.getElementById("express").value === "1",
+    };
+  }
   function getFormDataText() {
     return `
 Umzugsanfrage - Klarumzug24
@@ -922,7 +993,7 @@ ${document.getElementById("hinweise").value.trim() || "-"}
       directSendButton.innerHTML = originalLabel;
     }
   }
-  function berechnen() {
+  async function berechnen() {
     const requiredFieldIds = ["qm", "zimmer", "stockwerk", "distanz", "entfernung", "kartons", "schraenke"];
     const firstMissing = requiredFieldIds.find((id) => !document.getElementById(id).value.trim());
     if (firstMissing) {
@@ -931,130 +1002,36 @@ ${document.getElementById("hinweise").value.trim() || "-"}
       return;
     }
 
-    const qm = getNonNegativeNumber("qm");
-    const zimmer = getNonNegativeNumber("zimmer");
-    const haustyp = document.getElementById("haustyp").value;
-    const keller = Number(document.getElementById("keller").value);
-    const dachboden = Number(document.getElementById("dachboden").value);
-    const balkon = Number(document.getElementById("balkon").value);
-    const garage = Number(document.getElementById("garage").value);
+    try {
+      const estimate = await fetchMoveEstimate(getEstimatePayload());
+      const rabattcode = document.getElementById("rabattcode").value.trim();
+      const rabattHinweis = rabattcode
+        ? " Rabattcodes werden aktuell nicht automatisch online verrechnet und muessen direkt geprueft werden."
+        : "";
+      document.getElementById("ergebnis").textContent =
+        "Geschaetzter Preis: " + estimate.price_min_eur + " EUR - " + estimate.price_max_eur + " EUR";
 
-    const stockwerk = getNonNegativeNumber("stockwerk");
-    const fahrstuhl = Number(document.getElementById("fahrstuhl").value);
-    const distanz = getNonNegativeNumber("distanz");
-    const entfernung = getNonNegativeNumber("entfernung");
-    const halteverbot = Number(document.getElementById("halteverbot").value);
-    const parken = Number(document.getElementById("parken").value);
+      document.getElementById("zusatzinfo").textContent =
+        estimate.explanation + rabattHinweis + " Dies ist eine unverbindliche Schaetzung. Fuer ein verbindliches Angebot kontaktieren Sie uns bitte direkt.";
 
-    const kartons = getNonNegativeNumber("kartons");
-    const schraenke = getNonNegativeNumber("schraenke");
-    const betten = getNonNegativeNumber("betten");
-    const sofas = getNonNegativeNumber("sofas");
-    const tische = getNonNegativeNumber("tische");
-    const stuehle = getNonNegativeNumber("stuehle");
+      document.getElementById("resultPanel").classList.add("is-visible");
+      setActionButtonsEnabled(true);
 
-    const waschmaschine = getNonNegativeNumber("waschmaschine");
-    const kuehlschrank = getNonNegativeNumber("kuehlschrank");
-    const fernseher = getNonNegativeNumber("fernseher");
-    const aquarium = Number(document.getElementById("aquarium").value);
-    const klavier = Number(document.getElementById("klavier").value);
-    const tresor = Number(document.getElementById("tresor").value);
+      const hasContactValues =
+        document.getElementById("name").value.trim() &&
+        document.getElementById("telefon").value.trim() &&
+        document.getElementById("email").value.trim();
 
-    const montage = Number(document.getElementById("montage").value);
-    const kueche_ab = Number(document.getElementById("kueche_ab").value);
-    const kueche_auf = Number(document.getElementById("kueche_auf").value);
-    const einpack = Number(document.getElementById("einpack").value);
-    const auspack = Number(document.getElementById("auspack").value);
-    const entsorgung = Number(document.getElementById("entsorgung").value);
+      if (hasContactValues) {
+        setLeadHint("Ihre Schaetzung ist bereit. Sie koennen die Anfrage jetzt senden.", "text-info");
+      } else {
+        setLeadHint("Preis berechnet. Tragen Sie jetzt Ihre Kontaktdaten ein und bestaetigen Sie AGB und Datenschutz.", "text-info");
+      }
 
-    const rabattcode = document.getElementById("rabattcode").value.trim().toUpperCase();
-    const express = Number(document.getElementById("express").value);
-
-    let preis = 0;
-
-    preis += qm * 4;
-    preis += zimmer * 20;
-
-    if (haustyp === "haus") preis += 80;
-    if (haustyp === "reihenhaus") preis += 40;
-
-    preis += keller * 40;
-    preis += dachboden * 40;
-    preis += balkon * 20;
-    preis += garage * 20;
-
-    preis += stockwerk * 10;
-    preis += distanz * 0.5;
-    preis += entfernung * 1.2;
-
-    if (fahrstuhl === 0) preis += 50;
-    if (halteverbot === 1) preis += 60;
-    if (parken === 0) preis += 30;
-
-    preis += kartons * 1.5;
-    preis += schraenke * 15;
-    preis += betten * 20;
-    preis += sofas * 25;
-    preis += tische * 10;
-    preis += stuehle * 3;
-
-    preis += waschmaschine * 25;
-    preis += kuehlschrank * 25;
-    preis += fernseher * 10;
-
-    if (aquarium === 1) preis += 80;
-    if (klavier === 1) preis += 150;
-    if (tresor === 1) preis += 120;
-
-    if (montage === 1) preis += 80;
-    if (kueche_ab === 1) preis += 120;
-    if (kueche_auf === 1) preis += 150;
-    if (einpack === 1) preis += kartons * 1.0 + 60;
-    if (auspack === 1) preis += kartons * 0.8 + 40;
-    if (entsorgung === 1) preis += 100;
-
-    if (express === 1) {
-      preis *= 1.2;
+      document.getElementById("resultPanel").scrollIntoView({ behavior: "smooth", block: "start" });
+    } catch (error) {
+      setLeadHint("Die Preis-Schaetzung ist gerade nicht verfuegbar. Bitte versuchen Sie es in einem Moment erneut.", "text-danger");
     }
-
-    let rabattText = "";
-    if (rabattcode === "NEUKUNDE10") {
-      preis *= 0.9;
-      rabattText = "Rabattcode NEUKUNDE10 angewendet (10 %). ";
-    } else if (rabattcode === "WINTER5") {
-      preis *= 0.95;
-      rabattText = "Rabattcode WINTER5 angewendet (5 %). ";
-    } else if (rabattcode === "VIP20") {
-      preis *= 0.8;
-      rabattText = "Rabattcode VIP20 angewendet (20 %). ";
-    } else if (rabattcode !== "") {
-      rabattText = "Unbekannter Rabattcode - es wurde kein Rabatt abgezogen. ";
-    }
-
-    const minPreis = preis * 0.9;
-    const maxPreis = preis * 1.15;
-
-    document.getElementById("ergebnis").textContent =
-      "Geschaetzter Preis: " + minPreis.toFixed(0) + " EUR - " + maxPreis.toFixed(0) + " EUR";
-
-    document.getElementById("zusatzinfo").textContent =
-      rabattText + "Dies ist eine unverbindliche Schaetzung. Fuer ein verbindliches Angebot kontaktieren Sie uns bitte direkt.";
-
-    document.getElementById("resultPanel").classList.add("is-visible");
-    setActionButtonsEnabled(true);
-
-    const hasContactValues =
-      document.getElementById("name").value.trim() &&
-      document.getElementById("telefon").value.trim() &&
-      document.getElementById("email").value.trim();
-
-    if (hasContactValues) {
-      setLeadHint("Ihre Schaetzung ist bereit. Sie koennen die Anfrage jetzt senden.", "text-info");
-    } else {
-      setLeadHint("Preis berechnet. Tragen Sie jetzt Ihre Kontaktdaten ein und bestaetigen Sie AGB und Datenschutz.", "text-info");
-    }
-
-    document.getElementById("resultPanel").scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   window.addEventListener("DOMContentLoaded", () => {

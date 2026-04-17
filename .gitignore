@@ -52,9 +52,14 @@ Desktop.ini
 # ========================
 *.log
 *.pid
+backend/reports/
 backend/reports/*.csv
 backend/reports/*.md
 backend/chat-conversion-report*.csv
+improvement_logs/
+local_knowledge_memory/
+reports/
+review_logs/
 
 # ========================
 # Local scripts & temp

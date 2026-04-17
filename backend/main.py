@@ -24,6 +24,11 @@ from app.core.config import ALLOWED_ORIGINS, DODE_MAX_MESSAGES, OPENAI_API_KEY
 from app.core.database import ensure_schema
 from app.schemas import ChatMessageIn
 
+try:
+    from app.api.routes.learning import router as learning_router
+except Exception:
+    learning_router = None
+
 LOGGER = logging.getLogger("klarumzug24")
 LOGGER.setLevel(logging.INFO)
 CHAT_LOG_PATH = Path(__file__).resolve().parent / "chat-events.log"
@@ -59,6 +64,8 @@ app.include_router(companies_router)
 app.include_router(company_portal_router)
 app.include_router(transactions_router)
 app.include_router(admin_router)
+if learning_router is not None:
+    app.include_router(learning_router)
 
 
 @app.exception_handler(StarletteHTTPException)

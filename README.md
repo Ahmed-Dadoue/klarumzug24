@@ -27,6 +27,8 @@ Klarumzug24 ist eine moderne B2B2C-Plattform, die Privatkunden bei der Umzugspla
 | **Datenbank** | SQLite (Entwicklung) / PostgreSQL 3.1+ (Produktion) |
 | **ORM** | SQLAlchemy 2.0+ |
 | **KI/LLM** | OpenAI GPT-4.1-mini (Dode Chat-Assistent) |
+| **Intent-Erkennung** | Regelbasierter Intent-Classifier |
+| **Wissensbank** | JSON-basierte FAQ (DE/EN) |
 | **Frontend** | Statisches HTML/CSS/JS (Nginx) |
 | **Containerisierung** | Docker & Docker Compose |
 | **E-Mail** | SMTP (Hostinger SSL 465) |
@@ -38,6 +40,9 @@ Klarumzug24 ist eine moderne B2B2C-Plattform, die Privatkunden bei der Umzugspla
 
 ```
 klarumzug24/
+├── .github/workflows/          # CI/CD Pipeline
+│   └── deploy.yml              # Auto-Deploy auf VPS (push → main)
+│
 ├── backend/                    # FastAPI Backend
 │   ├── main.py                 # Hauptanwendung & API-Startpunkt
 │   ├── requirements.txt        # Python Dependencies
@@ -48,41 +53,87 @@ klarumzug24/
 │   │   ├── ai/                 # KI-Layer (Dode)
 │   │   │   ├── agent.py        # Chat-Agent Orchestrierung
 │   │   │   ├── tools.py        # Backend-Tool Integration
-│   │   │   ├── prompts.py      # System Prompts
+│   │   │   ├── prompts.py      # System Prompts (v1)
+│   │   │   ├── prompts_v2.py   # System Prompts (v2, Service-aware)
 │   │   │   ├── pricing_calculator.py  # Preisberechnung
+│   │   │   ├── pricing_tool.py # Pricing-Tool Orchestrierung
 │   │   │   ├── intent_classifier.py   # Intent-Erkennung
+│   │   │   ├── faq_store.py    # FAQ Wissensdatenbank
+│   │   │   ├── services.py     # Service-Typ-Erkennung
+│   │   │   ├── logging_utils.py# Chat-Event Logging
 │   │   │   ├── schemas.py      # KI-Datenmodelle
-│   │   │   └── knowledge/      # FAQ Wissensdatenbank
+│   │   │   └── knowledge/      # FAQ Wissensdatenbank (DE/EN)
 │   │   │
 │   │   ├── api/routes/         # REST API Endpoints
+│   │   │   ├── admin.py        # Admin-Dashboard
+│   │   │   ├── chat.py         # Chat-Interaktion
+│   │   │   ├── companies.py    # Unternehmens-Verwaltung
+│   │   │   ├── company_portal.py # Unternehmens-Portal
+│   │   │   ├── health.py       # Health Check
+│   │   │   ├── leads.py        # Lead-Management
+│   │   │   ├── pricing.py      # Preis-Endpoints
+│   │   │   └── transactions.py # Transaktionen
+│   │   │
 │   │   ├── models/             # SQLAlchemy ORM Modelle
+│   │   │   ├── company.py      # Unternehmen
+│   │   │   ├── lead.py         # Leads
+│   │   │   ├── lead_event.py   # Lead-Status-Events
+│   │   │   ├── pricing_rule.py # Preisregeln
+│   │   │   ├── transaction.py  # Transaktionen
+│   │   │   └── chat_submission.py # Chat-Nachrichten
+│   │   │
 │   │   ├── schemas/            # Pydantic Validierung
 │   │   ├── services/           # Business-Logik Services
+│   │   │   ├── chat_service.py         # Chat-Orchestrierung
+│   │   │   ├── chat_booking_service.py # Chat-to-Booking Flow
+│   │   │   ├── lead_service.py         # Lead CRUD
+│   │   │   ├── lead_assignment_service.py # Round-Robin Verteilung
+│   │   │   ├── pricing_service.py      # Preisberechnung
+│   │   │   └── emailer.py              # SMTP E-Mail-Versand
+│   │   │
 │   │   ├── core/               # Konfiguration & Sicherheit
+│   │   │   ├── config.py       # Zentrale Konfiguration
+│   │   │   ├── database.py     # Datenbankverbindung
+│   │   │   ├── security.py     # Authentifizierung
+│   │   │   └── serialization.py# Serialisierung
+│   │   │
 │   │   └── utils/              # Hilfsfunktionen
+│   │       ├── masking.py      # PII-Maskierung
+│   │       ├── normalization.py# Daten-Normalisierung
+│   │       ├── parsing.py      # NLP-Parsing
+│   │       └── validation.py   # Input-Validierung
 │   │
 │   └── deploy/                 # Deployment-Dateien
 │       ├── nginx/              # Reverse Proxy Config
 │       └── systemd/            # Service-Dateien
 │
-├── docs/                       # Frontend (Static HTML)
-│   ├── index.html              # Startseite
-│   ├── umzugsrechner.html      # Umzugsrechner mit Chat
-│   ├── kontakt.html            # Kontaktformular
-│   ├── agb.html                # AGB
-│   ├── datenschutz.html        # Datenschutzerklärung
-│   ├── impressum.html          # Impressum
-│   ├── ueber-uns.html          # Über uns
+├── docs/                       # Frontend (Static HTML, DE + EN)
+│   ├── index.html / index-en.html
+│   ├── umzugsrechner.html / umzugsrechner-en.html
+│   ├── kontakt.html / kontakt-en.html
+│   ├── agb.html / agb-en.html
+│   ├── datenschutz.html / datenschutz-en.html
+│   ├── impressum.html / impressum-en.html
+│   ├── ueber-uns.html / ueber-uns-en.html
 │   ├── Dockerfile              # Frontend Container (Nginx)
 │   └── assets/
 │       ├── dode-chat.js        # Chat-Widget
 │       ├── dode-chat.css       # Chat-Styling
 │       └── site.css            # Seiten-Styling
 │
+├── scripts/                    # Betriebsskripte
+│   ├── backup_db.sh            # Datenbank-Backup
+│   ├── health_check.sh         # Health-Monitoring
+│   └── setup_hardening.sh      # Server-Härtung
+│
+├── deploy.sh                   # Auto-Deploy Script (SSH)
 ├── docker-compose.yml          # Gesamtplattform Compose
+├── start_local.bat             # Lokaler Start (Windows)
+├── AGENTS.md                   # KI-Entwicklungsrichtlinien
 ├── BUSINESS_RULES.md           # Geschäftsregeln
 ├── TOOLS_SPEC.md               # KI-Tool Spezifikation
 ├── DEPLOYMENT_GUIDE.md         # Deployment-Anleitung
+├── DEPLOY_DOCKER.md            # Docker-Anleitung
 └── LICENSE                     # MIT Lizenz
 ```
 
@@ -194,6 +245,18 @@ Dode: "Für Ihren Umzug von Hamburg nach Kiel (3 Zimmer, ~90 km)
        Schätzung. Möchten Sie ein konkretes Angebot?"
 ```
 
+### KI-Architektur (v2)
+
+| Modul | Funktion |
+|---|---|
+| `agent.py` | Chat-Agent Orchestrierung & OpenAI Responses API |
+| `intent_classifier.py` | Strukturierte Intent-Erkennung (Umzug, FAQ, Lead, ...) |
+| `pricing_calculator.py` | Regelbasierte Preisberechnung |
+| `pricing_tool.py` | Pricing-Tool Orchestrierung |
+| `faq_store.py` | FAQ-Wissensdatenbank (DE/EN) |
+| `services.py` | Service-Typ-Erkennung (Umzug, Entrümpelung, ...) |
+| `logging_utils.py` | Chat-Event Logging & Analytics |
+
 ### KI-Tools
 
 | Tool | Funktion |
@@ -201,6 +264,7 @@ Dode: "Für Ihren Umzug von Hamburg nach Kiel (3 Zimmer, ~90 km)
 | `calculate_move_price` | Preisberechnung basierend auf Umzugsdetails |
 | `create_lead` | Lead-Erstellung mit Kontaktdaten |
 | `get_matching_companies` | Passende Unternehmen finden |
+| `get_faq` | FAQ-Wissensdatenbank abfragen |
 
 ### Sicherheitsregeln
 
@@ -250,6 +314,10 @@ Automatische Round-Robin-Zuordnung:
 | `ADMIN_API_KEY` | Ja | Admin-Authentifizierung |
 | `DATABASE_URL` | Nein | DB Connection String (Default: SQLite) |
 | `DODE_MODEL` | Nein | LLM Modell (Default: `gpt-4.1-mini`) |
+| `DODE_MAX_MESSAGES` | Nein | Max. Nachrichten pro Konversation |
+| `DODE_MAX_OUTPUT_TOKENS` | Nein | Max. Output-Tokens pro Antwort |
+| `MAX_PHOTO_BYTES` | Nein | Max. Foto-Upload Größe |
+| `DEDUP_HOURS` | Nein | Lead-Deduplizierung Zeitfenster |
 | `ALLOWED_ORIGINS` | Nein | CORS Whitelist |
 | `SMTP_HOST` | Nein | SMTP Server für E-Mail |
 | `SMTP_PORT` | Nein | SMTP Port (Default: 465) |
@@ -260,6 +328,16 @@ Automatische Round-Robin-Zuordnung:
 
 ## Deployment
 
+### CI/CD Pipeline
+
+GitHub Actions deployt automatisch bei Push auf `main`:
+
+1. Push auf `main` → GitHub Actions verbindet per SSH
+2. `deploy.sh` wird ausgeführt (Backup → Pull → Dependencies → Restart → Health Check)
+3. Auto-Rollback bei fehlgeschlagenem Health Check
+
+Workflow: [.github/workflows/deploy.yml](.github/workflows/deploy.yml)
+
 ### Warum systemd + Nginx statt Docker in Produktion?
 
 Klarumzug24 besteht aus einem einzelnen FastAPI-Backend und statischen HTML-Dateien. Für dieses Setup ist Bare-Metal-Deployment mit systemd + Nginx die beste Wahl:
@@ -268,7 +346,7 @@ Klarumzug24 besteht aus einem einzelnen FastAPI-Backend und statischen HTML-Date
 - **Schneller**: Kein Docker-Overhead, direkter Zugriff auf System-Ressourcen
 - **Debugbar**: `journalctl`, `systemctl status`, direkte Log-Dateien
 - **Stabil**: systemd überwacht den Prozess und startet ihn bei Absturz automatisch neu
-- **SSL nativ**: Let's Encrypt + certbot integiert sich direkt mit Nginx
+- **SSL nativ**: Let's Encrypt + certbot integriert sich direkt mit Nginx
 
 Docker bleibt im Repository für lokale Entwicklung verfügbar, wird aber **nicht** für Produktion verwendet.
 
@@ -412,6 +490,18 @@ systemctl restart klarumzug24-api
 
 ---
 
+## Betriebsskripte
+
+| Script | Funktion |
+|---|---|
+| `deploy.sh` | Auto-Deploy mit Backup & Rollback |
+| `start_local.bat` | Lokaler Start (Windows) |
+| `scripts/backup_db.sh` | PostgreSQL Datenbank-Backup |
+| `scripts/health_check.sh` | Health-Monitoring |
+| `scripts/setup_hardening.sh` | Server-Sicherheitshärtung |
+
+---
+
 ## Weiterführende Dokumentation
 
 | Dokument | Inhalt |
@@ -419,6 +509,7 @@ systemctl restart klarumzug24-api
 | [backend/README.md](backend/README.md) | Ausführliche Backend-Dokumentation & API-Referenz |
 | [BUSINESS_RULES.md](BUSINESS_RULES.md) | Geschäftsregeln & Preislogik |
 | [TOOLS_SPEC.md](TOOLS_SPEC.md) | KI-Tool Spezifikation |
+| [AGENTS.md](AGENTS.md) | KI-Entwicklungsrichtlinien |
 | [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) | Schritt-für-Schritt Deployment |
 | [DEPLOY_DOCKER.md](DEPLOY_DOCKER.md) | Docker-Setup Anleitung |
 | [PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md) | Projektübersicht |

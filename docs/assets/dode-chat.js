@@ -7,6 +7,7 @@
   const pageLang = (document.documentElement.lang || "de").toLowerCase();
   const isEnglish = pageLang.startsWith("en");
   const conversationStorageKey = "dode_conversation_id";
+  const urlParams = new URLSearchParams(window.location.search);
   let initialized = false;
 
   function generateConversationId() {
@@ -25,6 +26,27 @@
     } catch (_) {
       return generateConversationId();
     }
+  }
+
+  function getConversationType() {
+    const requested = String(urlParams.get("chat_conversation_type") || "").trim();
+    if (["real_user", "test_script", "automated_test"].includes(requested)) {
+      return requested;
+    }
+    return "real_user";
+  }
+
+  function getSourceLabel() {
+    const requested = String(urlParams.get("chat_source_label") || "").trim();
+    if (requested) {
+      return requested.slice(0, 80);
+    }
+    return isLocalHost ? "website_widget_localhost" : "website_widget";
+  }
+
+  function getTestRunId() {
+    const requested = String(urlParams.get("chat_test_run_id") || "").trim();
+    return requested ? requested.slice(0, 80) : null;
   }
 
   const dictionary = {
@@ -309,6 +331,10 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             conversation_id: getConversationId(),
+            conversation_type: getConversationType(),
+            source_label: getSourceLabel(),
+            test_run_id: getTestRunId(),
+            memory_review_required: isLocalHost,
             lang: isEnglish ? "en" : "de",
             page: window.location.pathname,
             messages: messages.slice(-12),
