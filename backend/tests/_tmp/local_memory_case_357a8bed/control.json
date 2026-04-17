@@ -1,0 +1,10 @@
+{
+  "capture_enabled": true,
+  "review_required_by_default": true,
+  "capture_types": {
+    "real_user": true,
+    "test_script": true,
+    "automated_test": true
+  },
+  "updated_at_utc": "2026-04-17T14:40:32.525004+00:00"
+}

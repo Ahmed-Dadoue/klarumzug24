@@ -1,0 +1,56 @@
+{
+  "label": "berlin_hamburg_complex_move",
+  "services": [
+    "umzug",
+    "kuechenmontage",
+    "halteverbotszone",
+    "entruempelung"
+  ],
+  "facts": {
+    "route": {
+      "from_city": "Berlin",
+      "to_city": "Hamburg"
+    },
+    "move": {
+      "rooms": 3,
+      "distance_km": 290
+    },
+    "pickup": {
+      "floor": "2. OG",
+      "elevator": false
+    },
+    "dropoff": {
+      "floor": "3. OG",
+      "elevator": false
+    },
+    "timing": {
+      "move_date": "2026-05-09",
+      "weekend": true
+    },
+    "items": {
+      "special": [
+        "Klavier",
+        "schwere Moebel"
+      ]
+    },
+    "services": {
+      "kitchen_montage": true,
+      "halteverbotszone": true,
+      "entruempelung": true,
+      "storage": false
+    },
+    "insurance": {
+      "required": true
+    },
+    "pricing": {
+      "budget_eur": 3500
+    },
+    "customer": {
+      "company_move": false
+    }
+  },
+  "notes": [
+    "Tester will Preise, Zuschlaege, Leistungsabgrenzung und Policy-Stabilitaet pruefen.",
+    "Tester kann bei Bedarf auf Beschwerden, Sonderfaelle und versteckte Kosten schwenken."
+  ]
+}

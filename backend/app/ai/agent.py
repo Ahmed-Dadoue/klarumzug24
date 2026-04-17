@@ -8,16 +8,46 @@ from fastapi import HTTPException
 
 from .faq_store import find_best_faq_match, get_faq_filename
 from .logging_utils import log_chat_event, log_chat_exception
+from .policy_registry import find_best_policy_truth
+from .pricing_truth import build_pricing_safety_reply, get_pricing_truth
+from .pricing_tool import get_pricing_tool
 from .prompts import build_dode_system_prompt, build_general_chat_prompt
 from .prompts_v2 import build_dode_system_prompt_v2
 from .schemas import ChatLanguage, ChatTurn, MoveDetails
+from .service_registry import (
+    build_service_overview_reply,
+    build_service_truth_reply,
+    find_best_service_truth,
+    get_service_truth,
+    is_service_overview_question,
+)
 from .tools import calculate_move_price
 from .intent_classifier import ClassifiedIntent, classify_intent, is_pricing_related_intent
+
+try:
+    from .learning.insight_store import build_insights_prompt_block
+except Exception:
+    def build_insights_prompt_block(_db) -> str:
+        return ""
+
+
+try:
+    from .learning.escalation_detector import detect_escalation, get_escalation_response
+except Exception:
+    class _FallbackEscalationResult:
+        should_escalate = False
+        reason = "none"
+        frustration_score = 0.0
+
+    def detect_escalation(_messages, _language):
+        return _FallbackEscalationResult()
+
+    def get_escalation_response(_result, _language):
+        return None
 
 DODE_MODEL = os.getenv("DODE_MODEL", "gpt-4.1-mini").strip()
 DODE_MAX_MESSAGES = int(os.getenv("DODE_MAX_MESSAGES", "12"))
 DODE_MAX_OUTPUT_TOKENS = int(os.getenv("DODE_MAX_OUTPUT_TOKENS", "220"))
-
 NON_CITY_WORDS = {
     "hallo", "hi", "hey", "hello", "ja", "nein", "yes", "no", "ok", "okay",
     "preis", "kosten", "price", "cost", "quote", "angebot", "umzug", "move",
@@ -44,6 +74,12 @@ ROOM_HINT_PATTERN = re.compile(r"\b(?:zimmer|raum|raeume|raume|room|rooms)\b", r
 DISTANCE_HINT_PATTERN = re.compile(r"\b(?:km|kilometer|kilometres|kilometers|strecke|distanz|entfernung|distance|route)\b", re.IGNORECASE)
 ESTIMATE_REPLY_PATTERN = re.compile(r"(?:unverbindlich\w*\s+schaetz\w+|non-binding\s+estimate).*(?:eur|euro)", re.IGNORECASE)
 DONT_KNOW_DISTANCE_PATTERN = re.compile(r"\b(?:weiss nicht|keine ahnung|keine angabe|unbekannt|nicht sicher|don't know|do not know|not sure|unknown)\b", re.IGNORECASE)
+AREA_PATTERN = re.compile(r"(\d{1,5}(?:[.,]\d{1,2})?)\s*(?:m2|qm|m²)", re.IGNORECASE)
+WEIGHT_PATTERN = re.compile(r"(\d{1,4}(?:[.,]\d{1,2})?)\s*(?:kg|kilogramm?)", re.IGNORECASE)
+LOCATION_PATTERN = re.compile(
+    r"\b(?:in|bei|aus)\s+([A-Za-zA-Z][A-Za-zA-Z .-]{1,80})(?:[,.!?]|$)",
+    re.IGNORECASE,
+)
 
 CITY_DISTANCES: dict[frozenset[str], int] = {
     frozenset({"kiel", "hamburg"}): 90,
@@ -67,6 +103,87 @@ NUMBER_WORDS = {
     "eight": 8, "nine": 9, "ten": 10, "eleven": 11, "twelve": 12, "thirteen": 13,
     "fourteen": 14, "fifteen": 15, "sixteen": 16, "seventeen": 17, "eighteen": 18,
     "nineteen": 19, "twenty": 20,
+}
+
+SERVICE_FIELD_QUESTIONS = {
+    "de": {
+        "entsorgung": {
+            "item_type": "Was moechten Sie genau entsorgen?",
+            "location": "In welchem Ort oder welcher Stadt soll die Entsorgung stattfinden?",
+        },
+        "laminat": {
+            "area_m2": "Wie viele Quadratmeter Laminat oder Parkett sollen entfernt werden?",
+            "location": "In welchem Ort soll der Laminat-Abbau stattfinden?",
+        },
+        "moebelmontage": {
+            "furniture_type": "Welches Moebel soll aufgebaut oder abgebaut werden?",
+            "location": "In welchem Ort soll die Montage stattfinden?",
+        },
+        "einzeltransport": {
+            "item_description": "Welchen Gegenstand moechten Sie transportieren?",
+            "location": "Von welchem Ort soll der Transport starten?",
+        },
+    },
+    "en": {
+        "entsorgung": {
+            "item_type": "What exactly would you like to dispose of?",
+            "location": "In which city should the disposal take place?",
+        },
+        "laminat": {
+            "area_m2": "How many square metres of laminate or flooring should be removed?",
+            "location": "In which city should the flooring removal take place?",
+        },
+        "moebelmontage": {
+            "furniture_type": "Which furniture should be assembled or disassembled?",
+            "location": "In which city should the assembly take place?",
+        },
+        "einzeltransport": {
+            "item_description": "Which item would you like to transport?",
+            "location": "From which city should the transport start?",
+        },
+    },
+}
+
+SERVICE_ITEM_ALIASES = {
+    "entsorgung": {
+        "stickmaschine": "Stickmaschine",
+        "waschmaschine": "Waschmaschine",
+        "kuehlschrank": "Kuehlschrank",
+        "kühlschrank": "Kuehlschrank",
+        "sofas": "Sofas",
+        "sofa": "Sofa",
+        "schrank": "Schrank",
+        "bett": "Bett",
+        "tisch": "Tisch",
+        "stuhl": "Stuhl",
+        "klavier": "Klavier",
+        "safe": "Safe",
+    },
+    "moebelmontage": {
+        "ikea": "IKEA-Moebel",
+        "kueche": "Kueche",
+        "küche": "Kueche",
+        "schrank": "Schrank",
+        "regal": "Regal",
+        "bett": "Bett",
+        "tisch": "Tisch",
+    },
+    "einzeltransport": {
+        "waschmaschine": "Waschmaschine",
+        "kuehlschrank": "Kuehlschrank",
+        "kühlschrank": "Kuehlschrank",
+        "sofa": "Sofa",
+        "bett": "Bett",
+        "matratze": "Matratze",
+        "fernseher": "Fernseher",
+        "tv": "Fernseher",
+        "kommode": "Kommode",
+        "spuelmaschine": "Spuelmaschine",
+        "spülmaschine": "Spuelmaschine",
+        "trockner": "Trockner",
+        "klavier": "Klavier",
+        "safe": "Safe",
+    },
 }
 
 TEXT = {
@@ -624,6 +741,567 @@ def _build_estimate_reply(move_details: MoveDetails, estimate_result, lang: Chat
     )
 
 
+def _extract_area_m2_from_text(text: str) -> float | None:
+    match = AREA_PATTERN.search(text)
+    if not match:
+        return None
+    value = float(match.group(1).replace(",", "."))
+    if 1 <= value <= 100000:
+        return value
+    return None
+
+
+def _extract_weight_kg_from_text(text: str) -> int | None:
+    match = WEIGHT_PATTERN.search(text)
+    if not match:
+        return None
+    value = float(match.group(1).replace(",", "."))
+    if 1 <= value <= 100000:
+        return int(round(value))
+    return None
+
+
+def _extract_location_candidate(text: str) -> str | None:
+    route_match = CITY_PATTERN.search(text)
+    if route_match:
+        return _normalize_city(route_match.group(1))
+    location_match = LOCATION_PATTERN.search(text)
+    if location_match:
+        return _normalize_city(location_match.group(1))
+    if _is_city_like_answer(text):
+        return _normalize_city(text)
+    return None
+
+
+def _extract_destination_candidate(text: str) -> str | None:
+    route_match = CITY_PATTERN.search(text)
+    if route_match:
+        return _normalize_city(route_match.group(2))
+    return None
+
+
+def _extract_service_item(text: str, service_type: str) -> str | None:
+    normalized = _normalize_for_compare(text)
+    aliases = SERVICE_ITEM_ALIASES.get(service_type, {})
+    for key in sorted(aliases, key=len, reverse=True):
+        if key in normalized:
+            return aliases[key]
+    return None
+
+
+def _build_service_follow_up_question(service_type: str, missing_fields: list[str], lang: ChatLanguage) -> str | None:
+    if not missing_fields:
+        return None
+    question_map = SERVICE_FIELD_QUESTIONS.get(lang, SERVICE_FIELD_QUESTIONS["de"])
+    field_map = question_map.get(service_type, {})
+    return field_map.get(missing_fields[0])
+
+
+def _extract_non_move_service_details(
+    messages: Sequence[ChatTurn],
+    service_type: str,
+) -> dict[str, Any]:
+    user_texts = [" ".join(message.content.split()) for message in messages if message.role == "user"]
+    if not user_texts:
+        return {}
+
+    combined_text = " ".join(user_texts)
+    combined_lower = _normalize_for_compare(combined_text)
+    location = _extract_location_candidate(combined_text)
+    quantity_value = _extract_number_from_text(combined_text)
+    quantity = None
+    if quantity_value is not None and 1 <= quantity_value <= 1000:
+        quantity = int(round(quantity_value))
+
+    details: dict[str, Any] = {}
+
+    if service_type == "entsorgung":
+        item = _extract_service_item(combined_text, service_type)
+        if item:
+            details["item_type"] = f"{quantity} {item}" if quantity and quantity > 1 else item
+        if location:
+            details["location"] = location
+        if quantity and quantity > 1:
+            details["quantity"] = quantity
+        return details
+
+    if service_type == "laminat":
+        area_m2 = _extract_area_m2_from_text(combined_text)
+        if area_m2 is not None:
+            details["area_m2"] = area_m2
+        if location:
+            details["location"] = location
+        if "ohne entsorgung" in combined_lower or "nur abbau" in combined_lower:
+            details["entsorgung_included"] = False
+        elif "entsorgung" in combined_lower:
+            details["entsorgung_included"] = True
+        return details
+
+    if service_type == "moebelmontage":
+        furniture_type = _extract_service_item(combined_text, service_type)
+        if furniture_type:
+            details["furniture_type"] = furniture_type
+        if location:
+            details["location"] = location
+        if quantity and quantity > 1:
+            details["quantity"] = quantity
+        if "abbau" in combined_lower and "aufbau" in combined_lower:
+            details["aufbau_or_abbau"] = "Aufbau und Abbau"
+        elif "abbau" in combined_lower:
+            details["aufbau_or_abbau"] = "Abbau"
+        elif "aufbau" in combined_lower or "montage" in combined_lower:
+            details["aufbau_or_abbau"] = "Aufbau"
+        return details
+
+    if service_type == "einzeltransport":
+        item_description = _extract_service_item(combined_text, service_type)
+        if item_description:
+            details["item_description"] = item_description
+        start_location = _extract_location_candidate(combined_text)
+        destination = _extract_destination_candidate(combined_text)
+        if start_location:
+            details["location"] = start_location
+        if destination:
+            details["destination"] = destination
+        weight_estimate = _extract_weight_kg_from_text(combined_text)
+        if weight_estimate is not None:
+            details["weight_estimate"] = weight_estimate
+        return details
+
+    return details
+
+
+def _lookup_faq_reply(last_user_text: str | None, lang: ChatLanguage) -> dict[str, Any] | None:
+    if not last_user_text:
+        return None
+    faq_match = find_best_faq_match(last_user_text, lang=lang)
+    if not faq_match:
+        return None
+    item = faq_match["item"]
+    answer = _localize_text_links((item.get("answer") or "").strip(), lang)
+    source_page = _localize_page_path((item.get("source_page") or "").strip(), lang)
+    if not answer:
+        return None
+    if source_page and source_page not in answer:
+        suffix = _lang_config(lang)["faq_suffix"].format(source_page=source_page)
+        answer = f"{answer} {suffix}"
+    return {
+        "reply": answer,
+        "faq_file": get_faq_filename(lang),
+        "faq_id": item.get("id"),
+        "faq_score": faq_match.get("score"),
+    }
+
+
+def _source_used_from_processing_path(processing_path: str) -> str:
+    if "policy_truth" in processing_path:
+        return "policy_truth"
+    if "service_truth" in processing_path or "manual_confirmation" in processing_path:
+        return "service_truth"
+    if processing_path == "openai_primary_faq":
+        return "faq"
+    if processing_path.endswith("_price"):
+        if "move" in processing_path:
+            return "pricing"
+        return "tool"
+    if any(
+        token in processing_path
+        for token in ("follow_up", "sanity", "single_item_transport", "escalation")
+    ):
+        return "rule"
+    return "openai"
+
+
+def _lookup_policy_truth_reply(last_user_text: str | None, lang: ChatLanguage) -> dict[str, Any] | None:
+    if not last_user_text:
+        return None
+    policy_match = find_best_policy_truth(last_user_text, lang=lang)
+    if not policy_match:
+        return None
+    return {
+        "reply": _localize_text_links(str(policy_match["reply"]).strip(), lang),
+        "policy_key": policy_match.get("key"),
+        "policy_score": policy_match.get("score"),
+        "truth_status": getattr(policy_match.get("policy"), "status", None),
+    }
+
+
+def _lookup_service_truth_reply(
+    last_user_text: str | None,
+    lang: ChatLanguage,
+    *,
+    classified_intent: ClassifiedIntent | None = None,
+    pricing_related: bool = False,
+) -> dict[str, Any] | None:
+    if not last_user_text:
+        return None
+
+    if is_service_overview_question(last_user_text, lang=lang):
+        return {
+            "reply": build_service_overview_reply(lang),
+            "service_key": "overview",
+            "service_score": 2.5,
+            "availability": "offered",
+        }
+
+    service_key = getattr(classified_intent, "service_type", None)
+    matched_service = get_service_truth(str(service_key)) if service_key else None
+    service_score = 0.0
+    if not matched_service:
+        service_match = find_best_service_truth(last_user_text, lang=lang)
+        if not service_match:
+            return None
+        matched_service = service_match["service"]
+        service_key = str(service_match["key"])
+        service_score = float(service_match["score"])
+    else:
+        service_score = 2.0
+
+    if not matched_service:
+        return None
+
+    reply = build_service_truth_reply(
+        matched_service,
+        lang=lang,
+        pricing_related=pricing_related,
+    )
+    return {
+        "reply": _localize_text_links(reply, lang),
+        "service_key": service_key,
+        "service_score": service_score,
+        "availability": matched_service.availability,
+        "pricing_source": matched_service.pricing_source,
+    }
+
+
+def _build_helper_payload(
+    *,
+    messages: Sequence[ChatTurn],
+    page: str | None,
+    lang: ChatLanguage,
+    classified_intent: ClassifiedIntent | None,
+    move_details: MoveDetails,
+    previous_details: MoveDetails,
+    session_factory: Callable[[], Any],
+    assigned_price_calculator: Callable[..., int],
+    escalation_response: str | None,
+    logger: logging.Logger | None,
+    request_id: str | None = None,
+    conversation_id: str | None = None,
+) -> dict[str, Any]:
+    helper_lines: list[str] = []
+    fallback_reply: str | None = None
+    faq_meta: dict[str, Any] = {}
+    truth_meta: dict[str, Any] = {}
+    helper_path = "openai_primary_general"
+    last_user_text = _last_user_message(messages)
+
+    if classified_intent:
+        helper_lines.append(f"Intent: {classified_intent.intent_type}")
+        if classified_intent.service_type:
+            helper_lines.append(f"Service: {classified_intent.service_type}")
+
+    if escalation_response:
+        helper_path = "openai_primary_escalation"
+        helper_lines.extend(
+            [
+                "Interner Helfer sagt: menschliche Uebergabe oder Deeskalation priorisieren.",
+                f"Empfohlene Antwortbasis: {escalation_response}",
+            ]
+        )
+        fallback_reply = escalation_response
+        return {
+            "path": helper_path,
+            "helper_context": "\n".join(helper_lines),
+            "fallback_reply": fallback_reply,
+            "faq_meta": faq_meta,
+            "truth_meta": truth_meta,
+        }
+
+    policy_payload = _lookup_policy_truth_reply(last_user_text, lang)
+    if policy_payload:
+        helper_path = "openai_primary_policy_truth"
+        fallback_reply = policy_payload["reply"]
+        helper_lines.extend(
+            [
+                "Autoritative Policy-Antwort aus lokaler Truth-Registry vorhanden.",
+                f"Nutze diese Antwortbasis: {fallback_reply}",
+            ]
+        )
+        truth_meta = {
+            "truth_type": "policy",
+            "truth_key": policy_payload.get("policy_key"),
+            "truth_score": policy_payload.get("policy_score"),
+            "truth_status": policy_payload.get("truth_status"),
+        }
+        return {
+            "path": helper_path,
+            "helper_context": "\n".join(helper_lines),
+            "fallback_reply": fallback_reply,
+            "faq_meta": faq_meta,
+            "truth_meta": truth_meta,
+        }
+
+    if classified_intent and not is_pricing_related_intent(classified_intent.intent_type):
+        service_truth_payload = _lookup_service_truth_reply(
+            last_user_text,
+            lang,
+            classified_intent=classified_intent,
+            pricing_related=False,
+        )
+        if service_truth_payload:
+            helper_path = "openai_primary_service_truth"
+            fallback_reply = service_truth_payload["reply"]
+            helper_lines.extend(
+                [
+                    "Autoritative Service-Antwort aus lokaler Truth-Registry vorhanden.",
+                    f"Nutze diese Antwortbasis: {fallback_reply}",
+                ]
+            )
+            truth_meta = {
+                "truth_type": "service",
+                "truth_key": service_truth_payload.get("service_key"),
+                "truth_score": service_truth_payload.get("service_score"),
+                "truth_status": service_truth_payload.get("availability"),
+                "pricing_source": service_truth_payload.get("pricing_source"),
+            }
+            return {
+                "path": helper_path,
+                "helper_context": "\n".join(helper_lines),
+                "fallback_reply": fallback_reply,
+                "faq_meta": faq_meta,
+                "truth_meta": truth_meta,
+            }
+
+    if _is_single_item_transport_request(messages, lang) or _is_single_item_transport_context(messages, lang):
+        helper_path = "openai_primary_single_item_transport"
+        fallback_reply = _lang_config(lang)["single_transport_reply"]
+        helper_lines.extend(
+            [
+                "Interner Helfer hat Einzeltransport erkannt.",
+                f"Empfohlene Antwortbasis: {fallback_reply}",
+            ]
+        )
+        return {
+            "path": helper_path,
+            "helper_context": "\n".join(helper_lines),
+            "fallback_reply": fallback_reply,
+            "faq_meta": faq_meta,
+            "truth_meta": truth_meta,
+        }
+
+    if classified_intent and classified_intent.service_type and classified_intent.service_type != "umzug":
+        if is_pricing_related_intent(classified_intent.intent_type):
+            pricing_tool = get_pricing_tool()
+            service_type = classified_intent.service_type
+            pricing_truth = get_pricing_truth(service_type)
+            service_truth = get_service_truth(service_type)
+            if service_truth and (
+                service_truth.availability != "offered"
+                or (pricing_truth is not None and not pricing_truth.can_quote_estimate)
+            ):
+                helper_path = f"openai_primary_{service_type}_manual_confirmation"
+                fallback_reply = build_service_truth_reply(
+                    service_truth,
+                    lang=lang,
+                    pricing_related=True,
+                )
+                pricing_safety_reply = build_pricing_safety_reply(service_type, lang=lang)
+                helper_lines.extend(
+                    [
+                        "Lokale Truth-Registry erlaubt hier keine freie Preisnennung im Chat.",
+                        f"Service-Antwortbasis: {fallback_reply}",
+                    ]
+                )
+                if pricing_safety_reply:
+                    helper_lines.append(f"Pricing-Sicherheitsnotiz: {pricing_safety_reply}")
+                truth_meta = {
+                    "truth_type": "service",
+                    "truth_key": service_type,
+                    "truth_status": service_truth.availability,
+                    "pricing_source": getattr(pricing_truth, "source_kind", None),
+                }
+                return {
+                    "path": helper_path,
+                    "helper_context": "\n".join(helper_lines),
+                    "fallback_reply": fallback_reply,
+                    "faq_meta": faq_meta,
+                    "truth_meta": truth_meta,
+                }
+
+            service_info = pricing_tool.get_service_info(service_type)
+            service_details = _extract_non_move_service_details(messages, service_type)
+            missing_fields = [field for field in service_info.required_fields if not service_details.get(field)]
+
+            helper_lines.append(f"Erkannte Service-Details: {service_details or '{}'}")
+            if missing_fields:
+                helper_path = f"openai_primary_{service_type}_follow_up"
+                follow_up_question = _build_service_follow_up_question(service_type, missing_fields, lang)
+                if follow_up_question:
+                    helper_lines.extend(
+                        [
+                            f"Es fehlen fuer {service_type}: {', '.join(missing_fields)}.",
+                            f"Stelle jetzt genau diese Rueckfrage: {follow_up_question}",
+                        ]
+                    )
+                    fallback_reply = follow_up_question
+                    truth_meta = {
+                        "truth_type": "pricing",
+                        "truth_key": service_type,
+                        "pricing_source": getattr(pricing_truth, "source_kind", None),
+                    }
+            else:
+                estimate = pricing_tool.calculate_estimated_price(service_type, service_details)
+                if estimate:
+                    helper_path = f"openai_primary_{service_type}_price"
+                    fallback_reply = pricing_tool.format_price_response(estimate)
+                    helper_lines.extend(
+                        [
+                            "Autoritative Schaetzung aus internem Pricing-Tool vorhanden.",
+                            f"Preisantwort-Basis: {fallback_reply}",
+                        ]
+                    )
+                    truth_meta = {
+                        "truth_type": "pricing",
+                        "truth_key": service_type,
+                        "pricing_source": getattr(pricing_truth, "source_kind", None),
+                    }
+
+            return {
+                "path": helper_path,
+                "helper_context": "\n".join(helper_lines),
+                "fallback_reply": fallback_reply,
+                "faq_meta": faq_meta,
+                "truth_meta": truth_meta,
+            }
+
+    if _has_estimate_intent(messages, lang, classified_intent=classified_intent) and not _is_general_topic_switch(messages, lang):
+        effective_move_details = move_details
+        if _is_reuse_estimate_request(messages, lang):
+            effective_move_details = _merge_missing_move_details(move_details, previous_details)
+
+        sanity_clarification = _build_sanity_clarification(messages, effective_move_details, lang)
+        if sanity_clarification:
+            helper_path = "openai_primary_move_sanity"
+            helper_lines.extend(
+                [
+                    "Interner Helfer vermutet eine unplausible Zimmerangabe.",
+                    f"Stelle diese Klarstellung: {sanity_clarification}",
+                ]
+            )
+            fallback_reply = sanity_clarification
+            return {
+                "path": helper_path,
+                "helper_context": "\n".join(helper_lines),
+                "fallback_reply": fallback_reply,
+                "faq_meta": faq_meta,
+                "truth_meta": truth_meta,
+            }
+
+        follow_up_question = _build_follow_up_question(effective_move_details, _last_assistant_message(messages), lang)
+        if follow_up_question:
+            helper_path = "openai_primary_move_follow_up"
+            helper_lines.extend(
+                [
+                    f"Erkannte Umzugsdaten: {effective_move_details.model_dump(exclude_none=True)}",
+                    f"Es fehlt noch mindestens ein Pflichtwert. Stelle diese Rueckfrage: {follow_up_question}",
+                ]
+            )
+            fallback_reply = follow_up_question
+            return {
+                "path": helper_path,
+                "helper_context": "\n".join(helper_lines),
+                "fallback_reply": fallback_reply,
+                "faq_meta": faq_meta,
+                "truth_meta": truth_meta,
+            }
+
+        estimate_result = calculate_move_price(
+            effective_move_details,
+            session_factory=session_factory,
+            assigned_price_calculator=assigned_price_calculator,
+            logger=logger,
+            request_id=request_id,
+            conversation_id=conversation_id,
+            lang=lang,
+        )
+        helper_path = "openai_primary_move_price"
+        fallback_reply = _build_estimate_reply(effective_move_details, estimate_result, lang)
+        helper_lines.extend(
+            [
+                f"Erkannte Umzugsdaten: {effective_move_details.model_dump(exclude_none=True)}",
+                "Autoritative Umzugs-Schaetzung aus bestehender Backend-Preislogik vorhanden.",
+                f"Preisantwort-Basis: {fallback_reply}",
+            ]
+        )
+        truth_meta = {
+            "truth_type": "pricing",
+            "truth_key": "umzug",
+            "pricing_source": "backend_move_pricing",
+        }
+        return {
+            "path": helper_path,
+            "helper_context": "\n".join(helper_lines),
+            "fallback_reply": fallback_reply,
+            "faq_meta": faq_meta,
+            "truth_meta": truth_meta,
+        }
+
+    service_truth_payload = _lookup_service_truth_reply(
+        last_user_text,
+        lang,
+        classified_intent=classified_intent,
+        pricing_related=False,
+    )
+    if service_truth_payload:
+        helper_path = "openai_primary_service_truth"
+        fallback_reply = service_truth_payload["reply"]
+        helper_lines.extend(
+            [
+                "Autoritative Service-Antwort aus lokaler Truth-Registry vorhanden.",
+                f"Nutze diese Antwortbasis: {fallback_reply}",
+            ]
+        )
+        truth_meta = {
+            "truth_type": "service",
+            "truth_key": service_truth_payload.get("service_key"),
+            "truth_score": service_truth_payload.get("service_score"),
+            "truth_status": service_truth_payload.get("availability"),
+            "pricing_source": service_truth_payload.get("pricing_source"),
+        }
+        return {
+            "path": helper_path,
+            "helper_context": "\n".join(helper_lines),
+            "fallback_reply": fallback_reply,
+            "faq_meta": faq_meta,
+            "truth_meta": truth_meta,
+        }
+
+    faq_payload = _lookup_faq_reply(last_user_text, lang)
+    if faq_payload:
+        helper_path = "openai_primary_faq"
+        fallback_reply = faq_payload["reply"]
+        helper_lines.extend(
+            [
+                "Passende interne FAQ-Antwort gefunden.",
+                f"Nutze diese Antwortbasis: {fallback_reply}",
+            ]
+        )
+        faq_meta = {
+            "faq_file": faq_payload.get("faq_file"),
+            "faq_id": faq_payload.get("faq_id"),
+            "faq_score": faq_payload.get("faq_score"),
+        }
+
+    return {
+        "path": helper_path,
+        "helper_context": "\n".join(helper_lines),
+        "fallback_reply": fallback_reply,
+        "faq_meta": faq_meta,
+        "truth_meta": truth_meta,
+    }
+
+
 def _build_transcript(messages: Sequence[ChatTurn], lang: ChatLanguage) -> str:
     transcript_lines: list[str] = []
     customer_label = _lang_config(lang)["customer_label"]
@@ -643,11 +1321,8 @@ def _build_faq_reply(
     request_id: str | None = None,
     conversation_id: str | None = None,
 ) -> str | None:
-    last_user_text = _last_user_message(messages)
-    if not last_user_text:
-        return None
-    faq_match = find_best_faq_match(last_user_text, lang=lang)
-    if not faq_match:
+    faq_payload = _lookup_faq_reply(_last_user_message(messages), lang)
+    if not faq_payload:
         return None
     log_chat_event(
         logger,
@@ -656,20 +1331,12 @@ def _build_faq_reply(
         conversation_id=conversation_id,
         lang=lang,
         path="faq",
-        faq_file=get_faq_filename(lang),
-        faq_id=faq_match["item"].get("id"),
-        faq_score=faq_match.get("score"),
+        faq_file=faq_payload.get("faq_file"),
+        faq_id=faq_payload.get("faq_id"),
+        faq_score=faq_payload.get("faq_score"),
         success=True,
     )
-    item = faq_match["item"]
-    answer = _localize_text_links((item.get("answer") or "").strip(), lang)
-    source_page = _localize_page_path((item.get("source_page") or "").strip(), lang)
-    if not answer:
-        return None
-    if source_page and source_page not in answer:
-        suffix = _lang_config(lang)["faq_suffix"].format(source_page=source_page)
-        return f"{answer} {suffix}"
-    return answer
+    return faq_payload["reply"]
 
 
 def _generate_general_reply(
@@ -679,36 +1346,69 @@ def _generate_general_reply(
     logger: logging.Logger | None,
     request_id: str | None = None,
     conversation_id: str | None = None,
+    insights_block: str = "",
+    helper_context: str = "",
+    helper_fallback: str | None = None,
+    processing_path: str = "openai_primary_general",
+    faq_meta: dict[str, Any] | None = None,
+    trace: dict[str, Any] | None = None,
 ) -> str:
-    faq_reply = _build_faq_reply(messages, lang, logger, request_id, conversation_id)
-    if faq_reply:
-        return faq_reply
-
+    faq_meta = faq_meta or {}
+    if trace is not None:
+        trace["helper_path"] = processing_path
+        trace["source_used"] = _source_used_from_processing_path(processing_path)
+        trace["faq_meta"] = dict(faq_meta)
+        trace["fallback_available"] = bool(helper_fallback)
     log_chat_event(
         logger,
         "chat_processing_path",
         request_id=request_id,
         conversation_id=conversation_id,
         lang=lang,
-        path="general_chat",
-        faq_file=get_faq_filename(lang),
+        path=processing_path,
+        faq_file=faq_meta.get("faq_file"),
+        faq_id=faq_meta.get("faq_id"),
+        faq_score=faq_meta.get("faq_score"),
         success=True,
     )
-    client = get_dode_client()
     transcript = _build_transcript(messages, lang)
+    system_prompt = build_dode_system_prompt(page, lang)
+    if insights_block:
+        system_prompt += "\n" + insights_block
     try:
+        client = get_dode_client()
         response = client.responses.create(
             model=DODE_MODEL,
-            instructions=build_dode_system_prompt(page, lang),
-            input=build_general_chat_prompt(transcript, lang),
+            instructions=system_prompt,
+            input=build_general_chat_prompt(transcript, lang, helper_context=helper_context),
             max_output_tokens=DODE_MAX_OUTPUT_TOKENS,
             store=False,
         )
         reply = (getattr(response, "output_text", "") or "").strip()
         if not reply:
             raise ValueError("empty response from Dode")
+        if trace is not None:
+            trace["fallback_used"] = False
+            trace["response_origin"] = "openai"
         return _localize_text_links(reply, lang)
     except HTTPException:
+        if helper_fallback:
+            if trace is not None:
+                trace["fallback_used"] = True
+                trace["response_origin"] = "helper_fallback"
+            log_chat_event(
+                logger,
+                "chat_helper_fallback_used",
+                request_id=request_id,
+                conversation_id=conversation_id,
+                lang=lang,
+                path=processing_path,
+                source_used=trace.get("source_used") if trace else None,
+                helper_path=processing_path,
+                fallback_used=True,
+                success=True,
+            )
+            return helper_fallback
         raise
     except Exception as exc:
         log_chat_exception(
@@ -717,10 +1417,28 @@ def _generate_general_reply(
             request_id=request_id,
             conversation_id=conversation_id,
             lang=lang,
-            path="general_chat",
+            path=processing_path,
             error_type=type(exc).__name__,
             success=False,
         )
+        if helper_fallback:
+            if trace is not None:
+                trace["fallback_used"] = True
+                trace["response_origin"] = "helper_fallback"
+                trace["fallback_error_type"] = type(exc).__name__
+            log_chat_event(
+                logger,
+                "chat_helper_fallback_used",
+                request_id=request_id,
+                conversation_id=conversation_id,
+                lang=lang,
+                path=processing_path,
+                source_used=trace.get("source_used") if trace else None,
+                helper_path=processing_path,
+                fallback_used=True,
+                success=True,
+            )
+            return helper_fallback
         raise HTTPException(status_code=502, detail=_lang_config(lang)["dode_unavailable"]) from exc
 
 
@@ -738,34 +1456,32 @@ def _handle_new_service_inquiry(
         last_user_text = _last_user_message(messages)
         if not last_user_text:
             return None
-        
+
         classified = classified_intent or classify_intent(last_user_text, lang=lang)
-        
+
         # Only handle if a specific service is detected (not umzug or generic)
         if not classified.service_type or classified.service_type == "umzug":
             return None
-        
+
         # Check if this looks like a pricing inquiry
         if not is_pricing_related_intent(classified.intent_type):
             return None
-        
-        # Log the new service path
+
         log_chat_event(
             logger,
             "chat_processing_path",
             request_id=request_id,
             conversation_id=conversation_id,
             lang=lang,
-            path=f"new_service_{classified.service_type}",
+            path="new_service_prompt",
             service_type=classified.service_type,
             intent=classified.intent_type,
             success=True,
         )
-        
-        # Use the new system prompt for this service type
+
         client = get_dode_client()
         transcript = _build_transcript(messages, lang)
-        
+
         response = client.responses.create(
             model=DODE_MODEL,
             instructions=build_dode_system_prompt_v2(page, classified.service_type, lang),
@@ -773,17 +1489,16 @@ def _handle_new_service_inquiry(
             max_output_tokens=DODE_MAX_OUTPUT_TOKENS,
             store=False,
         )
-        
+
         reply = (getattr(response, "output_text", "") or "").strip()
         if not reply:
             raise ValueError("empty response from new service handler")
-        
+
         return _localize_text_links(reply, lang)
-        
+
     except HTTPException:
         raise
     except Exception as exc:
-        # If new service handler fails, return None to fall back to general flow
         log_chat_exception(
             logger,
             "new_service_processing_failed",
@@ -796,7 +1511,7 @@ def _handle_new_service_inquiry(
         return None
 
 
-def generate_dode_reply(
+def _generate_dode_reply_legacy(
     *,
     messages: Sequence[Any],
     page: str | None,
@@ -810,6 +1525,39 @@ def generate_dode_reply(
     chat_turns = [_as_chat_turn(message) for message in messages]
     if not chat_turns:
         raise HTTPException(status_code=422, detail="messages are required")
+
+    # Load learned insights once for this request
+    insights_block = ""
+    try:
+        db = session_factory()
+        try:
+            insights_block = build_insights_prompt_block(db)
+        finally:
+            db.close()
+    except Exception:
+        pass  # Insights are optional – never block the chat
+
+    # Check for escalation triggers (frustration, human request)
+    escalation_response: str | None = None
+    try:
+        messages_for_escalation = [
+            {"role": t.role, "content": t.content} for t in chat_turns
+        ]
+        escalation_result = detect_escalation(messages_for_escalation, lang)
+        if escalation_result.should_escalate:
+            log_chat_event(
+                logger,
+                "chat_escalation_triggered",
+                request_id=request_id,
+                conversation_id=conversation_id,
+                lang=lang,
+                reason=escalation_result.reason,
+                frustration_score=escalation_result.frustration_score,
+                success=True,
+            )
+            escalation_response = get_escalation_response(escalation_result, lang)
+    except Exception:
+        pass  # Escalation detection is optional
 
     estimate_reply_idx = _last_estimate_reply_index(chat_turns)
     previous_details = MoveDetails()
@@ -862,7 +1610,7 @@ def generate_dode_reply(
                 success=True,
             )
         if _is_general_topic_switch(active_turns, lang):
-            return _generate_general_reply(active_turns, page, lang, logger, request_id, conversation_id)
+            return _generate_general_reply(active_turns, page, lang, logger, request_id, conversation_id, insights_block=insights_block)
 
         sanity_clarification = _build_sanity_clarification(active_turns, move_details, lang)
         if sanity_clarification:
@@ -913,4 +1661,116 @@ def generate_dode_reply(
         )
         return _build_estimate_reply(move_details, estimate_result, lang)
 
-    return _generate_general_reply(active_turns, page, lang, logger, request_id, conversation_id)
+    return _generate_general_reply(active_turns, page, lang, logger, request_id, conversation_id, insights_block=insights_block)
+
+
+def generate_dode_reply(
+    *,
+    messages: Sequence[Any],
+    page: str | None,
+    lang: ChatLanguage = "de",
+    session_factory: Callable[[], Any],
+    assigned_price_calculator: Callable[..., int],
+    logger: logging.Logger | None = None,
+    request_id: str | None = None,
+    conversation_id: str | None = None,
+    trace: dict[str, Any] | None = None,
+) -> str:
+    chat_turns = [_as_chat_turn(message) for message in messages]
+    if not chat_turns:
+        raise HTTPException(status_code=422, detail="messages are required")
+
+    insights_block = ""
+    try:
+        db = session_factory()
+        try:
+            insights_block = build_insights_prompt_block(db)
+        finally:
+            db.close()
+    except Exception:
+        pass
+
+    escalation_response: str | None = None
+    try:
+        messages_for_escalation = [
+            {"role": turn.role, "content": turn.content} for turn in chat_turns
+        ]
+        escalation_result = detect_escalation(messages_for_escalation, lang)
+        if escalation_result.should_escalate:
+            log_chat_event(
+                logger,
+                "chat_escalation_triggered",
+                request_id=request_id,
+                conversation_id=conversation_id,
+                lang=lang,
+                reason=escalation_result.reason,
+                frustration_score=escalation_result.frustration_score,
+                success=True,
+            )
+            escalation_response = get_escalation_response(escalation_result, lang)
+    except Exception:
+        pass
+
+    estimate_reply_idx = _last_estimate_reply_index(chat_turns)
+    previous_details = MoveDetails()
+    if estimate_reply_idx >= 0:
+        previous_details = _extract_move_details(chat_turns[: estimate_reply_idx + 1], lang)
+
+    active_turns = chat_turns
+    if estimate_reply_idx >= 0 and estimate_reply_idx < len(chat_turns) - 1:
+        active_turns = chat_turns[estimate_reply_idx + 1 :]
+
+    move_details = _extract_move_details(active_turns, lang)
+    classified_intent = _classify_last_user_intent(active_turns, lang)
+
+    if _has_estimate_intent(active_turns, lang, classified_intent=classified_intent):
+        active_user_message_count = sum(1 for message in active_turns if message.role == "user")
+        if active_user_message_count == 1:
+            log_chat_event(
+                logger,
+                "chat_conversion",
+                request_id=request_id,
+                conversation_id=conversation_id,
+                lang=lang,
+                page=page or "-",
+                conversion_step="entered_price_flow",
+                success=True,
+            )
+
+    helper_payload = _build_helper_payload(
+        messages=active_turns,
+        page=page,
+        lang=lang,
+        classified_intent=classified_intent,
+        move_details=move_details,
+        previous_details=previous_details,
+        session_factory=session_factory,
+        assigned_price_calculator=assigned_price_calculator,
+        escalation_response=escalation_response,
+        logger=logger,
+        request_id=request_id,
+        conversation_id=conversation_id,
+    )
+
+    if trace is not None:
+        trace["helper_path"] = helper_payload["path"]
+        trace["source_used"] = _source_used_from_processing_path(helper_payload["path"])
+        trace["faq_meta"] = dict(helper_payload["faq_meta"])
+        trace["truth_meta"] = dict(helper_payload.get("truth_meta") or {})
+        trace["helper_context_present"] = bool(helper_payload["helper_context"])
+        trace["fallback_available"] = bool(helper_payload["fallback_reply"])
+
+    return _generate_general_reply(
+        active_turns,
+        page,
+        lang,
+        logger,
+        request_id,
+        conversation_id,
+        insights_block=insights_block,
+        helper_context=helper_payload["helper_context"],
+        helper_fallback=helper_payload["fallback_reply"],
+        processing_path=helper_payload["path"],
+        faq_meta=helper_payload["faq_meta"],
+        trace=trace,
+    )

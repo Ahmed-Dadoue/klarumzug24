@@ -1,21 +1,25 @@
-"""
-Service definitions and requirements.
-Each service type is defined with its required fields for pricing calculation.
-"""
+"""AI-facing service definitions derived from the local service registry."""
+
+from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import Literal
 
+from .service_registry import get_service_truth
+
 ServiceType = Literal[
     "umzug",
-    "entsorgung", 
+    "entsorgung",
     "laminat",
     "moebelmontage",
-    "einzeltransport"
+    "einzeltransport",
 ]
 
-@dataclass
+
+@dataclass(frozen=True)
 class ServiceDefinition:
-    """Defines a service type and its requirements."""
+    """Defines a service type and the data needed for pricing or follow-up questions."""
+
     key: ServiceType
     name_de: str
     keywords_de: list[str]
@@ -23,69 +27,126 @@ class ServiceDefinition:
     optional_fields: list[str]
     description_de: str
 
-# Service Type Definitions
-SERVICES = {
+
+SERVICES: dict[ServiceType, ServiceDefinition] = {
     "umzug": ServiceDefinition(
         key="umzug",
         name_de="Umzug",
-        keywords_de=["umzug", "umziehen", "umzugs", "ziehe", "ziehen um", "moving", "move", "zimmer", "von", "nach", "transport"],
+        keywords_de=[
+            "umzug",
+            "umziehen",
+            "umzugsservice",
+            "privatumzug",
+            "firmenumzug",
+            "move",
+            "moving",
+            "transport",
+        ],
         required_fields=["from_city", "to_city"],
-        optional_fields=["rooms", "floor_from", "floor_to", "has_elevator_from", "has_elevator_to"],
-        description_de="Kompletter Umzugsservice mit Transport von Möbeln und Gegenständen"
+        optional_fields=[
+            "rooms",
+            "floor_from",
+            "floor_to",
+            "has_elevator_from",
+            "has_elevator_to",
+        ],
+        description_de=(get_service_truth("umzug").summary_de if get_service_truth("umzug") else "Umzugsservice"),
     ),
     "entsorgung": ServiceDefinition(
         key="entsorgung",
-        name_de="Entsorgung / Räumung",
-        keywords_de=["entsorgung", "entsorgen", "entrümpelung", "entrümplung", "räumung", "disposal", "junk", "stickmaschine", "möbel weg", "wegschmeissen", "abholen", "möbel entsorgen"],
+        name_de="Entsorgung",
+        keywords_de=[
+            "entsorgung",
+            "entsorgen",
+            "entruempelung",
+            "raeumung",
+            "alte moebel",
+            "disposal",
+            "junk removal",
+        ],
         required_fields=["location", "item_type"],
         optional_fields=["quantity", "size_description", "access_difficulty"],
-        description_de="Entsorgung, Entrümpelung, Räumung von Gegenständen und Möbeln"
+        description_de=(
+            get_service_truth("entsorgung").summary_de if get_service_truth("entsorgung") else "Entsorgung"
+        ),
     ),
     "laminat": ServiceDefinition(
         key="laminat",
-        name_de="Laminat / Parkett Abbau & Entsorgung",
-        keywords_de=["laminat", "parkett", "flooring", "bodenbelag", "abbau", "disposal floor", "entfernen boden"],
+        name_de="Laminat / Parkett",
+        keywords_de=[
+            "laminat",
+            "parkett",
+            "boden",
+            "bodenbelag",
+            "flooring",
+        ],
         required_fields=["location", "area_m2"],
         optional_fields=["abbau_only", "entsorgung_included", "floor"],
-        description_de="Abbau und Entsorgung von Laminat, Parkett oder anderen Bodenbelägen"
+        description_de=(
+            get_service_truth("laminat").summary_de if get_service_truth("laminat") else "Laminat-Abbau"
+        ),
     ),
     "moebelmontage": ServiceDefinition(
         key="moebelmontage",
-        name_de="Möbelmontage / Abbau",
-        keywords_de=["montage", "aufbau", "abbau", "assembly", "ikea", "regal", "schrank", "küche"],
+        name_de="Moebelmontage",
+        keywords_de=[
+            "montage",
+            "demontage",
+            "aufbau",
+            "abbau",
+            "moebelmontage",
+            "ikea",
+            "assembly",
+        ],
         required_fields=["location", "furniture_type"],
         optional_fields=["quantity", "aufbau_or_abbau"],
-        description_de="Montage oder Abbau von Möbeln, Küchen, Regalen, etc."
+        description_de=(
+            get_service_truth("moebelmontage").summary_de
+            if get_service_truth("moebelmontage")
+            else "Moebelmontage"
+        ),
     ),
     "einzeltransport": ServiceDefinition(
         key="einzeltransport",
         name_de="Einzeltransport",
-        keywords_de=["transport", "waschmaschine", "kühlschrank", "sofa", "einzeln", "item", "kleintransport", "von nach", "klavier", "piano", "clavinova", "safe", "transport lassen"],
+        keywords_de=[
+            "einzeltransport",
+            "transport",
+            "abholung",
+            "lieferung",
+            "waschmaschine",
+            "kuehlschrank",
+            "sofa",
+            "klavier",
+            "safe",
+            "item transport",
+        ],
         required_fields=["location", "item_description"],
         optional_fields=["destination", "weight_estimate"],
-        description_de="Transport von einzelnen Gegenständen oder Möbelstücken"
-    )
+        description_de=(
+            get_service_truth("einzeltransport").summary_de
+            if get_service_truth("einzeltransport")
+            else "Einzeltransport"
+        ),
+    ),
 }
 
+
 def identify_service_type(user_text: str) -> ServiceType | None:
-    """
-    Identify the most likely service type from user text.
-    Returns the service key if found, None otherwise.
-    """
-    user_text_lower = user_text.lower()
-    user_words = set(" ".join(user_text_lower.split()).split())
-    
-    best_match = None
+    """Identify the most likely service type from the user text."""
+    normalized = " ".join((user_text or "").lower().split())
+    best_match: ServiceType | None = None
     best_score = 0
-    
+
     for service_key, service in SERVICES.items():
-        match_count = sum(1 for keyword in service.keywords_de if keyword in user_text_lower)
-        if match_count > best_score:
-            best_score = match_count
+        score = sum(1 for keyword in service.keywords_de if keyword in normalized)
+        if score > best_score:
+            best_score = score
             best_match = service_key
-    
+
     return best_match if best_score > 0 else None
 
+
 def get_service(service_type: ServiceType) -> ServiceDefinition:
-    """Get service definition by type."""
+    """Return the AI-facing service definition."""
     return SERVICES[service_type]

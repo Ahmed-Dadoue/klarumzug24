@@ -126,7 +126,6 @@ def _detect_service_type(focus_text: str, full_text: str) -> ServiceType | None:
         return "einzeltransport"
     if has_no_umzug and has_transport_item:
         return "einzeltransport"
-
     # Laminat must not fall into generic entsorgung, unless strong entsorgung signal is present.
     if has_laminat and has_strong_entsorgung:
         return "entsorgung"

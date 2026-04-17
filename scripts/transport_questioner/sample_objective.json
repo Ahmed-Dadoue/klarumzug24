@@ -1,0 +1,35 @@
+{
+  "label": "expert_transport_audit",
+  "primary_goal": "Pruefe, ob der externe Chatbot fuer Umzug und umzugsnahe Dienstleistungen konsistent, fachlich sicher und branchentauglich antwortet.",
+  "service_focus": [
+    "umzug",
+    "kuechenmontage",
+    "entruempelung",
+    "halteverbotszone",
+    "sondertransporte"
+  ],
+  "focus_areas": [
+    "preise",
+    "zuschlaege",
+    "versicherung",
+    "montage_demontage",
+    "halteverbotszone",
+    "leistungsabgrenzung",
+    "versteckte_kosten",
+    "ablauf_organisation",
+    "qualitaetsprobleme"
+  ],
+  "known_weak_points": [
+    "starrer Preisflow statt echter Antwort",
+    "unklare Zuschlaege fuer Wochenende, Etage und Trageweg",
+    "unklare Abgrenzung zwischen Entruempelung, Entsorgung und Hausaufloesung",
+    "Widersprueche bei Versicherung, Haftung oder Festpreisnaehe",
+    "zu schnelle Zusagen bei Sonderfaellen wie Klavier oder schwere Moebel"
+  ],
+  "success_signals": [
+    "Bot beantwortet Fachfragen direkt und bleibt konsistent",
+    "Bot erkennt Servicegrenzen ohne Halluzination",
+    "Bot bleibt im Kontext des komplexen Szenarios"
+  ],
+  "notes": "Wenn der Bot ausweicht, soll der Questioner nachsetzen und in Widerspruchs- oder Policy-Probes wechseln."
+}

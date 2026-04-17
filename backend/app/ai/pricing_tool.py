@@ -1,87 +1,66 @@
-"""
-Pricing Tool: Main interface for price calculation and service details.
-This is what the bot and agent will use to get pricing information.
-"""
-from typing import Optional
-from dataclasses import asdict
+"""Main pricing interface for the chat supervisor."""
 
-from .services import ServiceType, identify_service_type, get_service
-from .pricing_calculator import calculate_price, PriceEstimate
-from .intent_classifier import classify_intent, ClassifiedIntent
+from __future__ import annotations
+
+from .intent_classifier import ClassifiedIntent, classify_intent
+from .pricing_calculator import PriceEstimate, calculate_price
+from .pricing_truth import get_pricing_truth
+from .services import ServiceType, get_service
 
 
 class PricingTool:
-    """Main interface for pricing and service information."""
-    
+    """Main interface for service details and safe price estimates."""
+
     @staticmethod
     def classify_user_message(message: str) -> ClassifiedIntent:
-        """Classify what the user is asking about."""
         return classify_intent(message)
-    
+
     @staticmethod
     def get_service_info(service_type: ServiceType):
-        """Get service definition and required fields."""
         return get_service(service_type)
-    
+
+    @staticmethod
+    def get_pricing_truth(service_type: str):
+        return get_pricing_truth(service_type)
+
     @staticmethod
     def calculate_estimated_price(
         service_type: ServiceType,
         details: dict,
     ) -> PriceEstimate | None:
-        """
-        Calculate estimated price for a service.
-        
-        Args:
-            service_type: Type of service
-            details: Dict with service-specific details
-        
-        Returns:
-            PriceEstimate or None if calculation fails
-        """
+        truth = get_pricing_truth(service_type)
+        if truth and not truth.can_quote_estimate:
+            return None
         return calculate_price(service_type, details)
-    
+
     @staticmethod
     def get_all_services():
-        """Get list of all available services for bot to display."""
         from .services import SERVICES
+
         return {
             key: {
                 "name": service.name_de,
                 "description": service.description_de,
+                "required_fields": list(service.required_fields),
             }
             for key, service in SERVICES.items()
         }
-    
+
     @staticmethod
-    def format_price_response(estimate: PriceEstimate) -> str:
-        """
-        Format a price estimate into a natural German response.
-        
-        Example output:
-        "Für die Entsorgung von 3 Sofas liegt die unverbindliche Schätzung
-         bei etwa 120–180 €. Der genaue Preis hängt vom Aufwand und der Region ab."
-        """
+    def format_price_response(estimate: PriceEstimate | None) -> str | None:
         if not estimate:
             return None
-        
-        response = (
-            f"Für {estimate.explanation} liegt die {estimate.note} "
-            f"bei etwa {estimate.min_price_eur}–{estimate.max_price_eur} {estimate.currency}."
+
+        return (
+            f"Fuer {estimate.explanation} liegt die {estimate.note} "
+            f"bei etwa {estimate.min_price_eur}-{estimate.max_price_eur} {estimate.currency}. "
+            "Der genaue Preis kann je nach Aufwand, Region, Zugang und Zusatzleistungen abweichen. "
+            "Fuer ein verbindliches Angebot bitten wir um eine direkte Anfrage."
         )
-        
-        # Add context about price variations
-        response += (
-            " Der genaue Preis kann je nach Aufwand, Region und Abtransport variieren. "
-            "Für ein verbindliches Angebot können Sie uns gerne kontaktieren oder WhatsApp nutzen."
-        )
-        
-        return response
 
 
-# Singleton instance
 pricing_tool = PricingTool()
 
 
 def get_pricing_tool() -> PricingTool:
-    """Get the pricing tool instance."""
     return pricing_tool

@@ -22,7 +22,6 @@ def calculate_move_price(
         raise ValueError("rooms is required")
     if move_details.distance_km is None:
         raise ValueError("distance_km is required")
-
     db = session_factory()
     try:
         log_chat_event(
