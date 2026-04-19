@@ -68,6 +68,8 @@ class PricingV2Input:
     difficulty: DifficultyLevel | None = None
     rooms: int | None = None
     cartons: int | None = None
+    furniture_items: int | None = None
+    kitchen_count: int | None = None
     heavy_items: int | None = None
     floor_from: int | None = None
     floor_to: int | None = None
@@ -106,6 +108,11 @@ CARTONS_PATTERN = re.compile(r"(\d{1,4})\s*(?:karton|kartons|kisten)\b", re.IGNO
 CARTONS_LABEL_PATTERN = re.compile(r"(?:karton|kartons|kisten)\s*:\s*(?:ca\.?\s*)?(\d{1,4})\b", re.IGNORECASE)
 WORKERS_PATTERN = re.compile(r"(\d{1,2})\s*(?:mann|maenner|männer|arbeiter|mitarbeiter|helfer|personen)\b", re.IGNORECASE)
 FLOOR_PATTERN = re.compile(r"(\d{1,2})\s*\.?\s*(?:stock|stockwerk|og|etage)\b", re.IGNORECASE)
+FURNITURE_ITEMS_PATTERN = re.compile(
+    r"(\d{1,4})\s*(?:schreibtische|schreibtisch|schreib\s*tische|tische|moebelstuecke|moebel)",
+    re.IGNORECASE,
+)
+KITCHEN_COUNT_PATTERN = re.compile(r"(\d{1,2})\s*(?:kuechen|kueche)\b", re.IGNORECASE)
 FLOOR_WORDS = {
     "erste": 1,
     "ersten": 1,
@@ -121,6 +128,55 @@ FLOOR_WORDS = {
     "sechsten": 6,
 }
 
+NUMBER_WORDS = {
+    "ein": 1,
+    "eine": 1,
+    "einen": 1,
+    "einem": 1,
+    "zwei": 2,
+    "drei": 3,
+    "vier": 4,
+    "fuenf": 5,
+    "sechs": 6,
+    "sieben": 7,
+    "acht": 8,
+    "neun": 9,
+    "zehn": 10,
+}
+
+CITY_ALIASES: dict[str, tuple[str, ...]] = {
+    "bordesholm": (
+        "bordesholm",
+        "24582",
+        "24583",
+        "luettparten",
+        "luettbarten",
+        "luetbarten",
+        "luttparten",
+        "luttbarten",
+    ),
+    "kiel": ("kiel", "gaarden", "holtenauer strasse"),
+    "stuttgart": ("stuttgart",),
+    "hamburg": ("hamburg",),
+    "berlin": ("berlin",),
+}
+
+CITY_DISTANCE_FROM_BORDESHOLM_KM: dict[str, float] = {
+    "bordesholm": 0.0,
+    "kiel": 30.0,
+    "hamburg": 95.0,
+    "berlin": 350.0,
+    "stuttgart": 735.0,
+}
+
+ROUTE_DISTANCE_KM: dict[tuple[str, str], float] = {
+    ("bordesholm", "kiel"): 30.0,
+    ("kiel", "hamburg"): 95.0,
+    ("kiel", "berlin"): 355.0,
+    ("kiel", "stuttgart"): 735.0,
+    ("bordesholm", "stuttgart"): 735.0,
+}
+
 CLEARANCE_SERVICE_TYPES = {
     "entsorgung",
     "entruempelung",
@@ -132,6 +188,10 @@ CLEARANCE_SERVICE_TYPES = {
 def _normalize(value: str) -> str:
     text = " ".join((value or "").lower().split())
     replacements = {
+        "\u00e4": "ae",
+        "\u00f6": "oe",
+        "\u00fc": "ue",
+        "\u00df": "ss",
         "ä": "ae",
         "ö": "oe",
         "ü": "ue",
@@ -177,6 +237,81 @@ def _extract_first_int(pattern: re.Pattern[str], text: str) -> int | None:
     return int(round(value))
 
 
+def _extract_word_count_before(text_ascii: str, nouns: tuple[str, ...]) -> int | None:
+    noun_pattern = "|".join(re.escape(noun) for noun in nouns)
+    word_pattern = "|".join(re.escape(word) for word in NUMBER_WORDS)
+    match = re.search(rf"\b(\d{{1,4}}|{word_pattern})\s+(?:{noun_pattern})\b", text_ascii)
+    if not match:
+        return None
+    value = match.group(1)
+    if value.isdigit():
+        return int(value)
+    return NUMBER_WORDS.get(value)
+
+
+def _extract_furniture_items(text_ascii: str) -> int | None:
+    count = _extract_first_int(FURNITURE_ITEMS_PATTERN, text_ascii)
+    if count is not None:
+        return count
+    return _extract_word_count_before(
+        text_ascii,
+        ("schreibtische", "schreibtisch", "schreib tische", "tische", "moebelstuecke", "moebel"),
+    )
+
+
+def _extract_kitchen_count(text_ascii: str) -> int | None:
+    count = _extract_first_int(KITCHEN_COUNT_PATTERN, text_ascii)
+    if count is not None:
+        return count
+    return _extract_word_count_before(text_ascii, ("kuechen", "kueche"))
+
+
+def _city_mentions(text_ascii: str) -> list[tuple[int, str]]:
+    mentions: list[tuple[int, str]] = []
+    for city, aliases in CITY_ALIASES.items():
+        for alias in aliases:
+            for match in re.finditer(rf"\b{re.escape(alias)}\b", text_ascii):
+                mentions.append((match.start(), city))
+    return sorted(mentions, key=lambda item: item[0])
+
+
+def _route_distance_from_cities(origin: str, destination: str) -> float | None:
+    if origin == destination:
+        return 0.0
+    direct = ROUTE_DISTANCE_KM.get((origin, destination))
+    if direct is not None:
+        return direct
+    return ROUTE_DISTANCE_KM.get((destination, origin))
+
+
+def _has_explicit_route_signal(text_ascii: str) -> bool:
+    return bool(re.search(r"\b(?:von|aus|ab)\s+.{2,120}\s+(?:nach|bis|zu)\b", text_ascii)) or (
+        "start" in text_ascii and "ziel" in text_ascii
+    )
+
+
+def _extract_known_route_distance(text_ascii: str) -> float | None:
+    mentions = _city_mentions(text_ascii)
+    if len(mentions) < 2:
+        return None
+
+    best_match: tuple[int, str, str] | None = None
+    for index, (origin_pos, origin_city) in enumerate(mentions):
+        for destination_pos, destination_city in mentions[index + 1 :]:
+            between = text_ascii[origin_pos:destination_pos]
+            before = text_ascii[max(0, origin_pos - 35) : origin_pos]
+            has_route_words = any(marker in between for marker in (" nach ", " bis ", " zu "))
+            has_origin_words = any(marker in before for marker in ("von ", "aus ", "ab ", "start", "route"))
+            has_start_target_words = "start" in before and "ziel" in between
+            if (has_route_words and has_origin_words) or has_start_target_words:
+                best_match = (destination_pos, origin_city, destination_city)
+
+    if not best_match:
+        return None
+    _, origin_city, destination_city = best_match
+    return _route_distance_from_cities(origin_city, destination_city)
+
+
 def _detect_bool(text_ascii: str, positive: tuple[str, ...], negative: tuple[str, ...]) -> bool | None:
     if any(marker in text_ascii for marker in negative):
         return False
@@ -193,6 +328,17 @@ def _detect_service_type(text_ascii: str) -> PricingV2ServiceType | None:
     has_worktop = any(
         token in text_ascii
         for token in ("arbeitsplatte", "kuechenplatte", "platte", "tischplatte", "ausschnitt", "spuele", "kochfeld")
+    )
+    has_route = _extract_known_route_distance(text_ascii) is not None or _has_explicit_route_signal(text_ascii)
+    has_move_scope = any(
+        token in text_ascii
+        for token in ("zimmer", "karton", "kartons", "kisten", "transporter", "transport", "trasport")
+    )
+    if has_route and has_move_scope:
+        return "umzug"
+
+    has_large_furniture = bool(_extract_furniture_items(text_ascii)) and any(
+        token in text_ascii for token in ("aufbau", "aufbauen", "montage", "montieren")
     )
     has_full_kitchen = any(
         token in text_ascii
@@ -213,6 +359,8 @@ def _detect_service_type(text_ascii: str) -> PricingV2ServiceType | None:
             "schrankelemente",
         )
     )
+    if has_full_kitchen and has_large_furniture:
+        return "moebelmontage"
     only_markers = ("nur arbeitsplatte", "nur platte", "platte only", "arbeitsplatte only", "nur tischplatte")
     if has_worktop and (any(marker in text_ascii for marker in only_markers) or not has_full_kitchen):
         return "arbeitsplatte_only"
@@ -220,7 +368,6 @@ def _detect_service_type(text_ascii: str) -> PricingV2ServiceType | None:
         return "kuechenmontage"
 
     has_move = any(token in text_ascii for token in ("umzug", "umziehen", "ziehe um", "wohnung wechseln"))
-    has_move_scope = any(token in text_ascii for token in (" von ", " nach ", "zimmer", "karton", "kisten", "transporter"))
     if has_move and has_move_scope:
         return "umzug"
 
@@ -258,7 +405,10 @@ def _detect_service_type(text_ascii: str) -> PricingV2ServiceType | None:
         return "einzeltransport"
     if has_move or ("ziehe" in text_ascii and " um" in text_ascii):
         return "umzug"
-    if has_price_signal and any(token in text_ascii for token in ("moebel", "moebelmontage", "schrank", "regal", "bett", "aufbauen", "montage")):
+    if has_price_signal and any(
+        token in text_ascii
+        for token in ("moebel", "moebelmontage", "schrank", "regal", "bett", "schreibtisch", "aufbau", "aufbauen", "montage")
+    ):
         return "moebelmontage"
     return None
 
@@ -286,7 +436,24 @@ def _default_hours_for_service(data: PricingV2Input) -> tuple[float | None, floa
             return 2.0, 3.0
         return None, None
 
-    if data.service_type in {"moebelmontage", "transporthilfe", "einzeltransport"}:
+    if data.service_type == "moebelmontage":
+        furniture_items = _safe_non_negative_int(data.furniture_items)
+        kitchen_count = _safe_non_negative_int(data.kitchen_count)
+        if furniture_items or kitchen_count:
+            workers = max(1, _default_workers_for_service(data))
+            man_hours = furniture_items * 0.45 + kitchen_count * 10.0
+            hours_min = max(3.0, 1.0 + (man_hours / workers) * 0.85)
+            hours_max = max(hours_min + 1.0, 2.0 + (man_hours / workers) * 1.25)
+            return round(hours_min, 2), round(hours_max, 2)
+        if data.difficulty == "hard":
+            return 4.0, 6.0
+        if data.difficulty == "medium":
+            return 3.0, 5.0
+        if data.difficulty == "simple":
+            return 2.0, 3.0
+        return None, None
+
+    if data.service_type in {"transporthilfe", "einzeltransport"}:
         if data.difficulty == "hard":
             return 4.0, 6.0
         if data.difficulty == "medium":
@@ -359,6 +526,15 @@ def _default_workers_for_service(data: PricingV2Input) -> int:
         return 2 if heavy_items <= 2 else 3
     if data.service_type in {"einzeltransport", "transporthilfe"} and heavy_items:
         return 2 if heavy_items <= 2 else 3
+    if data.service_type == "moebelmontage":
+        furniture_items = _safe_non_negative_int(data.furniture_items)
+        kitchen_count = _safe_non_negative_int(data.kitchen_count)
+        if furniture_items >= 100 or kitchen_count >= 2:
+            return 7
+        if furniture_items >= 30:
+            return 4
+        if furniture_items >= 10 or kitchen_count:
+            return 2
     return 1
 
 
@@ -506,7 +682,7 @@ def _build_explanation_de(
         time_text = f", voraussichtlich ca. {hours_min:g} bis {hours_max:g} Stunden"
     distance_text = ""
     if distance_km is not None:
-        distance_text = f" und {distance_km:g} km einfache Strecke ab {profile.base_location}"
+        distance_text = f" und {distance_km:g} km einfache Strecke"
     model_text = "nach Laufmetern" if pricing_model == "kitchen_meter_rate" else "nach Zeit, Aufwand und Strecke"
     return (
         f"Fuer {service_label} liegt die unverbindliche Schaetzung bei {price_text}. "
@@ -548,8 +724,15 @@ def _extract_distance_or_base_location(combined_text: str, text_ascii: str) -> f
     distance_km = _extract_first_float(DISTANCE_PATTERN, combined_text)
     if distance_km is not None:
         return distance_km
-    if any(token in text_ascii for token in ("bordesholm", "24582", "luettbarten", "luetbarten", "luttbarten")):
-        return 0.0
+    route_distance = _extract_known_route_distance(text_ascii)
+    if route_distance is not None:
+        return route_distance
+    if _has_explicit_route_signal(text_ascii):
+        return None
+    mentions = _city_mentions(text_ascii)
+    if mentions:
+        latest_city = mentions[-1][1]
+        return CITY_DISTANCE_FROM_BORDESHOLM_KM.get(latest_city)
     return None
 
 
@@ -593,8 +776,12 @@ def extract_pricing_v2_input_from_messages(messages: list[ChatTurn]) -> PricingV
     distance_km = _extract_distance_or_base_location(combined_text, text_ascii)
     hours = _extract_first_float(HOURS_PATTERN, combined_text)
     kitchen_meters = _extract_first_float(METER_PATTERN, combined_text) if service_type == "kuechenmontage" else None
+    kitchen_count = _extract_kitchen_count(text_ascii)
+    furniture_items = _extract_furniture_items(text_ascii)
     workers_total = _extract_first_int(WORKERS_PATTERN, combined_text)
-    rooms = _extract_first_int(ROOMS_PATTERN, combined_text)
+    rooms = _extract_first_int(ROOMS_PATTERN, combined_text) or _extract_word_count_before(
+        text_ascii, ("zimmer", "zimmern", "raeume", "raum", "rooms")
+    )
     cartons = _extract_first_int(CARTONS_PATTERN, combined_text) or _extract_first_int(CARTONS_LABEL_PATTERN, combined_text)
     floors = _extract_floors(combined_text, text_ascii)
     elevator = _detect_elevator(text_ascii)
@@ -616,8 +803,18 @@ def extract_pricing_v2_input_from_messages(messages: list[ChatTurn]) -> PricingV
 
     needs_transporter = _detect_bool(
         text_ascii,
-        positive=("transporter", "sprinter", "auto", "fahrzeug", "wagen"),
-        negative=("ohne transporter", "ohne auto", "kein transporter", "nur helfer", "nur hilfe"),
+        positive=("transporter", "trasport", "sprinter", "auto", "fahrzeug", "wagen"),
+        negative=(
+            "ohne transporter",
+            "ohne transport",
+            "ohne auto",
+            "kein transporter",
+            "kein transport",
+            "keinen transport",
+            "transport brauchen wir nicht",
+            "nur helfer",
+            "nur hilfe",
+        ),
     )
     if service_type in {"umzug", "einzeltransport", *CLEARANCE_SERVICE_TYPES} and needs_transporter is None:
         needs_transporter = True
@@ -652,6 +849,8 @@ def extract_pricing_v2_input_from_messages(messages: list[ChatTurn]) -> PricingV
         difficulty=difficulty,
         rooms=rooms,
         cartons=cartons,
+        furniture_items=furniture_items,
+        kitchen_count=kitchen_count,
         heavy_items=heavy_items or None,
         floor_from=floors[0] if floors else None,
         floor_to=floors[1] if len(floors) > 1 else None,

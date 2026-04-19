@@ -238,6 +238,32 @@ class ChatBookingIntegrationTest(unittest.TestCase):
         self.assertNotIn("verbindlichen Angebot", response["data"]["reply"])
         create_mock.assert_not_called()
 
+    def test_email_address_question_does_not_trigger_handoff_guard(self) -> None:
+        payload = self._payload(
+            "conv_email_address_question",
+            [
+                ChatMessageIn(role="user", content="ich brauche Kuechenaufbau in Bordesholm"),
+                ChatMessageIn(
+                    role="assistant",
+                    content="Moechten Sie, dass ich das fuer Sie weiter pruefe?",
+                ),
+                ChatMessageIn(role="user", content="Ich will aber eine E-Mail-Adresse"),
+            ],
+        )
+        create_mock = Mock()
+
+        with patch.object(chat_service, "_is_chat_conversation_submitted", return_value=False):
+            response = self._run_chat(
+                payload,
+                generate_reply=Mock(return_value="Die Kontakt-E-Mail lautet info@klarumzug24.de."),
+                create_lead=create_mock,
+            )
+
+        self.assertFalse(response["data"]["lead_submitted"])
+        self.assertIn("info@klarumzug24.de", response["data"]["reply"])
+        self.assertNotIn("Noch nicht uebermittelt", response["data"]["reply"])
+        create_mock.assert_not_called()
+
     def test_unsafe_promise_sentence_is_removed_when_no_lead_was_created(self) -> None:
         payload = self._payload(
             "conv_remove_unsafe_sentence",

@@ -8,6 +8,7 @@ from app.ai.company_pricing import (
     PricingV2Input,
     build_company_pricing_helper_payload,
     estimate_company_price_v2,
+    extract_pricing_v2_input_from_messages,
 )
 from app.ai.schemas import ChatTurn
 
@@ -112,6 +113,91 @@ class CompanyPricingV2Test(unittest.TestCase):
         self.assertEqual("company_pricing_v2", payload["truth_meta"]["pricing_source"])
         self.assertEqual(2, payload["truth_meta"]["workers_total"])
         self.assertTrue(payload["truth_meta"]["needs_transporter"])
+
+    def test_latest_route_overrides_old_bordesholm_context(self) -> None:
+        payload = build_company_pricing_helper_payload(
+            [
+                ChatTurn(role="user", content="Ich bin in Bordesholm im Erdgeschoss."),
+                ChatTurn(
+                    role="user",
+                    content=(
+                        "Von Kiel nach Stuttgart, nur zwei Zimmer, Wohnzimmer und Schlafzimmer, "
+                        "etwa 10 Kartons, Transporter noetig, kein Aufzug, 1. Etage, Termin 28.04.2026. "
+                        "Kannst du mir den ungefaehren Preis nennen?"
+                    ),
+                ),
+            ],
+            lang="de",
+        )
+
+        self.assertIsNotNone(payload)
+        assert payload is not None
+        self.assertEqual("umzug", payload["truth_meta"]["truth_key"])
+        self.assertGreater(payload["truth_meta"]["distance_km"], 500)
+        self.assertGreater(payload["truth_meta"]["price_min_eur"], 1000)
+        self.assertEqual([], payload["truth_meta"]["missing_fields"])
+
+    def test_route_without_umzug_word_is_detected_as_move(self) -> None:
+        pricing_input = extract_pricing_v2_input_from_messages(
+            [
+                ChatTurn(
+                    role="user",
+                    content="Von Kiel nach Stuttgart, zwei Zimmer, 10 Kartons und Transporter.",
+                )
+            ]
+        )
+
+        self.assertIsNotNone(pricing_input)
+        assert pricing_input is not None
+        self.assertEqual("umzug", pricing_input.service_type)
+        self.assertEqual(735.0, pricing_input.distance_km)
+        self.assertEqual(2, pricing_input.rooms)
+        self.assertEqual(10, pricing_input.cartons)
+
+    def test_unknown_explicit_route_does_not_fall_back_to_local_city(self) -> None:
+        payload = build_company_pricing_helper_payload(
+            [
+                ChatTurn(
+                    role="user",
+                    content="Von Kiel nach Bremen, zwei Zimmer, 10 Kartons und Transporter. Was kostet das?",
+                )
+            ],
+            lang="de",
+        )
+
+        self.assertIsNotNone(payload)
+        assert payload is not None
+        self.assertEqual("umzug", payload["truth_meta"]["truth_key"])
+        self.assertIsNone(payload["truth_meta"]["distance_km"])
+        self.assertIn("ort_oder_entfernung_ab_bordesholm", payload["truth_meta"]["missing_fields"])
+
+    def test_large_furniture_and_kitchen_assembly_gets_price_range(self) -> None:
+        payload = build_company_pricing_helper_payload(
+            [
+                ChatTurn(
+                    role="user",
+                    content=(
+                        "Wir brauchen in Kiel den Aufbau neuer Moebel, zwei Kuechen montieren, "
+                        "etwa 150 Schreibtische, 3 Etagen, Aufzug vorhanden, kein Transport noetig, "
+                        "alles bis 30.04.2026 fertig."
+                    ),
+                ),
+                ChatTurn(
+                    role="user",
+                    content="Nenne mir die Kosten, ich habe es eilig. 7 Helfer oder 10 Helfer sind gut?",
+                ),
+            ],
+            lang="de",
+        )
+
+        self.assertIsNotNone(payload)
+        assert payload is not None
+        self.assertEqual("moebelmontage", payload["truth_meta"]["truth_key"])
+        self.assertFalse(payload["truth_meta"]["needs_transporter"])
+        self.assertEqual(7, payload["truth_meta"]["workers_total"])
+        self.assertGreater(payload["truth_meta"]["price_min_eur"], 2000)
+        self.assertEqual([], payload["truth_meta"]["missing_fields"])
+        self.assertIn("unverbindliche Schaetzung", payload["fallback_reply"])
 
     def test_dode_uses_company_pricing_v2_fallback(self) -> None:
         messages = [

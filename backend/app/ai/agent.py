@@ -73,7 +73,10 @@ ELEVATOR_TO_FALSE_PATTERN = re.compile(r"(?:einzug|ziel|nach|to)\D{0,20}(?:ohne|
 STANDALONE_NUMBER_PATTERN = re.compile(r"\b(\d{1,4}(?:[.,]\d{1,2})?)\b")
 ROOM_HINT_PATTERN = re.compile(r"\b(?:zimmer|raum|raeume|raume|room|rooms)\b", re.IGNORECASE)
 DISTANCE_HINT_PATTERN = re.compile(r"\b(?:km|kilometer|kilometres|kilometers|strecke|distanz|entfernung|distance|route)\b", re.IGNORECASE)
-ESTIMATE_REPLY_PATTERN = re.compile(r"(?:unverbindlich\w*\s+schaetz\w+|non-binding\s+estimate).*(?:eur|euro)", re.IGNORECASE)
+ESTIMATE_REPLY_PATTERN = re.compile(
+    r"(?:unverbindlich\w*\s+schaetz\w+|schaetzung|richtwert|preisspanne|liegt\s+.*(?:bei|zwischen)|non-binding\s+estimate).{0,240}(?:eur|euro)",
+    re.IGNORECASE,
+)
 DONT_KNOW_DISTANCE_PATTERN = re.compile(r"\b(?:weiss nicht|keine ahnung|keine angabe|unbekannt|nicht sicher|don't know|do not know|not sure|unknown)\b", re.IGNORECASE)
 AREA_PATTERN = re.compile(r"(\d{1,5}(?:[.,]\d{1,2})?)\s*(?:m2|qm|m²)", re.IGNORECASE)
 WEIGHT_PATTERN = re.compile(r"(\d{1,4}(?:[.,]\d{1,2})?)\s*(?:kg|kilogramm?)", re.IGNORECASE)

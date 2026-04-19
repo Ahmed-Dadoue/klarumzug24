@@ -78,6 +78,36 @@ def _normalize_for_match(text: str) -> str:
     return normalized
 
 
+def _is_company_email_address_question(text: str | None) -> bool:
+    normalized = _normalize_for_match(text or "")
+    if not normalized:
+        return False
+    if CHAT_EMAIL_PATTERN.search(text or ""):
+        return False
+    address_markers = (
+        "email adresse",
+        "e-mail adresse",
+        "e-mail-adresse",
+        "mail adresse",
+        "mailadresse",
+        "eure email",
+        "eure e-mail",
+        "ihre email",
+        "ihre e-mail",
+        "welche email",
+        "welche e-mail",
+        "welche mail",
+        "an welche mail",
+        "wie lautet eure email",
+        "wie lautet ihre email",
+        "ich will aber eine email",
+        "ich will aber eine e-mail",
+        "ich moechte eine email adresse",
+        "ich moechte eine e-mail adresse",
+    )
+    return any(marker in normalized for marker in address_markers)
+
+
 def _extract_service_from_text(text: str) -> str | None:
     normalized = _normalize_for_match(text)
     if any(keyword in normalized for keyword in ("umzug", "umziehen", "ziehe", "move", "moving")):
@@ -248,6 +278,8 @@ def _is_handoff_request(text: str | None, messages: list[Any]) -> bool:
     normalized = _normalize_for_match(text or "")
     if not normalized:
         return False
+    if _is_company_email_address_question(text):
+        return False
     has_context = _conversation_has_handoff_context(messages)
     if "ich stimme zu" in normalized and not has_context:
         return False
@@ -275,7 +307,10 @@ def _is_handoff_request(text: str | None, messages: list[Any]) -> bool:
         return True
     if CHAT_EMAIL_PATTERN.search(text or "") and has_context:
         return True
-    if "mail" in normalized and has_context:
+    if "mail" in normalized and has_context and any(
+        marker in normalized
+        for marker in ("schicken", "senden", "erwarte", "uebermitteln", "weiterleiten", "anfrage", "angebot")
+    ):
         return True
     return any(marker in normalized for marker in HANDOFF_REQUEST_MARKERS) and has_context
 
