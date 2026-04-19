@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from fastapi import HTTPException
 
@@ -154,6 +154,22 @@ class CompanyPricingV2Test(unittest.TestCase):
         self.assertEqual(2, pricing_input.rooms)
         self.assertEqual(10, pricing_input.cartons)
 
+    def test_customer_typo_route_is_detected_as_move(self) -> None:
+        pricing_input = extract_pricing_v2_input_from_messages(
+            [
+                ChatTurn(
+                    role="user",
+                    content="Von Kie nach Stutgart, zwei Zimmer, 10 Kartons und Trasport.",
+                )
+            ]
+        )
+
+        self.assertIsNotNone(pricing_input)
+        assert pricing_input is not None
+        self.assertEqual("umzug", pricing_input.service_type)
+        self.assertEqual(735.0, pricing_input.distance_km)
+        self.assertTrue(pricing_input.needs_transporter)
+
     def test_unknown_explicit_route_does_not_fall_back_to_local_city(self) -> None:
         payload = build_company_pricing_helper_payload(
             [
@@ -198,6 +214,79 @@ class CompanyPricingV2Test(unittest.TestCase):
         self.assertGreater(payload["truth_meta"]["price_min_eur"], 2000)
         self.assertEqual([], payload["truth_meta"]["missing_fields"])
         self.assertIn("unverbindliche Schaetzung", payload["fallback_reply"])
+        self.assertTrue(payload["force_reply"])
+
+    def test_company_pricing_reply_is_forced_over_model_guess(self) -> None:
+        messages = [
+            ChatTurn(
+                role="user",
+                content=(
+                    "Von Kiel nach Stuttgart, zwei Zimmer, 10 Kartons, Transporter noetig, "
+                    "kein Aufzug, 1. Etage. Was kostet das ungefaehr?"
+                ),
+            )
+        ]
+        trace = {}
+
+        with patch.object(agent, "get_dode_client") as client_mock:
+            reply = agent.generate_dode_reply(
+                messages=messages,
+                page="/kontakt.html",
+                lang="de",
+                session_factory=self._session_factory,
+                assigned_price_calculator=Mock(),
+                logger=None,
+                request_id="req_forced_pricing",
+                conversation_id="conv_forced_pricing",
+                trace=trace,
+            )
+
+        client_mock.assert_not_called()
+        self.assertIn("unverbindliche Schaetzung", reply)
+        self.assertIn("735 km", reply)
+        self.assertNotIn("250 EUR", reply)
+        self.assertEqual("forced_helper_reply", trace.get("response_origin"))
+
+    def test_price_reuse_uses_full_chat_when_active_window_lost_route(self) -> None:
+        messages = [
+            ChatTurn(role="user", content="Ich bin in Bordesholm und brauche Entsorgung."),
+            ChatTurn(
+                role="assistant",
+                content="Fuer die Entsorgung liegt die unverbindliche Schaetzung bei ca. 250 EUR.",
+            ),
+            ChatTurn(
+                role="user",
+                content="Von Kiel nach Stuttgart, zwei Zimmer, 10 Kartons, Transporter noetig, 1. Etage ohne Aufzug.",
+            ),
+            ChatTurn(
+                role="assistant",
+                content="Fuer die Entsorgung in Bordesholm liegt die unverbindliche Schaetzung bei ca. 250 EUR.",
+            ),
+            ChatTurn(
+                role="user",
+                content="Du hast doch meine Infos von Anfang an. Wie viel kostet alles insgesamt mit dem Umzug?",
+            ),
+        ]
+        trace = {}
+
+        with patch.object(agent, "get_dode_client") as client_mock:
+            reply = agent.generate_dode_reply(
+                messages=messages,
+                page="/kontakt.html",
+                lang="de",
+                session_factory=self._session_factory,
+                assigned_price_calculator=Mock(),
+                logger=None,
+                request_id="req_full_context_pricing",
+                conversation_id="conv_full_context_pricing",
+                trace=trace,
+            )
+
+        client_mock.assert_not_called()
+        self.assertIn("735 km", reply)
+        self.assertIn("unverbindliche Schaetzung", reply)
+        self.assertEqual("umzug", trace["truth_meta"]["truth_key"])
+        self.assertEqual(735.0, trace["truth_meta"]["distance_km"])
 
     def test_dode_uses_company_pricing_v2_fallback(self) -> None:
         messages = [

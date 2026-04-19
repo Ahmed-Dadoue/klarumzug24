@@ -43,8 +43,9 @@ class OpenAiPrimaryChatTest(unittest.TestCase):
             ChatTurn(role="user", content="90 km"),
         ]
 
-    def test_openai_is_primary_for_move_estimate(self) -> None:
+    def test_company_pricing_is_authoritative_for_move_estimate(self) -> None:
         fake_client = _FakeClient(text="OpenAI finale Antwort")
+        trace = {}
 
         with patch.object(agent, "get_dode_client", return_value=fake_client):
             reply = agent.generate_dode_reply(
@@ -56,14 +57,14 @@ class OpenAiPrimaryChatTest(unittest.TestCase):
                 logger=None,
                 request_id="req_test_primary",
                 conversation_id="conv_test_primary",
+                trace=trace,
             )
 
-        self.assertEqual("OpenAI finale Antwort", reply)
-        self.assertIsNotNone(fake_client.responses.last_kwargs)
-        prompt_input = fake_client.responses.last_kwargs["input"]
-        self.assertIn("INTERNER HELFER-KONTEXT", prompt_input)
-        self.assertIn("Pricing v2", prompt_input)
-        self.assertIn("Berechnung/Antwortbasis", prompt_input)
+        self.assertIn("unverbindliche Schaetzung", reply)
+        self.assertIn("560", reply)
+        self.assertIn("690", reply)
+        self.assertIsNone(fake_client.responses.last_kwargs)
+        self.assertEqual("forced_helper_reply", trace.get("response_origin"))
 
     def test_helper_fallback_is_used_when_openai_client_fails(self) -> None:
         with patch.object(

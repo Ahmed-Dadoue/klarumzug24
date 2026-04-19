@@ -1545,6 +1545,58 @@ def _generate_general_reply(
         raise HTTPException(status_code=502, detail=_lang_config(lang)["dode_unavailable"]) from exc
 
 
+def _is_pricing_context_reuse_request(messages: Sequence[ChatTurn], lang: ChatLanguage) -> bool:
+    text = _last_user_message(messages).lower()
+    markers = (
+        "preis",
+        "kosten",
+        "kostet",
+        "wie viel",
+        "wieviel",
+        "schaetzung",
+        "schätzung",
+        "angebot",
+        "alles insgesamt",
+        "insgesamt",
+        "meine infos",
+        "infos gespeichert",
+        "schon gesagt",
+        "anfang",
+    )
+    if any(marker in text for marker in markers):
+        return True
+    return _is_reuse_estimate_request(messages, lang)
+
+
+def _should_use_full_pricing_payload(
+    active_payload: dict[str, Any],
+    full_payload: dict[str, Any] | None,
+) -> bool:
+    if not full_payload:
+        return False
+    full_truth = full_payload.get("truth_meta") if isinstance(full_payload.get("truth_meta"), dict) else {}
+    if full_truth.get("pricing_source") != "company_pricing_v2":
+        return False
+    active_truth = active_payload.get("truth_meta") if isinstance(active_payload.get("truth_meta"), dict) else {}
+    if active_truth.get("pricing_source") != "company_pricing_v2":
+        return True
+
+    full_missing = full_truth.get("missing_fields") or []
+    active_missing = active_truth.get("missing_fields") or []
+    full_price = full_truth.get("price_min_eur")
+    active_price = active_truth.get("price_min_eur")
+    full_distance = full_truth.get("distance_km") or 0
+    active_distance = active_truth.get("distance_km") or 0
+
+    if active_missing and not full_missing and full_price:
+        return True
+    if full_distance and full_distance > active_distance + 80:
+        return True
+    if full_price and active_price and full_price > active_price * 1.5:
+        return True
+    return False
+
+
 def _handle_new_service_inquiry(
     messages: Sequence[ChatTurn],
     page: str | None,
@@ -1854,6 +1906,10 @@ def generate_dode_reply(
         request_id=request_id,
         conversation_id=conversation_id,
     )
+    if active_turns != chat_turns and _is_pricing_context_reuse_request(active_turns, lang):
+        full_pricing_payload = build_company_pricing_helper_payload(list(chat_turns), lang=lang)
+        if _should_use_full_pricing_payload(helper_payload, full_pricing_payload):
+            helper_payload = full_pricing_payload
 
     if trace is not None:
         trace["helper_path"] = helper_payload["path"]

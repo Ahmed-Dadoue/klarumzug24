@@ -147,6 +147,7 @@ NUMBER_WORDS = {
 CITY_ALIASES: dict[str, tuple[str, ...]] = {
     "bordesholm": (
         "bordesholm",
+        "bordes",
         "24582",
         "24583",
         "luettparten",
@@ -155,8 +156,8 @@ CITY_ALIASES: dict[str, tuple[str, ...]] = {
         "luttparten",
         "luttbarten",
     ),
-    "kiel": ("kiel", "gaarden", "holtenauer strasse"),
-    "stuttgart": ("stuttgart",),
+    "kiel": ("kiel", "kie", "gaarden", "holtenauer strasse"),
+    "stuttgart": ("stuttgart", "stutgart"),
     "hamburg": ("hamburg",),
     "berlin": ("berlin",),
 }
@@ -893,6 +894,7 @@ def build_company_pricing_helper_payload(
         "path": helper_path,
         "helper_context": "\n".join(helper_lines),
         "fallback_reply": result.explanation_de,
+        "force_reply": True,
         "faq_meta": {},
         "truth_meta": {
             "truth_type": "pricing",
