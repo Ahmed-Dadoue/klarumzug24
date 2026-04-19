@@ -81,6 +81,16 @@ LOCATION_PATTERN = re.compile(
     r"\b(?:in|bei|aus)\s+([A-Za-zA-Z][A-Za-zA-Z .-]{1,80})(?:[,.!?]|$)",
     re.IGNORECASE,
 )
+GENERIC_HELP_MARKERS = (
+    "ich brauche hilfe",
+    "kannst du mir helfen",
+    "koennen sie mir helfen",
+    "koennt ihr mir helfen",
+    "hilfe bitte",
+    "brauche hilfe",
+    "i need help",
+    "can you help me",
+)
 
 CITY_DISTANCES: dict[frozenset[str], int] = {
     frozenset({"kiel", "hamburg"}): 90,
@@ -402,6 +412,64 @@ def _normalize_city(value: str) -> str:
 
 def _normalize_for_compare(value: str) -> str:
     return " ".join(value.lower().split())
+
+
+def _normalize_ascii(value: str | None) -> str:
+    return (
+        " ".join((value or "").lower().split())
+        .replace("ä", "ae")
+        .replace("ö", "oe")
+        .replace("ü", "ue")
+        .replace("ß", "ss")
+        .replace("Ã¤", "ae")
+        .replace("Ã¶", "oe")
+        .replace("Ã¼", "ue")
+        .replace("ÃŸ", "ss")
+    )
+
+
+def _is_generic_help_request(
+    text: str | None,
+    classified_intent: ClassifiedIntent | None,
+) -> bool:
+    normalized = _normalize_ascii(text)
+    if not normalized:
+        return False
+    if getattr(classified_intent, "service_type", None):
+        return False
+    if not any(marker in normalized for marker in GENERIC_HELP_MARKERS):
+        return False
+    service_tokens = (
+        "umzug",
+        "transport",
+        "kueche",
+        "kuechen",
+        "arbeitsplatte",
+        "moebel",
+        "montage",
+        "aufbau",
+        "abbau",
+        "entsorgung",
+        "entruempel",
+        "haushaltsaufloesung",
+        "wohnungsaufloesung",
+        "raeumung",
+    )
+    return not any(token in normalized for token in service_tokens)
+
+
+def _build_generic_help_reply(lang: ChatLanguage) -> str:
+    if lang == "en":
+        return (
+            "Of course. Please briefly describe what you need help with, for example moving, "
+            "transport, furniture or kitchen assembly, clearance, household clearance or disposal. "
+            "Then I will ask only the details needed for the next step."
+        )
+    return (
+        "Gerne. Worum geht es genau: Umzug, Transport, Moebel- oder Kuechenmontage, "
+        "Arbeitsplatte, Entruempelung, Haushaltsaufloesung oder Entsorgung? "
+        "Beschreiben Sie kurz den Auftrag, dann frage ich gezielt die fehlenden Angaben ab."
+    )
 
 
 def _is_city_like_answer(text: str) -> bool:
@@ -1009,6 +1077,25 @@ def _build_helper_payload(
         helper_lines.append(f"Intent: {classified_intent.intent_type}")
         if classified_intent.service_type:
             helper_lines.append(f"Service: {classified_intent.service_type}")
+
+    if _is_generic_help_request(last_user_text, classified_intent):
+        helper_path = "openai_primary_generic_intake"
+        fallback_reply = _build_generic_help_reply(lang)
+        helper_lines.extend(
+            [
+                "Generische Hilfe-Anfrage erkannt.",
+                "Keine FAQ zu Halteverbot, Preisen oder Kontakt verwenden, solange der Kunde keinen konkreten Bedarf genannt hat.",
+                f"Antworte genau mit dieser neutralen Intake-Antwort: {fallback_reply}",
+            ]
+        )
+        return {
+            "path": helper_path,
+            "helper_context": "\n".join(helper_lines),
+            "fallback_reply": fallback_reply,
+            "faq_meta": faq_meta,
+            "truth_meta": truth_meta,
+            "force_reply": True,
+        }
 
     if escalation_response:
         helper_path = "openai_primary_escalation"
@@ -1772,6 +1859,12 @@ def generate_dode_reply(
         trace["truth_meta"] = dict(helper_payload.get("truth_meta") or {})
         trace["helper_context_present"] = bool(helper_payload["helper_context"])
         trace["fallback_available"] = bool(helper_payload["fallback_reply"])
+
+    if helper_payload.get("force_reply") and helper_payload.get("fallback_reply"):
+        if trace is not None:
+            trace["fallback_used"] = True
+            trace["response_origin"] = "forced_helper_reply"
+        return str(helper_payload["fallback_reply"])
 
     return _generate_general_reply(
         active_turns,

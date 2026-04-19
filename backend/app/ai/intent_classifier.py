@@ -119,7 +119,11 @@ def _detect_service_type(focus_text: str, full_text: str) -> ServiceType | None:
     )
     has_montage = any(
         kw in focus_text
-        for kw in ("moebelmontage", "moebelaufbau", "aufbauen", "montage", "montieren", "ikea")
+        for kw in ("moebelmontage", "moebelaufbau", "aufbauen", "aufbau", "montage", "montieren", "montiert", "ikea")
+    )
+    has_kitchen = any(
+        kw in focus_text
+        for kw in ("kueche", "kuechen", "kuechenmontage", "kuechenaufbau", "arbeitsplatte")
     )
 
     if focus_text in ("transport", "transport?", "nur transport"):
@@ -152,6 +156,8 @@ def _detect_service_type(focus_text: str, full_text: str) -> ServiceType | None:
         return "entsorgung"
     if has_transport_word and (has_transport_item or has_route_words) and not has_umzug_word:
         return "einzeltransport"
+    if has_kitchen and (has_montage or "hilfe" in focus_text or "nicht geklappt" in focus_text):
+        return "moebelmontage"
     if has_montage and not has_entsorgung and not has_transport_word:
         return "moebelmontage"
     if has_umzug_word:

@@ -1,3 +1,4 @@
+import re
 import time
 import uuid
 from typing import Any
@@ -123,6 +124,59 @@ def _format_price_range(truth_meta: dict[str, Any]) -> str:
     if int(price_min) == int(price_max):
         return f"ca. {int(price_min)} EUR"
     return f"ca. {int(price_min)} bis {int(price_max)} EUR"
+
+
+UNSAFE_CHAT_PROMISE_MARKERS = (
+    "intern weiter",
+    "intern uebermittelt",
+    "intern übermittelt",
+    "zur pruefung uebermittelt",
+    "zur prüfung übermittelt",
+    "ein kollege wird",
+    "ein mitarbeiter wird",
+    "wir melden uns",
+    "wird sich bald",
+    "wird sich zeitnah",
+    "in kuerze",
+    "in kürze",
+    "per e-mail bei ihnen melden",
+    "e-mail erhalten",
+    "mail erhalten",
+    "verbindliches angebot",
+    "verbindlichen angebot",
+    "verbindliche termin",
+    "bestellung",
+)
+
+
+def _normalize_reply_guard_text(value: str | None) -> str:
+    return (
+        " ".join((value or "").lower().split())
+        .replace("ä", "ae")
+        .replace("ö", "oe")
+        .replace("ü", "ue")
+        .replace("ß", "ss")
+    )
+
+
+def _contains_unsafe_chat_promise(reply: str | None) -> bool:
+    normalized = _normalize_reply_guard_text(reply)
+    return any(marker in normalized for marker in UNSAFE_CHAT_PROMISE_MARKERS)
+
+
+def _strip_unsafe_promise_sentences(reply: str) -> str:
+    parts = [
+        part.strip()
+        for part in re.split(r"(?<=[.!?])\s+|\n+", reply or "")
+        if part.strip()
+    ]
+    safe_parts = [
+        part
+        for part in parts
+        if not _contains_unsafe_chat_promise(part)
+    ]
+    stripped = " ".join(safe_parts).strip()
+    return stripped or reply
 
 
 def _build_pricing_review_lines(truth_meta: dict[str, Any]) -> list[str]:
@@ -449,9 +503,10 @@ def dode_chat(
     )
     booking_action = booking_result.get("action")
     booking_reply_text = booking_result.get("reply_text")
+    booking_override_reply = bool(booking_result.get("override_reply"))
 
     if booking_action == "ask_consent" and booking_reply_text:
-        reply = f"{reply}\n\n{booking_reply_text}".strip()
+        reply = booking_reply_text if booking_override_reply else f"{reply}\n\n{booking_reply_text}".strip()
     elif booking_action == "submit_lead":
         try:
             lead_payload_data = booking_result.get("lead_payload") or {}
@@ -513,12 +568,12 @@ def dode_chat(
             if payload.lang == "en":
                 reply = (
                     f"{reply}\n\nYour request has been forwarded for review. "
-                    "We will contact you with the final price and appointment confirmation."
+                    "The team will review price and appointment details before contacting you."
                 ).strip()
             else:
                 reply = (
                     f"{reply}\n\nIhre Anfrage wurde zur Pruefung uebermittelt. "
-                    "Wir melden uns mit der finalen Preis- und Terminbestaetigung."
+                    "Das Team prueft Preis und Termin, bevor wir uns bei Ihnen melden."
                 ).strip()
         except Exception:
             logger.exception(
@@ -533,7 +588,13 @@ def dode_chat(
                 event_type="chat_submit_blocked",
                 payload={"reason": "duplicate_conversation_submit"},
             )
-        reply = f"{reply}\n\n{booking_reply_text}".strip()
+        reply = booking_reply_text if booking_override_reply else f"{reply}\n\n{booking_reply_text}".strip()
+
+    if not lead_data and _contains_unsafe_chat_promise(reply):
+        guarded_reply = _strip_unsafe_promise_sentences(reply or "")
+        if guarded_reply != reply:
+            reply = guarded_reply
+            reply_trace["reply_guard_applied"] = True
 
     duration_ms = round((time.perf_counter() - started_at) * 1000, 2)
     source_used = str(reply_trace.get("source_used") or "openai")

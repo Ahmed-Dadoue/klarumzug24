@@ -3,6 +3,44 @@ from __future__ import annotations
 import re
 from typing import Any
 
+HANDOFF_CONTEXT_MARKERS = (
+    "moechten sie",
+    "soll ich",
+    "kann ich",
+    "weiter pruefen",
+    "weiterpruefen",
+    "weiterleiten",
+    "uebermitteln",
+    "zur pruefung",
+    "anfrage",
+    "angebot",
+    "daten",
+    "kontaktdaten",
+    "intern",
+    "team",
+    "kollege",
+)
+HANDOFF_REQUEST_MARKERS = (
+    "ja bitte",
+    "mach das mal",
+    "mach das bitte",
+    "mach bitte",
+    "mach es",
+    "bitte weiterleiten",
+    "weiterleiten",
+    "leite",
+    "senden",
+    "schicken",
+    "uebermitteln",
+    "angebot",
+    "anfrage",
+    "auftrag",
+    "bestellung",
+    "email schicken",
+    "mail schicken",
+    "erwarte die mail",
+)
+
 CHAT_NAME_PATTERN = re.compile(
     r"\b(?:mein name ist|ich bin|name)\s+([A-Za-zÄÖÜäöüß][A-Za-zÄÖÜäöüß .'-]{1,80})",
     re.IGNORECASE,
@@ -90,7 +128,16 @@ def _extract_service_from_text(text: str) -> str | None:
         return "Kuechenmontage"
     if any(
         keyword in normalized
-        for keyword in ("kueche", "kuechenmontage", "kueche montieren", "kueche aufbauen")
+        for keyword in (
+            "kueche",
+            "kuechen",
+            "kuechenmontage",
+            "kuechenaufbau",
+            "kuechen aufbau",
+            "kueche montieren",
+            "kueche aufbauen",
+            "kuechen montiert",
+        )
     ):
         return "Kuechenmontage"
     if any(
@@ -176,6 +223,99 @@ def _is_chat_lead_complete(candidate: dict[str, str | None]) -> bool:
     return all(candidate.get(field) for field in ("name", "email", "phone", "service", "location"))
 
 
+def _last_assistant_text(messages: list[Any]) -> str:
+    for message in reversed(messages):
+        if getattr(message, "role", None) == "assistant":
+            return str(getattr(message, "content", "") or "")
+    return ""
+
+
+def _conversation_has_handoff_context(messages: list[Any]) -> bool:
+    assistant_text = _normalize_for_match(_last_assistant_text(messages))
+    if any(marker in assistant_text for marker in HANDOFF_CONTEXT_MARKERS):
+        return True
+    joined = _normalize_for_match(
+        "\n".join(
+            str(getattr(message, "content", "") or "")
+            for message in messages[-8:]
+            if getattr(message, "role", None) == "assistant"
+        )
+    )
+    return any(marker in joined for marker in HANDOFF_CONTEXT_MARKERS)
+
+
+def _is_handoff_request(text: str | None, messages: list[Any]) -> bool:
+    normalized = _normalize_for_match(text or "")
+    if not normalized:
+        return False
+    has_context = _conversation_has_handoff_context(messages)
+    if "ich stimme zu" in normalized and not has_context:
+        return False
+    if any(
+        marker in normalized
+        for marker in ("weiterleit", "leite", "auftrag", "bestellung")
+    ):
+        return True
+    if has_context and any(
+        marker in normalized
+        for marker in (
+            "mach das mal",
+            "mach das bitte",
+            "mach bitte",
+            "mach es",
+            "senden",
+            "schicken",
+            "uebermitteln",
+            "angebot",
+            "anfrage",
+        )
+    ):
+        return True
+    if "ja bitte" in normalized and has_context:
+        return True
+    if CHAT_EMAIL_PATTERN.search(text or "") and has_context:
+        return True
+    if "mail" in normalized and has_context:
+        return True
+    return any(marker in normalized for marker in HANDOFF_REQUEST_MARKERS) and has_context
+
+
+def _missing_contact_fields(candidate: dict[str, str | None]) -> list[str]:
+    labels = {
+        "name": "Name",
+        "email": "E-Mail",
+        "phone": "Telefonnummer",
+        "service": "Leistung",
+        "location": "Ort",
+    }
+    return [label for field, label in labels.items() if not candidate.get(field)]
+
+
+def _build_missing_contact_reply(candidate: dict[str, str | None], lang: str) -> str:
+    missing = _missing_contact_fields(candidate)
+    missing_text = ", ".join(missing) if missing else "die Zustimmung"
+    if lang == "en":
+        return (
+            "Not submitted yet. I can only forward the request for internal review after the required contact "
+            f"details are complete. Still missing: {missing_text}. This is still a request, not a confirmed order."
+        )
+    known_parts = []
+    if candidate.get("service"):
+        known_parts.append(f"Leistung: {candidate.get('service')}")
+    if candidate.get("location"):
+        known_parts.append(f"Ort: {candidate.get('location')}")
+    if candidate.get("email"):
+        known_parts.append(f"E-Mail: {candidate.get('email')}")
+    known_text = "\n".join(f"- {part}" for part in known_parts) if known_parts else "- bisher noch keine vollstaendigen Kontaktdaten"
+    return (
+        "Noch nicht uebermittelt. Ich kann die Anfrage erst intern zur Pruefung senden, wenn die Pflichtangaben "
+        f"vollstaendig sind. Es fehlt noch: {missing_text}.\n\n"
+        f"Bisher notiert:\n{known_text}\n\n"
+        "Wichtig: Das ist noch keine Bestellung und kein verbindlicher Auftrag. "
+        "Bitte senden Sie die fehlenden Angaben; danach frage ich nach der Zustimmung zu Datenschutz und AGB."
+    )
+
+
 def _is_chat_submit_consent(text: str | None) -> bool:
     normalized = " ".join((text or "").lower().split())
     if not normalized:
@@ -240,6 +380,13 @@ def process(conversation_id: str, user_message: str, current_state: dict[str, An
     candidate = _extract_chat_lead_candidate(messages)
 
     if not _is_chat_lead_complete(candidate):
+        if _is_handoff_request(user_message, messages):
+            return {
+                "action": "reply_only",
+                "reply_text": _build_missing_contact_reply(candidate, lang),
+                "override_reply": True,
+                "lead_candidate": candidate,
+            }
         return {"action": "reply_only", "reply_text": None}
 
     if conversation_submitted:
@@ -254,6 +401,7 @@ def process(conversation_id: str, user_message: str, current_state: dict[str, An
         return {
             "action": "ask_consent",
             "reply_text": _build_consent_prompt(candidate, lang),
+            "override_reply": True,
             "lead_candidate": candidate,
         }
 

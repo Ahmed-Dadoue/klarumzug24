@@ -112,6 +112,11 @@
   color: #f4f4f4;
 }
 
+.dode-message.bot.dode-typing {
+  color: #cfcfcf;
+  font-style: italic;
+}
+
 .dode-message.user {
   align-self: flex-end;
   background: #ffd700;

@@ -103,8 +103,23 @@ HOURS_PATTERN = re.compile(r"(\d{1,2}(?:[.,]\d{1,2})?)\s*(?:h|std|stunde|stunden
 METER_PATTERN = re.compile(r"(\d{1,2}(?:[.,]\d{1,2})?)\s*(?:m|meter|laufmeter)\b", re.IGNORECASE)
 ROOMS_PATTERN = re.compile(r"(\d{1,2})\s*(?:zimmern?|raeume|räume|room|rooms)\b", re.IGNORECASE)
 CARTONS_PATTERN = re.compile(r"(\d{1,4})\s*(?:karton|kartons|kisten)\b", re.IGNORECASE)
+CARTONS_LABEL_PATTERN = re.compile(r"(?:karton|kartons|kisten)\s*:\s*(?:ca\.?\s*)?(\d{1,4})\b", re.IGNORECASE)
 WORKERS_PATTERN = re.compile(r"(\d{1,2})\s*(?:mann|maenner|männer|arbeiter|mitarbeiter|helfer|personen)\b", re.IGNORECASE)
 FLOOR_PATTERN = re.compile(r"(\d{1,2})\s*\.?\s*(?:stock|stockwerk|og|etage)\b", re.IGNORECASE)
+FLOOR_WORDS = {
+    "erste": 1,
+    "ersten": 1,
+    "zweite": 2,
+    "zweiten": 2,
+    "dritte": 3,
+    "dritten": 3,
+    "vierte": 4,
+    "vierten": 4,
+    "fuenfte": 5,
+    "fuenften": 5,
+    "sechste": 6,
+    "sechsten": 6,
+}
 
 CLEARANCE_SERVICE_TYPES = {
     "entsorgung",
@@ -115,24 +130,31 @@ CLEARANCE_SERVICE_TYPES = {
 
 
 def _normalize(value: str) -> str:
-    return (
-        " ".join((value or "").lower().split())
-        .replace("ä", "ae")
-        .replace("ö", "oe")
-        .replace("ü", "ue")
-        .replace("ß", "ss")
-    )
+    text = " ".join((value or "").lower().split())
+    replacements = {
+        "ä": "ae",
+        "ö": "oe",
+        "ü": "ue",
+        "ß": "ss",
+        "Ã¤": "ae",
+        "Ã¶": "oe",
+        "Ã¼": "ue",
+        "ÃŸ": "ss",
+    }
+    for source, target in replacements.items():
+        text = text.replace(source, target)
+    return text
 
 
 def _round_up_to_10(value: float) -> int:
     return int(ceil(max(0.0, value) / 10.0) * 10)
 
 
-def _safe_positive_float(value: float | int | None) -> float | None:
+def _safe_non_negative_float(value: float | int | None) -> float | None:
     if value is None:
         return None
     safe_value = float(value)
-    return safe_value if safe_value > 0 else None
+    return safe_value if safe_value >= 0 else None
 
 
 def _safe_non_negative_int(value: int | None) -> int:
@@ -178,8 +200,13 @@ def _detect_service_type(text_ascii: str) -> PricingV2ServiceType | None:
             "kuechenmontage",
             "kueche komplett",
             "komplette kueche",
+            "kuechen aufbau",
+            "kuechenaufbau",
             "kueche montieren",
             "kueche aufbauen",
+            "kueche aufgebaut",
+            "kuechen montiert",
+            "kueche montiert",
             "unterschrank",
             "oberschrank",
             "schraenke",
@@ -191,6 +218,11 @@ def _detect_service_type(text_ascii: str) -> PricingV2ServiceType | None:
         return "arbeitsplatte_only"
     if has_full_kitchen:
         return "kuechenmontage"
+
+    has_move = any(token in text_ascii for token in ("umzug", "umziehen", "ziehe um", "wohnung wechseln"))
+    has_move_scope = any(token in text_ascii for token in (" von ", " nach ", "zimmer", "karton", "kisten", "transporter"))
+    if has_move and has_move_scope:
+        return "umzug"
 
     if any(token in text_ascii for token in ("haushaltsaufloesung", "hausaufloesung")):
         return "haushaltsaufloesung"
@@ -224,9 +256,7 @@ def _detect_service_type(text_ascii: str) -> PricingV2ServiceType | None:
         return "transporthilfe"
     if any(token in text_ascii for token in ("einzeltransport", "nur transport", "transportieren", "abholen", "lieferung")):
         return "einzeltransport"
-    if any(token in text_ascii for token in ("umzug", "umziehen", "ziehe um", "wohnung wechseln")) or (
-        "ziehe" in text_ascii and " um" in text_ascii
-    ):
+    if has_move or ("ziehe" in text_ascii and " um" in text_ascii):
         return "umzug"
     if has_price_signal and any(token in text_ascii for token in ("moebel", "moebelmontage", "schrank", "regal", "bett", "aufbauen", "montage")):
         return "moebelmontage"
@@ -337,7 +367,7 @@ def estimate_company_price_v2(
     *,
     profile: CompanyPricingProfile = DEFAULT_COMPANY_PRICING_PROFILE,
 ) -> PricingV2Result:
-    distance_km = _safe_positive_float(data.distance_km)
+    distance_km = _safe_non_negative_float(data.distance_km)
     needs_transporter = bool(data.needs_transporter)
     if data.needs_transporter is None and data.service_type in {"umzug", "einzeltransport", *CLEARANCE_SERVICE_TYPES}:
         needs_transporter = True
@@ -514,6 +544,42 @@ def _build_follow_up_question_de(service_type: PricingV2ServiceType, missing_fie
     )
 
 
+def _extract_distance_or_base_location(combined_text: str, text_ascii: str) -> float | None:
+    distance_km = _extract_first_float(DISTANCE_PATTERN, combined_text)
+    if distance_km is not None:
+        return distance_km
+    if any(token in text_ascii for token in ("bordesholm", "24582", "luettbarten", "luetbarten", "luttbarten")):
+        return 0.0
+    return None
+
+
+def _extract_floors(combined_text: str, text_ascii: str) -> list[int]:
+    floors = [int(value) for value in FLOOR_PATTERN.findall(combined_text)]
+    for word, value in FLOOR_WORDS.items():
+        if f"{word} etage" in text_ascii or f"{word} stock" in text_ascii:
+            floors.append(value)
+    return floors
+
+
+def _detect_elevator(text_ascii: str) -> bool | None:
+    if any(token in text_ascii for token in ("kein aufzug", "keinen aufzug", "ohne aufzug", "kein lift", "ohne lift")):
+        return False
+    if any(
+        token in text_ascii
+        for token in ("mit aufzug", "aufzug vorhanden", "es gibt ein aufzug", "es gibt einen aufzug", "lift vorhanden")
+    ):
+        return True
+    return None
+
+
+def _has_cutout_for(text_ascii: str, item_tokens: tuple[str, ...], explicit_tokens: tuple[str, ...]) -> bool:
+    if any(token in text_ascii for token in explicit_tokens):
+        return True
+    if "ausschnitt" not in text_ascii and "ausschneiden" not in text_ascii and "loch" not in text_ascii:
+        return False
+    return any(token in text_ascii for token in item_tokens)
+
+
 def extract_pricing_v2_input_from_messages(messages: list[ChatTurn]) -> PricingV2Input | None:
     user_texts = [" ".join(message.content.split()) for message in messages if message.role == "user"]
     if not user_texts:
@@ -524,13 +590,14 @@ def extract_pricing_v2_input_from_messages(messages: list[ChatTurn]) -> PricingV
     if not service_type:
         return None
 
-    distance_km = _extract_first_float(DISTANCE_PATTERN, combined_text)
+    distance_km = _extract_distance_or_base_location(combined_text, text_ascii)
     hours = _extract_first_float(HOURS_PATTERN, combined_text)
     kitchen_meters = _extract_first_float(METER_PATTERN, combined_text) if service_type == "kuechenmontage" else None
     workers_total = _extract_first_int(WORKERS_PATTERN, combined_text)
     rooms = _extract_first_int(ROOMS_PATTERN, combined_text)
-    cartons = _extract_first_int(CARTONS_PATTERN, combined_text)
-    floors = [int(value) for value in FLOOR_PATTERN.findall(combined_text)]
+    cartons = _extract_first_int(CARTONS_PATTERN, combined_text) or _extract_first_int(CARTONS_LABEL_PATTERN, combined_text)
+    floors = _extract_floors(combined_text, text_ascii)
+    elevator = _detect_elevator(text_ascii)
     heavy_items = sum(
         1
         for token in (
@@ -558,8 +625,19 @@ def extract_pricing_v2_input_from_messages(messages: list[ChatTurn]) -> PricingV
         needs_transporter = False
 
     difficulty = _detect_difficulty(text_ascii)
-    sink_cutout = any(token in text_ascii for token in ("spuele", "spuelbecken", "spuelenausschnitt"))
-    cooktop_cutout = any(token in text_ascii for token in ("kochfeld", "herd", "ceran", "gas", "kochfeld-ausschnitt"))
+    sink_cutout = _has_cutout_for(
+        text_ascii,
+        ("spuele", "spuelbecken"),
+        ("spuelenausschnitt", "spuele ausschnitt", "ausschnitt fuer spuele", "ausschnitt für spuele"),
+    )
+    cooktop_cutout = _has_cutout_for(
+        text_ascii,
+        ("kochfeld", "herd", "ceran", "gas"),
+        ("kochfeldausschnitt", "kochfeld-ausschnitt", "ausschnitt fuer kochfeld", "ausschnitt für kochfeld"),
+    )
+    if service_type == "arbeitsplatte_only":
+        sink_cutout = sink_cutout or any(token in text_ascii for token in ("spuele", "spuelbecken"))
+        cooktop_cutout = cooktop_cutout or any(token in text_ascii for token in ("kochfeld", "ceran", "gas"))
 
     return PricingV2Input(
         service_type=service_type,
@@ -577,6 +655,8 @@ def extract_pricing_v2_input_from_messages(messages: list[ChatTurn]) -> PricingV
         heavy_items=heavy_items or None,
         floor_from=floors[0] if floors else None,
         floor_to=floors[1] if len(floors) > 1 else None,
+        elevator_from=elevator,
+        elevator_to=elevator if len(floors) > 1 else None,
         description=combined_text,
     )
 

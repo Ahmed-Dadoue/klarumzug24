@@ -174,6 +174,98 @@ class ChatBookingIntegrationTest(unittest.TestCase):
         self.assertEqual("AI reply", response["data"]["reply"])
         create_mock.assert_not_called()
 
+    def test_handoff_request_without_contact_data_overrides_unsafe_ai_reply(self) -> None:
+        payload = self._payload(
+            "conv_incomplete_handoff",
+            [
+                ChatMessageIn(role="user", content="ich brauche Kuechenaufbau in Bordesholm"),
+                ChatMessageIn(
+                    role="assistant",
+                    content="Moechten Sie, dass ich das fuer Sie weiter pruefe?",
+                ),
+                ChatMessageIn(role="user", content="Ja bitte"),
+            ],
+        )
+        create_mock = Mock()
+        unsafe_reply = (
+            "Ich leite Ihre Anfrage intern weiter. "
+            "Ein Kollege wird sich bald per E-Mail melden."
+        )
+
+        with patch.object(chat_service, "_is_chat_conversation_submitted", return_value=False):
+            response = self._run_chat(
+                payload,
+                generate_reply=Mock(return_value=unsafe_reply),
+                create_lead=create_mock,
+            )
+
+        self.assertFalse(response["data"]["lead_submitted"])
+        self.assertIn("Noch nicht uebermittelt", response["data"]["reply"])
+        self.assertIn("Telefonnummer", response["data"]["reply"])
+        self.assertNotIn("Ein Kollege wird sich bald", response["data"]["reply"])
+        create_mock.assert_not_called()
+
+    def test_move_handoff_without_contact_data_overrides_unsafe_ai_reply(self) -> None:
+        payload = self._payload(
+            "conv_move_handoff_missing_contact",
+            [
+                ChatMessageIn(role="user", content="Ich brauche Hilfe beim Umzug"),
+                ChatMessageIn(
+                    role="assistant",
+                    content="Wenn Sie moechten, kann ich Ihre Daten sofort weiterleiten.",
+                ),
+                ChatMessageIn(role="user", content="Ja mach das mal"),
+            ],
+        )
+        create_mock = Mock()
+
+        with patch.object(chat_service, "_is_chat_conversation_submitted", return_value=False):
+            response = self._run_chat(
+                payload,
+                generate_reply=Mock(
+                    return_value=(
+                        "Alles klar, ich leite Ihre Angaben sofort intern weiter. "
+                        "Ein Kollege wird sich zeitnah mit einem verbindlichen Angebot melden."
+                    )
+                ),
+                create_lead=create_mock,
+            )
+
+        self.assertFalse(response["data"]["lead_submitted"])
+        self.assertIn("Noch nicht uebermittelt", response["data"]["reply"])
+        self.assertIn("Name", response["data"]["reply"])
+        self.assertIn("Telefonnummer", response["data"]["reply"])
+        self.assertNotIn("verbindlichen Angebot", response["data"]["reply"])
+        create_mock.assert_not_called()
+
+    def test_unsafe_promise_sentence_is_removed_when_no_lead_was_created(self) -> None:
+        payload = self._payload(
+            "conv_remove_unsafe_sentence",
+            [
+                ChatMessageIn(role="user", content="Wie laeuft so ein Umzug ab?"),
+            ],
+        )
+        create_mock = Mock()
+
+        with patch.object(chat_service, "_is_chat_conversation_submitted", return_value=False):
+            response = self._run_chat(
+                payload,
+                generate_reply=Mock(
+                    return_value=(
+                        "Am Umzugstag kommen die Helfer mit dem Transporter, laden ein "
+                        "und bringen alles zum Zielort. Ein Kollege wird sich zeitnah "
+                        "mit einem verbindlichen Angebot bei Ihnen melden."
+                    )
+                ),
+                create_lead=create_mock,
+            )
+
+        self.assertFalse(response["data"]["lead_submitted"])
+        self.assertIn("Am Umzugstag kommen die Helfer", response["data"]["reply"])
+        self.assertNotIn("Ein Kollege wird sich", response["data"]["reply"])
+        self.assertNotIn("verbindlichen Angebot", response["data"]["reply"])
+        create_mock.assert_not_called()
+
     def test_mark_submitted_only_after_successful_create_lead_and_not_on_error(self) -> None:
         payload_success = self._payload("conv_success", self._complete_messages(with_consent=True))
         call_order: list[str] = []

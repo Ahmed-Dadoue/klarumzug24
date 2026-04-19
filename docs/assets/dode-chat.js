@@ -53,9 +53,9 @@
     de: {
       openWhatsapp: "WhatsApp oeffnen",
       greetingHtml:
-        "Hallo, ich bin <strong>Dode</strong>. Ich helfe Ihnen schnell bei Preis, Kontakt, WhatsApp und allgemeinen Fragen rund um Ihren Umzug.",
+        "Hallo, ich bin <strong>Dode</strong>. Ich helfe Ihnen bei Umzug, Transport, Montage, Kueche, Entruempelung, Entsorgung und der passenden Einschaetzung.",
       greetingText:
-        "Hallo, ich bin Dode. Ich helfe Ihnen schnell bei Preis, Kontakt, WhatsApp und allgemeinen Fragen rund um Ihren Umzug.",
+        "Hallo, ich bin Dode. Ich helfe Ihnen bei Umzug, Transport, Montage, Kueche, Entruempelung, Entsorgung und der passenden Einschaetzung.",
       fabLabel: "Dode Chat oeffnen",
       panelLabel: "Dode Chat",
       subtitle: "Ihr Klarumzug24 Assistent",
@@ -63,9 +63,9 @@
       inputPlaceholder: "Fragen Sie Dode...",
       inputAria: "Nachricht an Dode",
       sendLabel: "Nachricht senden",
-      note: "Dode hilft bei Preis, Kontakt, WhatsApp und allgemeinen Umzugsfragen.",
+      note: "Dode hilft bei Umzug, Transport, Montage, Kueche, Entruempelung, Entsorgung und Kontakt.",
       typing: "Dode schreibt...",
-      quickActions: ["Preis berechnen", "Kontakt", "WhatsApp", "Leistungen", "Einsatzgebiet"],
+      quickActions: ["Umzug planen", "Kueche/Moebel", "Entsorgung", "Preis einschaetzen", "Kontakt"],
       pageLabels: {
         "index.html": "Startseite",
         "index-en.html": "Home",
@@ -83,7 +83,7 @@
         "impressum-en.html": "Legal notice"
       },
       fallbackReplies: {
-        hello: "Hallo, ich bin <strong>Dode</strong>. Ich helfe Ihnen bei Preis, Kontakt, WhatsApp, Leistungen und allgemeinen Fragen zu Klarumzug24.",
+        hello: "Hallo, ich bin <strong>Dode</strong>. Worum geht es genau: Umzug, Transport, Montage, Kueche, Entruempelung oder Entsorgung?",
         price: 'Fuer eine schnelle Preis-Schaetzung nutzen Sie bitte unseren <a href="umzugsrechner.html">Umzugsrechner</a>. Wenn Sie lieber direkt anfragen moechten, koennen Sie danach sofort ueber die Seite senden oder mich nach <strong>WhatsApp</strong> fragen.',
         contact: 'Sie erreichen Klarumzug24 unter <a href="tel:+491636157234">+49 163 615 7234</a> oder per E-Mail an <a href="mailto:info@klarumzug24.de">info@klarumzug24.de</a>. Fuer eine schriftliche Anfrage gibt es auch das <a href="kontakt.html">Kontaktformular</a>.',
         whatsapp: 'Sie koennen direkt per WhatsApp schreiben: <a href="https://wa.me/491636157234" target="_blank" rel="noopener">WhatsApp oeffnen</a>. Dort koennen Sie auch Bilder oder weitere Details senden.',
@@ -308,13 +308,196 @@
     addMessage(container, "bot", linkifyText(text));
   }
 
+  function sleep(ms) {
+    return new Promise((resolve) => window.setTimeout(resolve, ms));
+  }
+
+  function getHumanTypingDelay(text) {
+    const length = String(text || "").length;
+    return Math.min(1300, Math.max(450, length * 6));
+  }
+
+  async function revealBotText(container, message, text) {
+    const fullText = String(text || "").trim();
+    await sleep(getHumanTypingDelay(fullText));
+
+    message.className = "dode-message bot";
+    message.textContent = "";
+
+    const chunkSize = Math.max(4, Math.min(14, Math.round(fullText.length / 55)));
+    for (let index = 0; index < fullText.length; index += chunkSize) {
+      message.textContent = fullText.slice(0, index + chunkSize);
+      container.scrollTop = container.scrollHeight;
+      await sleep(26 + Math.floor(Math.random() * 28));
+    }
+
+    message.innerHTML = linkifyText(fullText);
+    container.scrollTop = container.scrollHeight;
+  }
+
   function createTypingMessage(container) {
     const message = document.createElement("div");
-    message.className = "dode-message bot";
+    message.className = "dode-message bot dode-typing";
     message.textContent = t.typing;
     container.appendChild(message);
     container.scrollTop = container.scrollHeight;
     return message;
+  }
+
+  function isShortNoiseMessage(text) {
+    const normalized = String(text || "").trim().toLowerCase();
+    return ["ja", "nein", "ok", "okay", "danke", "bitte"].includes(normalized);
+  }
+
+  function normalizeMemoryText(text) {
+    return String(text || "")
+      .toLowerCase()
+      .replace(/ä/g, "ae")
+      .replace(/ö/g, "oe")
+      .replace(/ü/g, "ue")
+      .replace(/ß/g, "ss")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function addUnique(list, value) {
+    const cleaned = String(value || "").replace(/\s+/g, " ").trim();
+    if (cleaned && !list.includes(cleaned)) {
+      list.push(cleaned);
+    }
+  }
+
+  function matchFirst(text, patterns) {
+    for (const pattern of patterns) {
+      const match = text.match(pattern);
+      if (match) {
+        return match;
+      }
+    }
+    return null;
+  }
+
+  function extractSessionFacts(userFacts) {
+    const combined = userFacts.join(" | ");
+    const normalized = normalizeMemoryText(combined);
+    const facts = [];
+    const services = [];
+
+    if (/(umzug|umziehen|ziehe .*um|transport|transporter)/i.test(normalized)) {
+      addUnique(services, "Umzug/Transport");
+    }
+    if (/(verpack|packen|vorbereit)/i.test(normalized)) {
+      addUnique(services, "Verpacken/Vorbereiten");
+    }
+    if (/(entsorg|abstellraum|sperrmuell|muell|wegwerfen|nicht brauche)/i.test(normalized)) {
+      addUnique(services, "Entsorgung");
+    }
+    if (/(kueche|kuechen|arbeitsplatte|moebelmontage|montage|aufbau|abbau)/i.test(normalized)) {
+      addUnique(services, "Montage");
+    }
+    if (services.length) {
+      facts.push("Leistungen: " + services.join(", "));
+    }
+
+    const routeMatch = matchFirst(combined, [
+      /\bvon\s+(.{2,80}?)\s+nach\s+(.{2,80}?)(?:\s+(?:es|und|mit|am|ich|wir|das|der|die|den|auf|in)\b|[,.!?|]|$)/i,
+      /\bstart\s+(?:ist|in)\s+(.{2,80}?)\s+(?:und\s+)?ziel\s+(?:ist|in)\s+(.{2,80}?)(?:\s+(?:es|und|mit|am|ich|wir)\b|[,.!?|]|$)/i,
+    ]);
+    if (routeMatch) {
+      facts.push("Route: von " + routeMatch[1].trim() + " nach " + routeMatch[2].trim());
+    }
+
+    const roomMatch = combined.match(/(\d{1,2})\s*(?:zimmer|raeume|räume)/i);
+    if (roomMatch) {
+      facts.push("Umfang: " + roomMatch[1] + " Zimmer");
+    }
+
+    const cartonMatch = combined.match(/(?:ca\.?|ungefaehr|ungefähr|etwa)?\s*(\d{1,4})\s*(?:kartons?|kisten)/i);
+    if (cartonMatch) {
+      facts.push("Kartons: ca. " + cartonMatch[1]);
+    }
+
+    const floorMatch = matchFirst(combined, [
+      /(\d{1,2})\.?\s*(?:etage|stock|og)/i,
+      /\b(erste|zweite|dritte|vierte|fuenfte|fünfte|sechste)\s+(?:etage|stock)/i,
+    ]);
+    if (floorMatch) {
+      const floorWords = {
+        erste: "1",
+        zweite: "2",
+        dritte: "3",
+        vierte: "4",
+        fuenfte: "5",
+        fünfte: "5",
+        sechste: "6",
+      };
+      const floor = floorWords[normalizeMemoryText(floorMatch[1])] || floorMatch[1];
+      facts.push("Zugang: " + floor + ". Etage");
+    }
+    if (/(kein(?:en)? aufzug|ohne aufzug|kein lift|ohne lift)/i.test(normalized)) {
+      facts.push("Zugang: kein Aufzug");
+    } else if (/(mit aufzug|aufzug vorhanden|es gibt ein(?:en)? aufzug|lift vorhanden)/i.test(normalized)) {
+      facts.push("Zugang: Aufzug vorhanden");
+    }
+
+    if (/(transporter|sprinter|fahrzeug|transport mit)/i.test(normalized)) {
+      facts.push("Fahrzeug: Transporter benoetigt");
+    }
+    if (/(kuehlschrank|waschmaschine|spuelmaschine|herd|ofen|bett|schrank|kommode|sofa|fernseher|schreibtisch)/i.test(normalized)) {
+      facts.push("Hinweis: Moebel/Geraete wurden genannt");
+    }
+
+    const dateMatch = combined.match(/\b(\d{1,2}\.\d{1,2}\.\d{2,4})\b/);
+    if (dateMatch) {
+      facts.push("Wunschtermin: " + dateMatch[1]);
+    }
+    if (/(weibliche helferin|helferin|weiblich|frau als helfer)/i.test(normalized)) {
+      facts.push("Kundenwunsch: weibliche Helferin, nicht garantiert ohne interne Pruefung");
+    }
+
+    return facts;
+  }
+
+  function buildSessionContextNote(messages) {
+    const userFacts = messages
+      .filter((message) => message.role === "user")
+      .map((message) => String(message.content || "").replace(/\s+/g, " ").trim())
+      .filter((text) => text && !isShortNoiseMessage(text));
+
+    if (userFacts.length < 4) {
+      return null;
+    }
+
+    const structuredFacts = extractSessionFacts(userFacts);
+    const evidenceFacts = [];
+    userFacts.slice(0, 4).forEach((text) => addUnique(evidenceFacts, text));
+    userFacts.slice(-12).forEach((text) => addUnique(evidenceFacts, text));
+
+    let summary = evidenceFacts.join(" | ");
+    if (summary.length > 1400) {
+      summary = summary.slice(-1400).replace(/^[^|]*\|\s*/, "");
+    }
+
+    const factText = structuredFacts.length
+      ? "Bekannte strukturierte Angaben: " + structuredFacts.join("; ") + ". "
+      : "";
+
+    return {
+      role: "user",
+      content:
+        "KONTEXTNOTIZ aus dieser laufenden Chat-Sitzung, nur als Gedaechtnis nutzen und nicht als neue Frage beantworten. " +
+        "Frage den Kunden nicht erneut nach Angaben, die hier bereits stehen. Antworte nur auf die neueste echte Kundenfrage. " +
+        factText +
+        "Kundenangaben kompakt: " +
+        summary,
+    };
+  }
+
+  function buildMessagesForApi(messages) {
+    const contextNote = buildSessionContextNote(messages);
+    const recentLimit = contextNote ? 11 : 20;
+    const recent = messages.slice(-recentLimit);
+    return contextNote ? [contextNote].concat(recent) : recent;
   }
 
   async function fetchAiReply(messages) {
@@ -337,7 +520,7 @@
             memory_review_required: isLocalHost,
             lang: isEnglish ? "en" : "de",
             page: window.location.pathname,
-            messages: messages.slice(-12),
+            messages: buildMessagesForApi(messages),
           }),
         });
 
@@ -379,8 +562,7 @@
 
     try {
       const reply = await fetchAiReply(conversation);
-      typingMessage.remove();
-      addBotText(container, reply);
+      await revealBotText(container, typingMessage, reply);
       conversation.push({ role: "assistant", content: reply });
     } catch (_) {
       const fallback = buildFallbackReply(text);
