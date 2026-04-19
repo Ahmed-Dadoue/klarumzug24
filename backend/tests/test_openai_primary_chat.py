@@ -62,8 +62,8 @@ class OpenAiPrimaryChatTest(unittest.TestCase):
         self.assertIsNotNone(fake_client.responses.last_kwargs)
         prompt_input = fake_client.responses.last_kwargs["input"]
         self.assertIn("INTERNER HELFER-KONTEXT", prompt_input)
-        self.assertIn("Preisantwort-Basis:", prompt_input)
-        self.assertIn("ca. 420 EUR", prompt_input)
+        self.assertIn("Pricing v2", prompt_input)
+        self.assertIn("Berechnung/Antwortbasis", prompt_input)
 
     def test_helper_fallback_is_used_when_openai_client_fails(self) -> None:
         with patch.object(
@@ -83,7 +83,8 @@ class OpenAiPrimaryChatTest(unittest.TestCase):
             )
 
         self.assertIn("unverbindliche Schaetzung", reply)
-        self.assertIn("ca. 420 EUR", reply)
+        self.assertIn("560", reply)
+        self.assertIn("690", reply)
 
 
 if __name__ == "__main__":

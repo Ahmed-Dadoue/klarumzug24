@@ -1,7 +1,8 @@
 from fastapi import APIRouter
 
 from app.api import success_response
-from app.schemas import CustomerMoveEstimateIn, PredictIn
+from app.ai.company_pricing import PricingV2Input, estimate_company_price_v2
+from app.schemas import CompanyPricingV2EstimateIn, CustomerMoveEstimateIn, PredictIn
 from app.services.pricing_service import (
     CustomerMovePricingInput,
     calculate_estimated_price,
@@ -73,6 +74,52 @@ def estimate_move(payload: CustomerMoveEstimateIn):
     }
     return success_response(
         "Customer move estimate calculated",
+        data=result,
+        legacy=result,
+    )
+
+
+@router.post("/api/pricing/v2/estimate")
+def estimate_company_pricing_v2(payload: CompanyPricingV2EstimateIn):
+    estimate = estimate_company_price_v2(
+        PricingV2Input(
+            service_type=payload.service_type,
+            distance_km=payload.distance_km,
+            estimated_hours_min=payload.estimated_hours_min,
+            estimated_hours_max=payload.estimated_hours_max,
+            workers_total=payload.workers_total,
+            needs_transporter=payload.needs_transporter,
+            kitchen_meters=payload.kitchen_meters,
+            sink_cutout=payload.sink_cutout,
+            cooktop_cutout=payload.cooktop_cutout,
+            difficulty=payload.difficulty,
+            rooms=payload.rooms,
+            cartons=payload.cartons,
+            heavy_items=payload.heavy_items,
+            floor_from=payload.floor_from,
+            floor_to=payload.floor_to,
+            elevator_from=payload.elevator_from,
+            elevator_to=payload.elevator_to,
+            description=payload.description,
+        )
+    )
+    result = {
+        "service_type": estimate.service_type,
+        "pricing_model": estimate.pricing_model,
+        "price_min_eur": estimate.price_min_eur,
+        "price_max_eur": estimate.price_max_eur,
+        "workers_total": estimate.workers_total,
+        "helpers_count": estimate.helpers_count,
+        "needs_transporter": estimate.needs_transporter,
+        "estimated_hours_min": estimate.estimated_hours_min,
+        "estimated_hours_max": estimate.estimated_hours_max,
+        "distance_km": estimate.distance_km,
+        "missing_fields": list(estimate.missing_fields),
+        "explanation": estimate.explanation_de,
+        "internal_notes": list(estimate.internal_notes),
+    }
+    return success_response(
+        "Company pricing v2 estimate calculated",
         data=result,
         legacy=result,
     )

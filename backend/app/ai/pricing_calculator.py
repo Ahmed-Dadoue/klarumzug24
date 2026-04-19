@@ -1,4 +1,7 @@
-"""Rule-based local estimators for non-move service prices."""
+"""Legacy rule-based local estimators for non-move service prices.
+
+New company-specific Dode pricing should use app.ai.company_pricing.
+"""
 
 from __future__ import annotations
 

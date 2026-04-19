@@ -7,6 +7,7 @@ from typing import Any
 from fastapi import HTTPException
 
 from .faq_store import find_best_faq_match, get_faq_filename
+from .company_pricing import build_company_pricing_helper_payload
 from .logging_utils import log_chat_event, log_chat_exception
 from .policy_registry import find_best_policy_truth
 from .pricing_truth import build_pricing_safety_reply, get_pricing_truth
@@ -1041,6 +1042,10 @@ def _build_helper_payload(
             "faq_meta": faq_meta,
             "truth_meta": truth_meta,
         }
+
+    company_pricing_payload = build_company_pricing_helper_payload(list(messages), lang=lang)
+    if company_pricing_payload:
+        return company_pricing_payload
 
     if classified_intent and not is_pricing_related_intent(classified_intent.intent_type):
         service_truth_payload = _lookup_service_truth_reply(

@@ -49,6 +49,34 @@ class CustomerMoveEstimateIn(BaseModel):
     express: bool = False
 
 
+class CompanyPricingV2EstimateIn(BaseModel):
+    service_type: Literal[
+        "umzug",
+        "transporthilfe",
+        "einzeltransport",
+        "kuechenmontage",
+        "arbeitsplatte_only",
+        "moebelmontage",
+    ]
+    distance_km: float | None = Field(default=None, ge=0, le=5000)
+    estimated_hours_min: float | None = Field(default=None, ge=0, le=200)
+    estimated_hours_max: float | None = Field(default=None, ge=0, le=200)
+    workers_total: int | None = Field(default=None, ge=1, le=20)
+    needs_transporter: bool | None = None
+    kitchen_meters: float | None = Field(default=None, ge=0, le=200)
+    sink_cutout: bool = False
+    cooktop_cutout: bool = False
+    difficulty: Literal["simple", "medium", "hard"] | None = None
+    rooms: int | None = Field(default=None, ge=0, le=50)
+    cartons: int | None = Field(default=None, ge=0, le=5000)
+    heavy_items: int | None = Field(default=None, ge=0, le=100)
+    floor_from: int | None = Field(default=None, ge=0, le=200)
+    floor_to: int | None = Field(default=None, ge=0, le=200)
+    elevator_from: bool | None = None
+    elevator_to: bool | None = None
+    description: str | None = Field(default=None, max_length=1200)
+
+
 class PredictIn(BaseModel):
     qm: int = Field(ge=0, le=10000)
     kartons: int = Field(ge=0, le=5000)

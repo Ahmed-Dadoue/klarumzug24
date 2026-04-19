@@ -7,6 +7,8 @@ from app.models import PricingRuleDB
 if TYPE_CHECKING:
     from app.schemas.pricing import PredictIn
 
+# Legacy move-pricing entry points remain for existing calculator/API compatibility.
+# New Dode/company pricing should use app.ai.company_pricing instead.
 HOURLY_RATE_PER_WORKER_EUR = 45.0
 MIN_ORDER_PRICE_EUR = 150.0
 LOCAL_DISTANCE_RATE_EUR = 0.60
