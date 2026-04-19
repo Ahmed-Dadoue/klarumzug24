@@ -23,10 +23,76 @@ CHAT_LOCATION_PATTERN = re.compile(
 )
 
 
+def _normalize_for_match(text: str) -> str:
+    normalized = " ".join((text or "").lower().split())
+    replacements = {
+        "\u00e4": "ae",
+        "\u00f6": "oe",
+        "\u00fc": "ue",
+        "\u00df": "ss",
+        "\u00c3\u00a4": "ae",
+        "\u00c3\u00b6": "oe",
+        "\u00c3\u00bc": "ue",
+        "\u00c3\u009f": "ss",
+    }
+    for source, target in replacements.items():
+        normalized = normalized.replace(source, target)
+    return normalized
+
+
 def _extract_service_from_text(text: str) -> str | None:
-    normalized = " ".join(text.lower().split())
+    normalized = _normalize_for_match(text)
     if any(keyword in normalized for keyword in ("umzug", "umziehen", "ziehe", "move", "moving")):
         return "Umzug"
+    if any(keyword in normalized for keyword in ("haushaltsaufloesung", "hausaufloesung")):
+        return "Haushaltsaufloesung"
+    if any(keyword in normalized for keyword in ("wohnungsaufloesung", "wohnung aufloesen")):
+        return "Wohnungsaufloesung"
+    if any(
+        keyword in normalized
+        for keyword in (
+            "entruempelung",
+            "entruempeln",
+            "entrumpelung",
+            "entrumpeln",
+            "raeumung",
+            "kellerraeumung",
+            "dachbodenraeumung",
+            "betriebsaufloesung",
+            "firmenaufloesung",
+        )
+    ):
+        return "Entruempelung"
+    if any(
+        keyword in normalized
+        for keyword in (
+            "arbeitsplatte",
+            "kuechenplatte",
+            "tischplatte",
+            "ausschnitt",
+            "spuele",
+            "kochfeld",
+        )
+    ):
+        if not any(
+            keyword in normalized
+            for keyword in (
+                "kueche komplett",
+                "komplette kueche",
+                "kueche montieren",
+                "kueche aufbauen",
+                "kuechenmontage",
+                "unterschrank",
+                "oberschrank",
+            )
+        ):
+            return "Arbeitsplatte"
+        return "Kuechenmontage"
+    if any(
+        keyword in normalized
+        for keyword in ("kueche", "kuechenmontage", "kueche montieren", "kueche aufbauen")
+    ):
+        return "Kuechenmontage"
     if any(
         keyword in normalized
         for keyword in ("entsorgung", "entsorgen", "entrümpel", "entruempel", "sperrmüll", "sperrmuell", "disposal", "junk removal", "clearance")
@@ -107,13 +173,14 @@ def _extract_chat_lead_candidate(messages: list[Any]) -> dict[str, str | None]:
 
 
 def _is_chat_lead_complete(candidate: dict[str, str | None]) -> bool:
-    return all(candidate.get(field) for field in ("name", "email", "phone", "service", "date", "location"))
+    return all(candidate.get(field) for field in ("name", "email", "phone", "service", "location"))
 
 
 def _is_chat_submit_consent(text: str | None) -> bool:
     normalized = " ".join((text or "").lower().split())
     if not normalized:
         return False
+    normalized = _normalize_for_match(normalized)
     consent_markers = (
         "ja, ich stimme zu und senden",
         "ja ich stimme zu und senden",
@@ -122,32 +189,44 @@ def _is_chat_submit_consent(text: str | None) -> bool:
         "ja ich stimme zu",
         "i agree and send",
     )
-    return any(marker in normalized for marker in consent_markers)
+    if any(marker in normalized for marker in consent_markers):
+        return True
+    yes_markers = ("ja", "passt", "ok", "okay", "einverstanden")
+    send_markers = ("senden", "schicken", "uebermitteln", "angebot", "anfrage")
+    return any(marker in normalized for marker in yes_markers) and any(
+        marker in normalized for marker in send_markers
+    )
 
 
 def _build_consent_prompt(candidate: dict[str, str | None], lang: str) -> str:
-    appointment = f"{candidate.get('date')}" + (f" {candidate.get('time')}" if candidate.get("time") else "")
+    appointment = (
+        f"{candidate.get('date')}" + (f" {candidate.get('time')}" if candidate.get("time") else "")
+        if candidate.get("date")
+        else "noch offen"
+    )
     if lang == "en":
         return (
-            "Before I submit your request as binding, please confirm:\n"
+            "Before I forward your request for review, please confirm:\n"
             f"- Name: {candidate.get('name')}\n"
             f"- Email: {candidate.get('email')}\n"
             f"- Phone: {candidate.get('phone')}\n"
             f"- Service: {candidate.get('service')}\n"
             f"- Appointment: {appointment}\n"
             f"- Location: {candidate.get('location')}\n\n"
+            "This is not a binding fixed-price offer or final appointment confirmation yet.\n"
             "Please confirm that you agree to our privacy policy and have read the terms (AGB).\n"
             "Links: /datenschutz-en.html and /agb-en.html\n"
             "Reply with: 'I agree and send'"
         )
     return (
-        "Bevor ich Ihre Anfrage verbindlich uebermittle, bitte kurz pruefen:\n"
+        "Bevor ich Ihre Anfrage zur Pruefung an unser Team uebermittle, bitte kurz pruefen:\n"
         f"- Name: {candidate.get('name')}\n"
         f"- E-Mail: {candidate.get('email')}\n"
         f"- Telefon: {candidate.get('phone')}\n"
         f"- Service: {candidate.get('service')}\n"
         f"- Termin: {appointment}\n"
         f"- Ort: {candidate.get('location')}\n\n"
+        "Das ist noch kein verbindliches Festpreisangebot und keine finale Terminbestaetigung.\n"
         "Bitte bestaetigen Sie, dass Sie unseren Datenschutzbestimmungen zustimmen und die AGB zur Kenntnis genommen haben.\n"
         "Links: /datenschutz.html und /agb.html\n"
         "Antworten Sie mit: 'Ja, ich stimme zu und senden'"
@@ -180,7 +259,11 @@ def process(conversation_id: str, user_message: str, current_state: dict[str, An
 
     lead_message_parts = [
         f"Service: {candidate.get('service')}",
-        f"Termin: {candidate.get('date')}" + (f" {candidate.get('time')} Uhr" if candidate.get("time") else ""),
+        (
+            f"Termin: {candidate.get('date')}" + (f" {candidate.get('time')} Uhr" if candidate.get("time") else "")
+            if candidate.get("date")
+            else "Termin: noch offen"
+        ),
         f"Ort: {candidate.get('location')}",
         "Quelle: Chat",
         "Consent: Datenschutz+AGB bestaetigt",

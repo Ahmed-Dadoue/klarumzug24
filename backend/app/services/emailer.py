@@ -55,6 +55,9 @@ def send_lead_notification(
     msg["Subject"] = f"[Klarumzug24] New lead: {_as_text(lead.get('name'))}"
     msg["From"] = sender
     msg["To"] = recipient
+    customer_email = _as_text(lead.get("email"))
+    if customer_email != "-":
+        msg["Reply-To"] = customer_email
     msg.set_content(
         "\n".join(
             [

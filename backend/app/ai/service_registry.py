@@ -47,10 +47,6 @@ class ServiceTruth:
 def _normalize_text(value: str) -> str:
     return (
         " ".join((value or "").lower().strip().split())
-        .replace("ae", "ae")
-        .replace("oe", "oe")
-        .replace("ue", "ue")
-        .replace("ss", "ss")
         .replace("ä", "ae")
         .replace("ö", "oe")
         .replace("ü", "ue")
@@ -148,8 +144,8 @@ SERVICE_REGISTRY: dict[str, ServiceTruth] = {
     ),
     "entsorgung": ServiceTruth(
         key="entsorgung",
-        name_de="Entsorgung",
-        name_en="Disposal",
+        name_de="Entsorgung, Entruempelung und Haushaltsaufloesung",
+        name_en="Disposal, clearance and household clearance",
         availability="offered",
         fulfillment_mode="internal",
         scope="standalone_or_addon",
@@ -157,17 +153,33 @@ SERVICE_REGISTRY: dict[str, ServiceTruth] = {
         extra_price_possible=True,
         standalone_available=True,
         required_details=("ort", "was_genau"),
-        optional_details=("menge", "zugang", "groesse"),
-        keywords_de=("entsorgung", "entruempelung", "raeumung", "alte moebel", "abholen"),
-        keywords_en=("disposal", "clearance", "junk removal"),
+        optional_details=("menge", "raeume", "etage", "aufzug", "zugang", "groesse", "demontage"),
+        keywords_de=(
+            "entsorgung",
+            "entsorgen",
+            "entruempelung",
+            "entruempeln",
+            "entrumpelung",
+            "raeumung",
+            "haushaltsaufloesung",
+            "wohnungsaufloesung",
+            "betriebsaufloesung",
+            "firmenaufloesung",
+            "kellerraeumung",
+            "dachbodenraeumung",
+            "alte moebel",
+            "sperrmuell",
+            "abholen",
+        ),
+        keywords_en=("disposal", "clearance", "household clearance", "junk removal"),
         source_pages_de=("/umzugsrechner.html",),
         source_pages_en=("/umzugsrechner-en.html",),
-        summary_de="Entsorgung alter Moebel oder Gegenstaende ist auf der Website als anfragbare Zusatzleistung genannt.",
-        summary_en="Disposal of old furniture or items is listed on the website as a requestable add-on service.",
-        note_de="Fuer einzelne Faelle ist auch eine direkte Anfrage sinnvoll.",
-        note_en="For individual cases, a direct request is advisable.",
-        pricing_note_de="Eine Schaetzung ist nur moeglich, wenn Ort und Entsorgungsumfang klar sind.",
-        pricing_note_en="An estimate is only possible once the location and disposal scope are clear.",
+        summary_de="Klarumzug24 behandelt Entsorgung, Entruempelung, Haushaltsaufloesung und Raeumung als eng verbundene Transport- und Auftragsleistungen.",
+        summary_en="Klarumzug24 treats disposal, clearance, household clearance and clearing as closely related transport services.",
+        note_de="Wichtig sind Ort, Menge, Zugang, Etage/Aufzug und ob Demontage noetig ist.",
+        note_en="Location, volume, access, floor/elevator and disassembly needs are important.",
+        pricing_note_de="Eine Schaetzung ist nur moeglich, wenn Ort und Entsorgungs- oder Raeumungsumfang klar sind.",
+        pricing_note_en="An estimate is only possible once the location and disposal or clearance scope are clear.",
     ),
     "verpackung": ServiceTruth(
         key="verpackung",

@@ -106,6 +106,98 @@ def _detect_context_problems(
     return problems
 
 
+def _compact_for_internal_email(value: Any, *, max_length: int = 700) -> str:
+    text = " ".join(str(value or "").split()).strip()
+    if not text:
+        return "-"
+    if len(text) > max_length:
+        return text[:max_length].rstrip() + "..."
+    return text
+
+
+def _format_price_range(truth_meta: dict[str, Any]) -> str:
+    price_min = truth_meta.get("price_min_eur")
+    price_max = truth_meta.get("price_max_eur")
+    if not isinstance(price_min, (int, float)) or not isinstance(price_max, (int, float)):
+        return "noch nicht schaetzbar"
+    if int(price_min) == int(price_max):
+        return f"ca. {int(price_min)} EUR"
+    return f"ca. {int(price_min)} bis {int(price_max)} EUR"
+
+
+def _build_pricing_review_lines(truth_meta: dict[str, Any]) -> list[str]:
+    if not truth_meta:
+        return ["Pricing: keine strukturierte Pricing-Diagnose im Chat-Trace."]
+
+    missing_fields = truth_meta.get("missing_fields")
+    if isinstance(missing_fields, list) and missing_fields:
+        missing_text = ", ".join(str(item) for item in missing_fields)
+    else:
+        missing_text = "-"
+
+    lines = [
+        f"Pricing-Quelle: {_compact_for_internal_email(truth_meta.get('pricing_source'))}",
+        f"Service/Truth-Key: {_compact_for_internal_email(truth_meta.get('truth_key'))}",
+        f"Modell: {_compact_for_internal_email(truth_meta.get('pricing_model'))}",
+        f"Preis-Schaetzung: {_format_price_range(truth_meta)}",
+        f"Geschaetzte Stunden: {_compact_for_internal_email(truth_meta.get('estimated_hours_min'))} bis {_compact_for_internal_email(truth_meta.get('estimated_hours_max'))}",
+        f"Personen gesamt: {_compact_for_internal_email(truth_meta.get('workers_total'))}",
+        f"Helfer: {_compact_for_internal_email(truth_meta.get('helpers_count'))}",
+        f"Transporter: {_compact_for_internal_email(truth_meta.get('needs_transporter'))}",
+        f"Entfernung ab Bordesholm: {_compact_for_internal_email(truth_meta.get('distance_km'))} km einfache Strecke",
+        f"Fehlende Angaben: {missing_text}",
+    ]
+    return lines
+
+
+def _build_internal_transcript(messages: list[Any], final_reply: str) -> str:
+    lines: list[str] = []
+    recent_messages = list(messages)[-16:]
+    for message in recent_messages:
+        role = getattr(message, "role", "")
+        label = "Kunde" if role == "user" else "Dode"
+        content = _compact_for_internal_email(getattr(message, "content", ""), max_length=520)
+        if content != "-":
+            lines.append(f"{label}: {content}")
+    if final_reply:
+        lines.append(f"Dode letzte Antwort: {_compact_for_internal_email(final_reply, max_length=700)}")
+    return "\n".join(lines) if lines else "-"
+
+
+def _build_chat_review_message(
+    *,
+    base_message: str | None,
+    messages: list[Any],
+    final_reply: str,
+    truth_meta: dict[str, Any],
+    request_id: str,
+    conversation_id: str,
+    page: str | None,
+) -> str:
+    sections = [
+        "Chat-Anfrage zur internen Pruefung",
+        "===================================",
+        f"Request ID: {request_id}",
+        f"Conversation ID: {conversation_id}",
+        f"Seite: {page or '-'}",
+        "Status: Kunde hat die Uebermittlung nach Datenschutz/AGB bestaetigt.",
+        "Wichtig: Preis und Termin intern pruefen. Dode hat kein verbindliches Festpreisangebot zugesagt.",
+        "",
+        "Lead-Basis:",
+        _compact_for_internal_email(base_message, max_length=900),
+        "",
+        "Pricing / Diagnose:",
+        *(_build_pricing_review_lines(truth_meta)),
+        "",
+        "Kundenverlauf:",
+        _build_internal_transcript(messages, final_reply),
+    ]
+    message = "\n".join(sections).strip()
+    if len(message) > 4950:
+        return message[:4947].rstrip() + "..."
+    return message
+
+
 def _build_candidate_knowledge(
     *,
     incoming_message: str,
@@ -363,12 +455,26 @@ def dode_chat(
     elif booking_action == "submit_lead":
         try:
             lead_payload_data = booking_result.get("lead_payload") or {}
+            truth_meta_for_lead = (
+                reply_trace.get("truth_meta")
+                if isinstance(reply_trace.get("truth_meta"), dict)
+                else {}
+            )
+            internal_review_message = _build_chat_review_message(
+                base_message=str(lead_payload_data.get("message", "")).strip() or None,
+                messages=list(payload.messages),
+                final_reply=reply or "",
+                truth_meta=truth_meta_for_lead,
+                request_id=request_id,
+                conversation_id=conversation_id,
+                page=page,
+            )
             lead_payload = LeadIn(
                 name=str(lead_payload_data.get("name", "")).strip(),
                 phone=str(lead_payload_data.get("phone", "")).strip(),
                 email=str(lead_payload_data.get("email", "")).strip(),
                 conversation_id=conversation_id,
-                message=str(lead_payload_data.get("message", "")).strip() or None,
+                message=internal_review_message or None,
                 accepted_agb=bool(lead_payload_data.get("accepted_agb", True)),
                 accepted_privacy=bool(lead_payload_data.get("accepted_privacy", True)),
             )
@@ -385,7 +491,13 @@ def dode_chat(
                     _log_chat_submit_event(
                         conversation_id=conversation_id,
                         event_type="chat_submit_confirmed",
-                        payload={"source": "chat_booking"},
+                        payload={
+                            "source": "chat_booking",
+                            "pricing_source": truth_meta_for_lead.get("pricing_source"),
+                            "truth_key": truth_meta_for_lead.get("truth_key"),
+                            "price_min_eur": truth_meta_for_lead.get("price_min_eur"),
+                            "price_max_eur": truth_meta_for_lead.get("price_max_eur"),
+                        },
                     )
                 else:
                     _log_lead_event_by_id(
@@ -400,13 +512,13 @@ def dode_chat(
                     )
             if payload.lang == "en":
                 reply = (
-                    f"{reply}\n\nYour request has been successfully submitted. "
-                    "We will confirm your appointment via your provided contact details."
+                    f"{reply}\n\nYour request has been forwarded for review. "
+                    "We will contact you with the final price and appointment confirmation."
                 ).strip()
             else:
                 reply = (
-                    f"{reply}\n\nIhre Anfrage wurde erfolgreich uebermittelt. "
-                    "Wir bestaetigen den Termin ueber Ihre angegebenen Kontaktdaten."
+                    f"{reply}\n\nIhre Anfrage wurde zur Pruefung uebermittelt. "
+                    "Wir melden uns mit der finalen Preis- und Terminbestaetigung."
                 ).strip()
         except Exception:
             logger.exception(

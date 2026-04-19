@@ -38,9 +38,9 @@ PRICING_TRUTH_REGISTRY: dict[str, PricingTruth] = {
         service_key="entsorgung",
         source_kind="rule_based_estimator",
         can_quote_estimate=True,
-        required_details=("ort", "was_genau"),
-        answer_de="Preise fuer Entsorgung duerfen nur als unverbindliche Schaetzung aus dem lokalen Regel-Schaetzer kommen.",
-        answer_en="Disposal prices may only be given as non-binding estimates from the local rule-based estimator.",
+        required_details=("ort", "was_genau", "umfang"),
+        answer_de="Preise fuer Entsorgung, Entruempelung und Haushaltsaufloesung duerfen nur als unverbindliche Schaetzung aus der freigegebenen Preislogik kommen.",
+        answer_en="Prices for disposal, clearance and household clearance may only be given as non-binding estimates from the approved pricing logic.",
     ),
     "moebelmontage": PricingTruth(
         service_key="moebelmontage",

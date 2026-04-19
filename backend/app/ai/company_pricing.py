@@ -14,6 +14,10 @@ PricingV2ServiceType = Literal[
     "umzug",
     "transporthilfe",
     "einzeltransport",
+    "entsorgung",
+    "entruempelung",
+    "haushaltsaufloesung",
+    "wohnungsaufloesung",
     "kuechenmontage",
     "arbeitsplatte_only",
     "moebelmontage",
@@ -97,10 +101,17 @@ class PricingV2Result:
 DISTANCE_PATTERN = re.compile(r"(\d{1,4}(?:[.,]\d{1,2})?)\s*(?:km|kilometer)\b", re.IGNORECASE)
 HOURS_PATTERN = re.compile(r"(\d{1,2}(?:[.,]\d{1,2})?)\s*(?:h|std|stunde|stunden)\b", re.IGNORECASE)
 METER_PATTERN = re.compile(r"(\d{1,2}(?:[.,]\d{1,2})?)\s*(?:m|meter|laufmeter)\b", re.IGNORECASE)
-ROOMS_PATTERN = re.compile(r"(\d{1,2})\s*(?:zimmer|raeume|räume|room|rooms)\b", re.IGNORECASE)
+ROOMS_PATTERN = re.compile(r"(\d{1,2})\s*(?:zimmern?|raeume|räume|room|rooms)\b", re.IGNORECASE)
 CARTONS_PATTERN = re.compile(r"(\d{1,4})\s*(?:karton|kartons|kisten)\b", re.IGNORECASE)
 WORKERS_PATTERN = re.compile(r"(\d{1,2})\s*(?:mann|maenner|männer|arbeiter|mitarbeiter|helfer|personen)\b", re.IGNORECASE)
 FLOOR_PATTERN = re.compile(r"(\d{1,2})\s*\.?\s*(?:stock|stockwerk|og|etage)\b", re.IGNORECASE)
+
+CLEARANCE_SERVICE_TYPES = {
+    "entsorgung",
+    "entruempelung",
+    "haushaltsaufloesung",
+    "wohnungsaufloesung",
+}
 
 
 def _normalize(value: str) -> str:
@@ -181,6 +192,34 @@ def _detect_service_type(text_ascii: str) -> PricingV2ServiceType | None:
     if has_full_kitchen:
         return "kuechenmontage"
 
+    if any(token in text_ascii for token in ("haushaltsaufloesung", "hausaufloesung")):
+        return "haushaltsaufloesung"
+    if any(token in text_ascii for token in ("wohnungsaufloesung", "wohnung aufloesen")):
+        return "wohnungsaufloesung"
+    if any(
+        token in text_ascii
+        for token in (
+            "entruempelung",
+            "entruempeln",
+            "entrumpelung",
+            "entrumpeln",
+            "raeumung",
+            "kellerraeumung",
+            "dachbodenraeumung",
+            "garage raeumen",
+            "keller raeumen",
+            "dachboden raeumen",
+            "betriebsaufloesung",
+            "firmenaufloesung",
+        )
+    ):
+        return "entruempelung"
+    if any(
+        token in text_ascii
+        for token in ("entsorgung", "entsorgen", "sperrmuell", "muell", "wegwerfen", "wegschmeissen")
+    ):
+        return "entsorgung"
+
     if any(token in text_ascii for token in ("umzugshilfe", "nur hilfe", "nur tragen", "tragen helfen")):
         return "transporthilfe"
     if any(token in text_ascii for token in ("einzeltransport", "nur transport", "transportieren", "abholen", "lieferung")):
@@ -226,6 +265,30 @@ def _default_hours_for_service(data: PricingV2Input) -> tuple[float | None, floa
             return 2.0, 3.0
         return None, None
 
+    if data.service_type in CLEARANCE_SERVICE_TYPES:
+        rooms = _safe_non_negative_int(data.rooms)
+        cartons = _safe_non_negative_int(data.cartons)
+        heavy_items = _safe_non_negative_int(data.heavy_items)
+        if not rooms and not cartons and not heavy_items and not data.difficulty:
+            return None, None
+        if data.difficulty == "hard":
+            return 5.0, 8.0
+        if data.difficulty == "medium":
+            return 3.0, 5.5
+        if data.difficulty == "simple" and not rooms and not cartons:
+            return 2.0, 3.0
+
+        if data.service_type == "entsorgung":
+            hours = 1.5 + rooms * 0.8 + cartons * 0.04 + heavy_items * 0.5
+        else:
+            hours = 2.0 + rooms * 1.25 + cartons * 0.04 + heavy_items * 0.35
+        floor_from = _safe_non_negative_int(data.floor_from)
+        if floor_from and not data.elevator_from:
+            hours += floor_from * 0.35
+        if data.distance_km:
+            hours += data.distance_km / 55.0
+        return max(2.0, round(hours * 0.9, 2)), max(3.0, round(hours * 1.25, 2))
+
     if data.service_type == "umzug":
         rooms = _safe_non_negative_int(data.rooms)
         cartons = _safe_non_negative_int(data.cartons)
@@ -258,6 +321,12 @@ def _default_workers_for_service(data: PricingV2Input) -> int:
         if rooms >= 2 or heavy_items >= 2:
             return 2
         return 1
+    if data.service_type in {"entruempelung", "haushaltsaufloesung", "wohnungsaufloesung"}:
+        if rooms >= 4 or heavy_items >= 4:
+            return 3
+        return 2 if rooms or heavy_items else 1
+    if data.service_type == "entsorgung" and heavy_items:
+        return 2 if heavy_items <= 2 else 3
     if data.service_type in {"einzeltransport", "transporthilfe"} and heavy_items:
         return 2 if heavy_items <= 2 else 3
     return 1
@@ -270,7 +339,7 @@ def estimate_company_price_v2(
 ) -> PricingV2Result:
     distance_km = _safe_positive_float(data.distance_km)
     needs_transporter = bool(data.needs_transporter)
-    if data.needs_transporter is None and data.service_type in {"umzug", "einzeltransport"}:
+    if data.needs_transporter is None and data.service_type in {"umzug", "einzeltransport", *CLEARANCE_SERVICE_TYPES}:
         needs_transporter = True
 
     workers_total = _default_workers_for_service(data)
@@ -326,6 +395,10 @@ def estimate_company_price_v2(
             internal_notes.append(
                 f"Mindestpreis {minimum} EUR deckt bis {profile.included_hours_in_minimum:g} Stunden ab."
             )
+            if data.service_type in CLEARANCE_SERVICE_TYPES:
+                internal_notes.append(
+                    "Entsorgungs-/Deponiegebuehren koennen je nach Material zusaetzlich geprueft werden."
+                )
 
     explanation = _build_explanation_de(
         service_type=data.service_type,
@@ -380,6 +453,10 @@ def _build_explanation_de(
         "umzug": "Ihren Umzug",
         "transporthilfe": "die Umzugshilfe",
         "einzeltransport": "den Einzeltransport",
+        "entsorgung": "die Entsorgung",
+        "entruempelung": "die Entruempelung",
+        "haushaltsaufloesung": "die Haushaltsaufloesung",
+        "wohnungsaufloesung": "die Wohnungsaufloesung",
         "kuechenmontage": "die Kuechenmontage",
         "arbeitsplatte_only": "die Montage/Anpassung der Arbeitsplatte",
         "moebelmontage": "die Moebelmontage",
@@ -415,6 +492,12 @@ def _build_follow_up_question_de(service_type: PricingV2ServiceType, missing_fie
             "Start/Ziel oder Entfernung ab Bordesholm, Etagen/Aufzug, ungefaehre Menge "
             "und ob ein Transporter gebraucht wird."
         )
+    if service_type in CLEARANCE_SERVICE_TYPES:
+        return (
+            "Damit ich den Auftrag wie eine Transportfirma einschaetzen kann, nennen Sie bitte Ort/PLZ "
+            "oder Entfernung ab Bordesholm, was genau raus muss, ungefaehre Menge/Raeume, Etage/Aufzug "
+            "und ob Demontage oder nur Abholung/Entsorgung noetig ist."
+        )
     if service_type == "kuechenmontage":
         return (
             "Damit ich die Kuechenmontage schaetzen kann, nennen Sie bitte Ort/PLZ oder Entfernung ab Bordesholm, "
@@ -448,14 +531,28 @@ def extract_pricing_v2_input_from_messages(messages: list[ChatTurn]) -> PricingV
     rooms = _extract_first_int(ROOMS_PATTERN, combined_text)
     cartons = _extract_first_int(CARTONS_PATTERN, combined_text)
     floors = [int(value) for value in FLOOR_PATTERN.findall(combined_text)]
-    heavy_items = sum(1 for token in ("waschmaschine", "kuehlschrank", "klavier", "tresor", "safe") if token in text_ascii)
+    heavy_items = sum(
+        1
+        for token in (
+            "waschmaschine",
+            "kuehlschrank",
+            "klavier",
+            "tresor",
+            "safe",
+            "sofa",
+            "schrank",
+            "kommode",
+            "bett",
+        )
+        if token in text_ascii
+    )
 
     needs_transporter = _detect_bool(
         text_ascii,
         positive=("transporter", "sprinter", "auto", "fahrzeug", "wagen"),
         negative=("ohne transporter", "ohne auto", "kein transporter", "nur helfer", "nur hilfe"),
     )
-    if service_type in {"umzug", "einzeltransport"} and needs_transporter is None:
+    if service_type in {"umzug", "einzeltransport", *CLEARANCE_SERVICE_TYPES} and needs_transporter is None:
         needs_transporter = True
     if service_type == "transporthilfe" and needs_transporter is None:
         needs_transporter = False

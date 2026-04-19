@@ -30,6 +30,22 @@ class ChatBookingIntegrationTest(unittest.TestCase):
             messages.append(ChatMessageIn(role="user", content="Ja, ich stimme zu und senden"))
         return messages
 
+    def _complete_offer_messages_without_date(self) -> list[ChatMessageIn]:
+        return [
+            ChatMessageIn(role="user", content="mein name ist siba dadoue"),
+            ChatMessageIn(role="user", content="ich moechte kuechenmontage in kiel"),
+            ChatMessageIn(role="user", content="emb19831@hotmail.com"),
+            ChatMessageIn(role="user", content="01636157234"),
+        ]
+
+    def _complete_clearance_offer_messages_without_date(self) -> list[ChatMessageIn]:
+        return [
+            ChatMessageIn(role="user", content="mein name ist siba dadoue"),
+            ChatMessageIn(role="user", content="ich brauche Haushaltsaufloesung in Kiel"),
+            ChatMessageIn(role="user", content="emb19831@hotmail.com"),
+            ChatMessageIn(role="user", content="01636157234"),
+        ]
+
     def _run_chat(
         self,
         payload: ChatRequestIn,
@@ -63,6 +79,41 @@ class ChatBookingIntegrationTest(unittest.TestCase):
 
         self.assertFalse(response["data"]["lead_submitted"])
         self.assertIn("Ja, ich stimme zu und senden", response["data"]["reply"])
+        create_mock.assert_not_called()
+
+    def test_offer_request_can_ask_consent_without_fixed_date(self) -> None:
+        payload = self._payload("conv_offer_no_date", self._complete_offer_messages_without_date())
+        create_mock = Mock()
+
+        with patch.object(chat_service, "_is_chat_conversation_submitted", return_value=False):
+            response = self._run_chat(
+                payload,
+                generate_reply=Mock(return_value="AI reply"),
+                create_lead=create_mock,
+            )
+
+        self.assertFalse(response["data"]["lead_submitted"])
+        self.assertIn("zur Pruefung", response["data"]["reply"])
+        self.assertIn("Termin: noch offen", response["data"]["reply"])
+        create_mock.assert_not_called()
+
+    def test_clearance_request_is_a_real_chat_lead_service(self) -> None:
+        payload = self._payload(
+            "conv_clearance_no_date",
+            self._complete_clearance_offer_messages_without_date(),
+        )
+        create_mock = Mock()
+
+        with patch.object(chat_service, "_is_chat_conversation_submitted", return_value=False):
+            response = self._run_chat(
+                payload,
+                generate_reply=Mock(return_value="AI reply"),
+                create_lead=create_mock,
+            )
+
+        self.assertFalse(response["data"]["lead_submitted"])
+        self.assertIn("Haushaltsaufloesung", response["data"]["reply"])
+        self.assertIn("zur Pruefung", response["data"]["reply"])
         create_mock.assert_not_called()
 
     def test_duplicate_consent_blocked_when_conversation_already_submitted(self) -> None:
@@ -163,6 +214,59 @@ class ChatBookingIntegrationTest(unittest.TestCase):
 
         self.assertFalse(response_fail["data"]["lead_submitted"])
         mark_mock_fail.assert_not_called()
+
+    def test_submitted_chat_lead_contains_pricing_and_transcript_for_internal_review(self) -> None:
+        payload = self._payload("conv_review_message", self._complete_messages(with_consent=True))
+        captured_payloads = []
+
+        def generate_reply_with_pricing_trace(**kwargs):
+            kwargs["trace"].update(
+                {
+                    "source_used": "pricing",
+                    "helper_path": "openai_primary_pricing_v2_arbeitsplatte_only_price",
+                    "truth_meta": {
+                        "truth_type": "pricing",
+                        "truth_key": "arbeitsplatte_only",
+                        "pricing_source": "company_pricing_v2",
+                        "pricing_model": "time_and_distance",
+                        "price_min_eur": 250,
+                        "price_max_eur": 330,
+                        "workers_total": 1,
+                        "helpers_count": 0,
+                        "needs_transporter": False,
+                        "estimated_hours_min": 3,
+                        "estimated_hours_max": 5,
+                        "distance_km": 20,
+                        "missing_fields": [],
+                    },
+                }
+            )
+            return "AI reply"
+
+        def create_ok(lead_payload, **kwargs):
+            captured_payloads.append(lead_payload)
+            return {"data": {"lead_id": 555}}
+
+        with patch.object(chat_service, "_is_chat_conversation_submitted", return_value=False), patch.object(
+            chat_service,
+            "_mark_chat_conversation_submitted",
+            return_value=True,
+        ):
+            response = self._run_chat(
+                payload,
+                generate_reply=generate_reply_with_pricing_trace,
+                create_lead=Mock(side_effect=create_ok),
+            )
+
+        self.assertTrue(response["data"]["lead_submitted"])
+        self.assertEqual(1, len(captured_payloads))
+        message = captured_payloads[0].message or ""
+        self.assertIn("Chat-Anfrage zur internen Pruefung", message)
+        self.assertIn("Preis-Schaetzung: ca. 250 bis 330 EUR", message)
+        self.assertIn("Service/Truth-Key: arbeitsplatte_only", message)
+        self.assertIn("Kundenverlauf:", message)
+        self.assertIn("Dode hat kein verbindliches Festpreisangebot zugesagt", message)
+        self.assertIn("Ihre Anfrage wurde zur Pruefung uebermittelt", response["data"]["reply"])
 
     def test_mark_chat_conversation_submitted_blocks_duplicate_conversation_id(self) -> None:
         conversation_id = f"conv_mark_dup_{uuid.uuid4().hex[:12]}"

@@ -109,8 +109,8 @@ NUMBER_WORDS = {
 SERVICE_FIELD_QUESTIONS = {
     "de": {
         "entsorgung": {
-            "item_type": "Was moechten Sie genau entsorgen?",
-            "location": "In welchem Ort oder welcher Stadt soll die Entsorgung stattfinden?",
+            "item_type": "Was soll genau entsorgt oder geraeumt werden, und wie gross ist der Umfang ungefaehr?",
+            "location": "In welchem Ort oder welcher Stadt soll die Entsorgung oder Entruempelung stattfinden?",
         },
         "laminat": {
             "area_m2": "Wie viele Quadratmeter Laminat oder Parkett sollen entfernt werden?",
@@ -127,8 +127,8 @@ SERVICE_FIELD_QUESTIONS = {
     },
     "en": {
         "entsorgung": {
-            "item_type": "What exactly would you like to dispose of?",
-            "location": "In which city should the disposal take place?",
+            "item_type": "What exactly should be disposed of or cleared out, and roughly how much is it?",
+            "location": "In which city should the disposal or clearance take place?",
         },
         "laminat": {
             "area_m2": "How many square metres of laminate or flooring should be removed?",
@@ -154,6 +154,14 @@ SERVICE_ITEM_ALIASES = {
         "sofas": "Sofas",
         "sofa": "Sofa",
         "schrank": "Schrank",
+        "wohnung": "Wohnung / Wohnungsaufloesung",
+        "haushalt": "Haushalt / Haushaltsaufloesung",
+        "keller": "Kellerraeumung",
+        "dachboden": "Dachbodenraeumung",
+        "garage": "Garagenraeumung",
+        "sperrmuell": "Sperrmuell",
+        "betriebsaufloesung": "Betriebsaufloesung",
+        "firmenaufloesung": "Firmenaufloesung",
         "bett": "Bett",
         "tisch": "Tisch",
         "stuhl": "Stuhl",
@@ -196,7 +204,7 @@ TEXT = {
         "distance_km": ["Wie viele Kilometer liegen ungefaehr zwischen Start und Ziel?", "Wie gross ist die Strecke ungefaehr in Kilometern?"],
         "intros": [
             "Gern helfe ich Ihnen mit einer unverbindlichen Schaetzung.",
-            "Danke, dann machen wir direkt mit der unverbindlichen Schaetzung weiter.",
+            "Alles klar, dann machen wir direkt mit der unverbindlichen Schaetzung weiter.",
             "Alles klar, fuer die unverbindliche Schaetzung brauche ich noch kurz diese Angabe.",
         ],
         "distance_hint": "Orientierung: {from_city} nach {to_city} sind ungefaehr {km} km.",

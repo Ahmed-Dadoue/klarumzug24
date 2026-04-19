@@ -4,7 +4,11 @@ from unittest.mock import patch
 from fastapi import HTTPException
 
 import app.ai.agent as agent
-from app.ai.company_pricing import PricingV2Input, estimate_company_price_v2
+from app.ai.company_pricing import (
+    PricingV2Input,
+    build_company_pricing_helper_payload,
+    estimate_company_price_v2,
+)
 from app.ai.schemas import ChatTurn
 
 
@@ -73,6 +77,41 @@ class CompanyPricingV2Test(unittest.TestCase):
         self.assertIsNone(estimate.price_min_eur)
         self.assertIn("ort_oder_entfernung_ab_bordesholm", estimate.missing_fields)
         self.assertIn("Arbeitsplatte", estimate.explanation_de)
+
+    def test_entruempelung_is_company_pricing_service(self) -> None:
+        estimate = estimate_company_price_v2(
+            PricingV2Input(
+                service_type="entruempelung",
+                distance_km=20,
+                rooms=2,
+            )
+        )
+
+        self.assertEqual("time_and_distance", estimate.pricing_model)
+        self.assertEqual(2, estimate.workers_total)
+        self.assertTrue(estimate.needs_transporter)
+        self.assertEqual((), estimate.missing_fields)
+        self.assertIsNotNone(estimate.price_min_eur)
+        self.assertIsNotNone(estimate.price_max_eur)
+        self.assertIn("Entruempelung", estimate.explanation_de)
+
+    def test_dode_detects_clearance_terms_as_pricing_v2(self) -> None:
+        payload = build_company_pricing_helper_payload(
+            [
+                ChatTurn(
+                    role="user",
+                    content="Was kostet eine Haushaltsaufloesung mit 2 Zimmern, 20 km ab Bordesholm?",
+                )
+            ],
+            lang="de",
+        )
+
+        self.assertIsNotNone(payload)
+        assert payload is not None
+        self.assertEqual("haushaltsaufloesung", payload["truth_meta"]["truth_key"])
+        self.assertEqual("company_pricing_v2", payload["truth_meta"]["pricing_source"])
+        self.assertEqual(2, payload["truth_meta"]["workers_total"])
+        self.assertTrue(payload["truth_meta"]["needs_transporter"])
 
     def test_dode_uses_company_pricing_v2_fallback(self) -> None:
         messages = [

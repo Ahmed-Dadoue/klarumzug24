@@ -94,12 +94,24 @@ def _detect_service_type(focus_text: str, full_text: str) -> ServiceType | None:
         kw in focus_text
         for kw in (
             "entsorgung", "entsorgen", "entruempel", "entrumpel", "raeumung",
+            "haushaltsaufloesung", "wohnungsaufloesung", "betriebsaufloesung", "firmenaufloesung",
+            "kellerraeumung", "dachbodenraeumung", "keller raeumen", "dachboden raeumen",
             "sperrmuell", "wegwerfen", "muell", "entruempelung", "wegmachen", "sofa weg",
         )
     )
     has_strong_entsorgung = any(
         kw in focus_text
-        for kw in ("entruempel", "entrumpel", "raeumung", "sperrmuell", "entruempelung")
+        for kw in (
+            "entruempel",
+            "entrumpel",
+            "raeumung",
+            "sperrmuell",
+            "entruempelung",
+            "haushaltsaufloesung",
+            "wohnungsaufloesung",
+            "betriebsaufloesung",
+            "firmenaufloesung",
+        )
     )
     has_laminat = any(
         kw in focus_text
